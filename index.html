@@ -461,6 +461,7 @@
 <script>
     const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
 
+    
     let newsData = [];
     let historicoCompleto = [];
     let currentFilter = 'all';
@@ -891,5 +892,6 @@
 
 </body>
 </html>
+
 
 
