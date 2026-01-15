@@ -466,30 +466,30 @@ let currentFilter = 'all';
 let currentTab = 'dashboard';
 
 async function buscarNoticias() {
-  const termo = document.getElementById('campo-busca').value || 'Ministério Público de Goiás';
+  const termo = document.getElementById('campo-busca').value || 'mpgo or gaeco';
 
   try {
     const resp = await fetch(
       'https://monitormpgo.lennontld.workers.dev/news-search?q=' + encodeURIComponent(termo)
     );
 
-    if (!resp.ok) {
-      throw new Error('HTTP ' + resp.status);
-    }
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
     const data = await resp.json();
 
     if (!data.ok || !Array.isArray(data.resultados)) {
-      throw new Error('Formato inesperado da API');
+      console.error('Resposta da API MPGO inesperada:', data);
+      throw new Error('Formato inesperado');
     }
 
-    // Aqui vai para o seu renderizador:
-    renderizarNoticias(data.resultados); // <‑‑ troque para o nome da sua função
+    // aqui renderiza
+    renderizarNoticias(data.resultados);
   } catch (e) {
     console.error('Erro ao buscar/analisar notícias:', e);
     alert('Erro ao buscar/analisar notícias. Tente novamente.');
   }
 }
+
 
 
     const propagandaTechniques = {
@@ -872,5 +872,6 @@ async function buscarNoticias() {
 
 </body>
 </html>
+
 
 
