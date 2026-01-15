@@ -484,13 +484,13 @@ async function buscarNoticias() {
       throw new Error('Formato inesperado');
     }
 
-    // 1) Aplica sua análise local em cada notícia recebida da API
+    // 1) aplica a análise local em cada notícia
     newsData = data.resultados.map(analyzeNewsItem);
 
-    // 2) Atualiza todo o dashboard
+    // 2) atualiza dashboard inteiro
     updateDashboard();
 
-    // 3) Mostra abas e botão limpar
+    // 3) mostra abas e botão limpar
     document.getElementById('clearBtn').style.display = 'inline-flex';
     document.getElementById('tabsContainer').style.display = 'flex';
 
@@ -502,10 +502,6 @@ async function buscarNoticias() {
     showStatus('Erro ao buscar/analisar notícias.', 'error');
   }
 }
-
-
-
-
     const propagandaTechniques = {
         'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
         'apelo emocional': ['indignação', 'medo', 'raiva', 'horror', 'tristeza', 'chocante'],
@@ -886,6 +882,7 @@ async function buscarNoticias() {
 
 </body>
 </html>
+
 
 
 
