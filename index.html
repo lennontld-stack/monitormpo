@@ -362,23 +362,20 @@
 
 <main class="main-container">
   <section class="input-section">
-  <div class="input-group">
-    <div class="input-field">
-      <label for="termoBusca">Termo de busca (últimas 24h)</label>
-      <input type="text" id="termoBusca"
-             placeholder='Ex.: MPGO OR "gaeco goiás" OR "cyro terra peres"'>
+    <div class="input-group">
+      <div class="input-field">
+        <label for="termoBusca">Termo de busca (últimas 24h)</label>
+        <input type="text" id="termoBusca"
+               placeholder='Ex.: MPGO OR "gaeco goiás" OR "cyro terra peres"'>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="buscarNoticias()">📡 Buscar e analisar</button>
+        <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo (local)</button>
+        <button class="btn btn-danger" onclick="clearData()" style="display: none;" id="clearBtn">🗑️ Limpar</button>
+      </div>
     </div>
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="buscarNoticias()">📡 Buscar e analisar</button>
-      <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo (local)</button>
-      <button class="btn btn-danger" onclick="clearData()" style="display: none;" id="clearBtn">🗑️ Limpar</button>
-    </div>
-  </div>
-  <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
-</section>
-
-
-
+    <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
+  </section>
 
     <div class="tabs" id="tabsContainer">
         <button class="tab active" onclick="switchTab('dashboard', event)">Dashboard</button>
@@ -450,7 +447,7 @@
                 </table>
             </div>
             <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary);">
-                <span id="tableEmpty">Clique em "Dados de Exemplo" ou informe um RSS para começar</span>
+                <span id="tableEmpty">Clique em "Dados de Exemplo" ou faça uma busca para começar</span>
             </div>
         </div>
     </div>
@@ -461,53 +458,57 @@
 </main>
 
 <script>
-   const API_BASE = 'https://monitormpgo.lennontld.workers.dev'; // ajuste se o subdomínio for outro
+    const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
 
-async function buscarNoticias() {
-  const termo = document.getElementById('termoBusca').value.trim();
-  if (!termo) {
-    alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.)');
-    return;
-  }
+    let newsData = [];
+    let historicoCompleto = [];
+    let currentFilter = 'all';
+    let currentTab = 'dashboard';
 
-  showStatus(`Buscando "${termo}" nas últimas 24h...`, 'loading');
+    async function buscarNoticias() {
+      const termo = document.getElementById('termoBusca').value.trim();
+      if (!termo) {
+        alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.).');
+        return;
+      }
 
-  try {
-    const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
-    if (!resp.ok) {
-      console.error('Resposta inválida da API MPGO:', resp);
-      throw new Error('HTTP ' + resp.status);
+      showStatus(`Buscando "${termo}" nas últimas 24h...`, 'loading');
+
+      try {
+        const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
+        if (!resp.ok) {
+          console.error('Resposta inválida da API MPGO:', resp);
+          throw new Error('HTTP ' + resp.status);
+        }
+        const dados = await resp.json();
+
+        newsData = dados.map(item => ({
+          title: item.title,
+          content: item.content,
+          url: item.url,
+          source: item.source,
+          date: item.date,
+          sentiment: 'neutral',
+          riskScore: item.risco_score != null ? Number(item.risco_score).toFixed(1) : '0.0',
+          riskLevel: item.risco_classificacao || 'low',
+          techniques: item.elementos_contrapropaganda || [],
+          gravity: item.sintese_tecnica || '',
+          mpRole: item.mp_role || 'neutro',
+          mpAgente: item.mp_role === 'autor',
+          mpAlvo: item.mp_role === 'alvo'
+        }));
+
+        updateDashboard();
+        document.getElementById('clearBtn').style.display = 'inline-flex';
+        document.getElementById('tabsContainer').style.display = 'flex';
+        showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
+        setTimeout(hideStatus, 3000);
+      } catch (e) {
+        console.error(e);
+        showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
+        setTimeout(hideStatus, 4000);
+      }
     }
-    const dados = await resp.json();
-
-    newsData = dados.map(item => ({
-      title: item.title,
-      content: item.content,
-      url: item.url,
-      source: item.source,
-      date: item.date,
-      sentiment: 'neutral',
-      riskScore: item.risco_score != null ? Number(item.risco_score).toFixed(1) : '0.0',
-      riskLevel: item.risco_classificacao || 'low',
-      techniques: item.elementos_contrapropaganda || [],
-      gravity: item.sintese_tecnica || '',
-      mpRole: item.mp_role || 'neutro',
-      mpAgente: item.mp_role === 'autor',
-      mpAlvo: item.mp_role === 'alvo'
-    }));
-
-    updateDashboard();
-    document.getElementById('clearBtn').style.display = 'inline-flex';
-    document.getElementById('tabsContainer').style.display = 'flex';
-    showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
-    setTimeout(hideStatus, 3000);
-  } catch (e) {
-    console.error(e);
-    showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
-    setTimeout(hideStatus, 4000);
-  }
-}
-
 
     const propagandaTechniques = {
         'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
@@ -527,125 +528,123 @@ async function buscarNoticias() {
     };
 
     function analyzeNewsItem(item) {
-  const full = (item.title + ' ' + item.content).toLowerCase();
+      const full = (item.title + ' ' + item.content).toLowerCase();
 
-  const mpAgente = [
-    'mp-go investiga',
-    'mpgo investiga',
-    'ministério público de goiás investiga',
-    'mp-go denuncia',
-    'mpgo denuncia',
-    'ofereceu denúncia',
-    'oferece denúncia',
-    'ofereceu denuncia',
-    'oferece denuncia',
-    'ajuizou ação',
-    'ajuizou acao',
-    'propôs ação',
-    'propôs acao',
-    'propõe ação',
-    'propõe acao',
-    'deflagrou operação',
-    'deflagra operação',
-    'deflagrou operacao',
-    'deflagra operacao',
-    'realizou operação',
-    'realiza operação',
-    'realizou operacao',
-    'realiza operacao',
-    'mp-go recupera',
-    'mpgo recupera',
-    'mp-go emite',
-    'mp-go lança',
-    'mpgo lança'
-  ].some(p => full.includes(p));
+      const mpAgente = [
+        'mp-go investiga',
+        'mpgo investiga',
+        'ministério público de goiás investiga',
+        'mp-go denuncia',
+        'mpgo denuncia',
+        'ofereceu denúncia',
+        'oferece denúncia',
+        'ofereceu denuncia',
+        'oferece denuncia',
+        'ajuizou ação',
+        'ajuizou acao',
+        'propôs ação',
+        'propôs acao',
+        'propõe ação',
+        'propõe acao',
+        'deflagrou operação',
+        'deflagra operação',
+        'deflagrou operacao',
+        'deflagra operacao',
+        'realizou operação',
+        'realiza operação',
+        'realizou operacao',
+        'realiza operacao',
+        'mp-go recupera',
+        'mpgo recupera',
+        'mp-go emite',
+        'mp-go lança',
+        'mpgo lança'
+      ].some(p => full.includes(p));
 
-  const mpAlvo =
-    full.includes('mp-go é criticado') ||
-    full.includes('mp-go é acusado') ||
-    full.includes('críticas ao mp-go') ||
-    full.includes('criticas ao mp-go') ||
-    full.includes('criticou o mp-go') ||
-    full.includes('criticou o ministério público de goiás') ||
-    full.includes('residente jurídico critica o mpgo') ||
-    full.includes('residente juridico critica o mpgo') ||
-    full.includes('atraso no pagamento de bolsas do mpgo');
+      const mpAlvo =
+        full.includes('mp-go é criticado') ||
+        full.includes('mp-go é acusado') ||
+        full.includes('críticas ao mp-go') ||
+        full.includes('criticas ao mp-go') ||
+        full.includes('criticou o mp-go') ||
+        full.includes('criticou o ministério público de goiás') ||
+        full.includes('residente jurídico critica o mpgo') ||
+        full.includes('residente juridico critica o mpgo') ||
+        full.includes('atraso no pagamento de bolsas do mpgo');
 
-  let sentimentoScore = 0;
-  Object.keys(sentimentLexicon).forEach(tipo => {
-    sentimentLexicon[tipo].forEach(palavra => {
-      if (full.includes(palavra)) {
-        if (tipo === 'negative') sentimentoScore -= 1;
-        if (tipo === 'positive') sentimentoScore += 1;
+      let sentimentoScore = 0;
+      Object.keys(sentimentLexicon).forEach(tipo => {
+        sentimentLexicon[tipo].forEach(palavra => {
+          if (full.includes(palavra)) {
+            if (tipo === 'negative') sentimentoScore -= 1;
+            if (tipo === 'positive') sentimentoScore += 1;
+          }
+        });
+      });
+
+      if (mpAgente) {
+        if (sentimentoScore < 0) {
+          sentimentoScore = 0;
+        }
+        if (sentimentoScore >= 0) {
+          sentimentoScore = 3;
+        }
       }
-    });
-  });
 
-  if (mpAgente) {
-    if (sentimentoScore < 0) {
-      sentimentoScore = 0;
+      let sentimento = 'neutral';
+      if (sentimentoScore > 0.5) sentimento = 'positive';
+      else if (sentimentoScore < -0.5) sentimento = 'negative';
+
+      const detectedTechniques = [];
+      Object.entries(propagandaTechniques).forEach(([technique, keywords]) => {
+        const matches = keywords.filter(keyword => full.includes(keyword)).length;
+        if (matches > 0) {
+          const name = technique.replace(/\b\w/g, c => c.toUpperCase());
+          detectedTechniques.push(name);
+        }
+      });
+
+      let riskScore = 0;
+
+      const citaMP =
+        full.includes('mpgo') ||
+        full.includes('mp-go') ||
+        full.includes('ministério público de goiás') ||
+        full.includes('ministério público de goias');
+
+      if (sentimento === 'negative') riskScore += 3;
+      if (sentimento === 'positive') riskScore -= 2;
+
+      riskScore += detectedTechniques.length * 1.5;
+
+      if (citaMP) riskScore += 2;
+
+      if (mpAgente && !mpAlvo) {
+        riskScore -= 4;
+      } else if (mpAlvo && !mpAgente) {
+        riskScore += 3;
+      }
+
+      riskScore = Math.max(0, Math.min(10, riskScore));
+
+      let riskLevel;
+      if (riskScore >= 8) riskLevel = 'critical';
+      else if (riskScore >= 6) riskLevel = 'high';
+      else if (riskScore >= 3) riskLevel = 'medium';
+      else riskLevel = 'low';
+
+      return {
+        ...item,
+        sentiment: sentimento,
+        riskScore: riskScore.toFixed(1),
+        riskLevel,
+        techniques: detectedTechniques,
+        gravity: generateGravityDescription(riskLevel, detectedTechniques),
+        mpRole: mpAgente ? 'autor' : (mpAlvo ? 'alvo' : 'nenhum'),
+        mpAgente,
+        mpAlvo
+      };
     }
-    if (sentimentoScore >= 0) {
-      sentimentoScore = 3;
-    }
-  }
-
-  let sentimento = 'neutral';
-  if (sentimentoScore > 0.5) sentimento = 'positive';
-  else if (sentimentoScore < -0.5) sentimento = 'negative';
-
-  const detectedTechniques = [];
-  Object.entries(propagandaTechniques).forEach(([technique, keywords]) => {
-    const matches = keywords.filter(keyword => full.includes(keyword)).length;
-    if (matches > 0) {
-      const name = technique.replace(/\b\w/g, c => c.toUpperCase());
-      detectedTechniques.push(name);
-    }
-  });
-
-  // NOVA LÓGICA DE RISCO
-  let riskScore = 0;
-
-  const citaMP =
-    full.includes('mpgo') ||
-    full.includes('mp-go') ||
-    full.includes('ministério público de goiás') ||
-    full.includes('ministério público de goias');
-
-  if (sentimento === 'negative') riskScore += 3;
-  if (sentimento === 'positive') riskScore -= 2;
-
-  riskScore += detectedTechniques.length * 1.5;
-
-  if (citaMP) riskScore += 2;
-
-  if (mpAgente && !mpAlvo) {
-    riskScore -= 4;
-  } else if (mpAlvo && !mpAgente) {
-    riskScore += 3;
-  }
-
-  riskScore = Math.max(0, Math.min(10, riskScore));
-
-  let riskLevel;
-  if (riskScore >= 8) riskLevel = 'critical';
-  else if (riskScore >= 6) riskLevel = 'high';
-  else if (riskScore >= 3) riskLevel = 'medium';
-  else riskLevel = 'low';
-
-  return {
-    ...item,
-    sentiment: sentimento,
-    riskScore: riskScore.toFixed(1),
-    riskLevel,
-    techniques: detectedTechniques,
-    gravity: generateGravityDescription(riskLevel, detectedTechniques),
-    mpRole: mpAgente ? 'autor' : (mpAlvo ? 'alvo' : 'nenhum'),
-    mpAgente,
-    mpAlvo
-  };
-}
-
 
     function generateGravityDescription(riskLevel, techniques) {
         const descriptions = {
@@ -683,50 +682,6 @@ async function buscarNoticias() {
         showStatus('✅ Análise concluída com dados de exemplo', 'ready');
         setTimeout(hideStatus, 3000);
     }
-
-    async function buscarNoticias() {
-  const termo = document.getElementById('termoBusca').value.trim();
-  if (!termo) {
-    alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.)');
-    return;
-  }
-
-  showStatus(`Buscando "${termo}" nas últimas 24h (News API + IA)...`, 'loading');
-
-  try {
-    const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const dados = await resp.json();
-
-    newsData = dados.map(item => ({
-      title: item.title,
-      content: item.content,
-      url: item.url,
-      source: item.source,
-      date: item.date,
-      // usamos diretamente o que veio da IA
-      sentiment: 'neutral', // se quiser, pode recalcular localmente
-      riskScore: item.risco_score != null ? item.risco_score.toFixed(1) : '0.0',
-      riskLevel: item.risco_classificacao || 'low',
-      techniques: item.elementos_contrapropaganda || [],
-      gravity: item.sintese_tecnica || '',
-      mpRole: item.mp_role || 'neutro',
-      mpAgente: item.mp_role === 'autor',
-      mpAlvo: item.mp_role === 'alvo'
-    }));
-
-    updateDashboard();
-    document.getElementById('clearBtn').style.display = 'inline-flex';
-    document.getElementById('tabsContainer').style.display = 'flex';
-    showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
-    setTimeout(hideStatus, 3000);
-  } catch (e) {
-    console.error(e);
-    showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
-    setTimeout(hideStatus, 4000);
-  }
-}
-
 
     function clearData() {
         newsData = [];
