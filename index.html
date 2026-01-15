@@ -466,11 +466,13 @@ let currentFilter = 'all';
 let currentTab = 'dashboard';
 
 async function buscarNoticias() {
-  const termo = document.getElementById('campo-busca').value || 'mpgo or gaeco';
+  const termo = document.getElementById('termoBusca').value || 'mpgo or gaeco';
 
   try {
+    showStatus('Buscando notícias e aplicando análise local...', 'loading');
+
     const resp = await fetch(
-      'https://monitormpgo.lennontld.workers.dev/news-search?q=' + encodeURIComponent(termo)
+      API_BASE + '/news-search?q=' + encodeURIComponent(termo)
     );
 
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -482,13 +484,25 @@ async function buscarNoticias() {
       throw new Error('Formato inesperado');
     }
 
-    // aqui renderiza
-    renderizarNoticias(data.resultados);
+    // 1) Aplica sua análise local em cada notícia recebida da API
+    newsData = data.resultados.map(analyzeNewsItem);
+
+    // 2) Atualiza todo o dashboard
+    updateDashboard();
+
+    // 3) Mostra abas e botão limpar
+    document.getElementById('clearBtn').style.display = 'inline-flex';
+    document.getElementById('tabsContainer').style.display = 'flex';
+
+    showStatus('✅ Análise concluída com notícias em tempo real', 'ready');
+    setTimeout(hideStatus, 3000);
   } catch (e) {
     console.error('Erro ao buscar/analisar notícias:', e);
     alert('Erro ao buscar/analisar notícias. Tente novamente.');
+    showStatus('Erro ao buscar/analisar notícias.', 'error');
   }
 }
+
 
 
 
@@ -872,6 +886,7 @@ async function buscarNoticias() {
 
 </body>
 </html>
+
 
 
 
