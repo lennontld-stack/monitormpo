@@ -459,7 +459,7 @@
 </main>
 
 <script>
-    const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
+    const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
 
     let newsData = [];
     let historicoCompleto = [];
@@ -891,4 +891,5 @@
 
 </body>
 </html>
+
 
