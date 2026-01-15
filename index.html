@@ -362,20 +362,21 @@
 
 <main class="main-container">
   <section class="input-section">
-    <div class="input-group">
-      <div class="input-field">
-        <label for="termoBusca">Termo de busca (últimas 24h)</label>
-        <input type="text" id="termoBusca"
-               placeholder='Ex.: MPGO OR "gaeco goiás" OR "cyro terra peres"'>
-      </div>
-      <div class="btn-group">
-        <button class="btn btn-primary" onclick="buscarNoticias()">📡 Buscar e analisar</button>
-        <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo (local)</button>
-        <button class="btn btn-danger" onclick="clearData()" style="display: none;" id="clearBtn">🗑️ Limpar</button>
-      </div>
+  <div class="input-group">
+    <div class="input-field">
+      <label for="termoBusca">Termo de busca (últimas 24h)</label>
+      <input type="text" id="termoBusca"
+             placeholder='Ex.: MPGO OR "gaeco goiás" OR "cyro terra peres"'>
     </div>
-    <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
-  </section>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="buscarNoticias()">📡 Buscar e analisar</button>
+      <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo (local)</button>
+      <button class="btn btn-danger" onclick="clearData()" style="display: none;" id="clearBtn">🗑️ Limpar</button>
+    </div>
+  </div>
+  <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
+</section>
+
 
     <div class="tabs" id="tabsContainer">
         <button class="tab active" onclick="switchTab('dashboard', event)">Dashboard</button>
@@ -890,3 +891,4 @@
 
 </body>
 </html>
+
