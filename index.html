@@ -466,42 +466,39 @@ let currentFilter = 'all';
 let currentTab = 'dashboard';
 
 async function buscarNoticias() {
-  const termo = document.getElementById('termoBusca').value || 'mpgo or gaeco';
-
   try {
-    showStatus('Buscando notícias e aplicando análise local...', 'loading');
+    showStatus('Buscando no Talkwalker e aplicando análise local...', 'loading');
 
-    const resp = await fetch(
-      API_BASE + '/news-search?q=' + encodeURIComponent(termo)
-    );
+    const resp = await fetch(API_BASE + '/talkwalker-search');
 
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
     const data = await resp.json();
 
     if (!data.ok || !Array.isArray(data.resultados)) {
-      console.error('Resposta da API MPGO inesperada:', data);
+      console.error('Resposta inesperada de /talkwalker-search:', data);
       throw new Error('Formato inesperado');
     }
 
-    // 1) aplica a análise local em cada notícia
+    // aplica a análise local em cada notícia
     newsData = data.resultados.map(analyzeNewsItem);
 
-    // 2) atualiza dashboard inteiro
+    // atualiza dashboard
     updateDashboard();
 
-    // 3) mostra abas e botão limpar
+    // mostra abas e botão limpar
     document.getElementById('clearBtn').style.display = 'inline-flex';
     document.getElementById('tabsContainer').style.display = 'flex';
 
-    showStatus('✅ Análise concluída com notícias em tempo real', 'ready');
+    showStatus('✅ Análise concluída com notícias do Talkwalker', 'ready');
     setTimeout(hideStatus, 3000);
   } catch (e) {
-    console.error('Erro ao buscar/analisar notícias:', e);
+    console.error('Erro ao buscar/analisar notícias (Talkwalker):', e);
     alert('Erro ao buscar/analisar notícias. Tente novamente.');
     showStatus('Erro ao buscar/analisar notícias.', 'error');
   }
 }
+
     const propagandaTechniques = {
         'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
         'apelo emocional': ['indignação', 'medo', 'raiva', 'horror', 'tristeza', 'chocante'],
@@ -882,6 +879,7 @@ async function buscarNoticias() {
 
 </body>
 </html>
+
 
 
 
