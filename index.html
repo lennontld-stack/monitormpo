@@ -593,23 +593,29 @@ async function buscarNoticias() {
         }
       });
 
-      let riskScore = 0;
+           let riskScore = 0;
 
       const citaMP =
         full.includes('mpgo') ||
         full.includes('mp-go') ||
         full.includes('ministério público de goiás') ||
-        full.includes('ministério público de goias');
+        full.includes('ministério público de goias') ||
+        full.includes('gaeco');
 
-      if (sentimento === 'negative') riskScore += 3;
+      // peso base do sentimento
+      if (sentimento === 'negative') riskScore += 2;   // era 3
       if (sentimento === 'positive') riskScore -= 2;
 
-      riskScore += detectedTechniques.length * 1.5;
+      // técnicas contam um pouco menos
+      riskScore += detectedTechniques.length * 1.0;    // era 1.5
 
-      if (citaMP) riskScore += 2;
+      // só citar MP/GAECO sobe pouco
+      if (citaMP) riskScore += 1;                      // era 2
 
+      // MP/GAECO como agente: puxa forte para baixo
       if (mpAgente && !mpAlvo) {
-        riskScore -= 4;
+        riskScore -= 5;                                // era -4
+        riskScore = Math.min(riskScore, 3);            // no máximo médio baixo
       } else if (mpAlvo && !mpAgente) {
         riskScore += 3;
       }
@@ -879,6 +885,7 @@ async function buscarNoticias() {
 
 </body>
 </html>
+
 
 
 
