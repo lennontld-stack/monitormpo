@@ -466,49 +466,31 @@ let currentFilter = 'all';
 let currentTab = 'dashboard';
 
 async function buscarNoticias() {
-  const termo = document.getElementById('termoBusca').value.trim();
-  if (!termo) {
-    alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.).');
-    return;
-  }
-
-  showStatus(`Buscando "${termo}" nas últimas 24h...`, 'loading');
+  const termo = document.getElementById('campo-busca').value || 'Ministério Público de Goiás';
 
   try {
-    const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
+    const resp = await fetch(
+      'https://monitormpgo.lennontld.workers.dev/news-search?q=' + encodeURIComponent(termo)
+    );
+
     if (!resp.ok) {
-      console.error('Resposta inválida da API MPGO:', resp);
       throw new Error('HTTP ' + resp.status);
     }
-    const dados = await resp.json();
 
-    newsData = dados.map(item => ({
-      title: item.title,
-      content: item.content,
-      url: item.url,
-      source: item.source,
-      date: item.date,
-      sentiment: 'neutral',
-      riskScore: item.risco_score != null ? Number(item.risco_score).toFixed(1) : '0.0',
-      riskLevel: item.risco_classificacao || 'low',
-      techniques: item.elementos_contrapropaganda || [],
-      gravity: item.sintese_tecnica || '',
-      mpRole: item.mp_role || 'neutro',
-      mpAgente: item.mp_role === 'autor',
-      mpAlvo: item.mp_role === 'alvo'
-    }));
+    const data = await resp.json();
 
-    updateDashboard();
-    document.getElementById('clearBtn').style.display = 'inline-flex';
-    document.getElementById('tabsContainer').style.display = 'flex';
-    showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
-    setTimeout(hideStatus, 3000);
+    if (!data.ok || !Array.isArray(data.resultados)) {
+      throw new Error('Formato inesperado da API');
+    }
+
+    // Aqui vai para o seu renderizador:
+    renderizarNoticias(data.resultados); // <‑‑ troque para o nome da sua função
   } catch (e) {
-    console.error(e);
-    showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
-    setTimeout(hideStatus, 4000);
+    console.error('Erro ao buscar/analisar notícias:', e);
+    alert('Erro ao buscar/analisar notícias. Tente novamente.');
   }
 }
+
 
     const propagandaTechniques = {
         'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
@@ -890,4 +872,5 @@ async function buscarNoticias() {
 
 </body>
 </html>
+
 
