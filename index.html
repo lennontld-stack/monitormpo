@@ -460,43 +460,53 @@
 </main>
 
 <script>
-    const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
+   const API_BASE = 'https://monitormpgo.lennontld.workers.dev'; // ajuste se o subdomínio for outro
 
-    let newsData = [];
-    let historicoCompleto = [];
-    let currentTab = 'dashboard';
-    let currentFilter = 'all';
+async function buscarNoticias() {
+  const termo = document.getElementById('termoBusca').value.trim();
+  if (!termo) {
+    alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.)');
+    return;
+  }
 
-    const demoData = [
-        {
-            title: "MP-GO emite de graça certidões eletrônicas sobre processos extrajudiciais",
-            source: "G1 Goiás",
-            date: "2020-01-05",
-            url: "https://g1.globo.com/go/goias/noticia/2020/01/05/mp-go-emite-de-graca-certidoes-eletronicas-sobre-processos-extrajudiciais.ghtml",
-            content: "MP-GO passa a emitir de graça certidões eletrônicas sobre processos extrajudiciais, facilitando acesso do cidadão à informação."
-        },
-        {
-            title: "Servidores usavam certificados falsos para conseguir gratificações; MP investiga esquema",
-            source: "G1 Goiás",
-            date: "2025-02-02",
-            url: "https://g1.globo.com/go/goias/noticia/2025/02/03/servidores-usavam-certificados-falsos-para-conseguir-gratificacoes-nos-salarios.ghtml",
-            content: "Ministério Público de Goiás investiga esquema de certificados falsos usados por servidores para aumentar gratificações salariais."
-        },
-        {
-            title: "MP-GO desiste de briga judicial e não vai mais exigir câmeras nas fardas da PM",
-            source: "Jornal Opção",
-            date: "2025-06-10",
-            url: "https://www.jornalopcao.com.br/justica/mp-go-desiste-de-briga-judicial-e-nao-vai-mais-exigir-cameras-em-fardas-da-pm-758316/",
-            content: "Decisão do MP-GO de desistir de ação que pedia uso obrigatório de câmeras em fardas da PM gera críticas de entidades de direitos humanos."
-        },
-        {
-            title: "MPGO lança ferramenta digital para materializar evidências em investigações",
-            source: "Portal MPGO",
-            date: "2023-08-20",
-            url: "https://www.mpgo.mp.br/portal/pagina/medi-materializador-de-evidencias-digitais-e-informaticas",
-            content: "Ferramenta MEDI permite ao Ministério Público de Goiás coletar e preservar evidências digitais com mais segurança e rastreabilidade."
-        }
-    ];
+  showStatus(`Buscando "${termo}" nas últimas 24h...`, 'loading');
+
+  try {
+    const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
+    if (!resp.ok) {
+      console.error('Resposta inválida da API MPGO:', resp);
+      throw new Error('HTTP ' + resp.status);
+    }
+    const dados = await resp.json();
+
+    newsData = dados.map(item => ({
+      title: item.title,
+      content: item.content,
+      url: item.url,
+      source: item.source,
+      date: item.date,
+      sentiment: 'neutral',
+      riskScore: item.risco_score != null ? Number(item.risco_score).toFixed(1) : '0.0',
+      riskLevel: item.risco_classificacao || 'low',
+      techniques: item.elementos_contrapropaganda || [],
+      gravity: item.sintese_tecnica || '',
+      mpRole: item.mp_role || 'neutro',
+      mpAgente: item.mp_role === 'autor',
+      mpAlvo: item.mp_role === 'alvo'
+    }));
+
+    updateDashboard();
+    document.getElementById('clearBtn').style.display = 'inline-flex';
+    document.getElementById('tabsContainer').style.display = 'flex';
+    showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
+    setTimeout(hideStatus, 3000);
+  } catch (e) {
+    console.error(e);
+    showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
+    setTimeout(hideStatus, 4000);
+  }
+}
+
 
     const propagandaTechniques = {
         'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
