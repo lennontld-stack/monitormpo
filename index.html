@@ -458,57 +458,57 @@
 </main>
 
 <script>
-    const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
+const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
 
-    let newsData = [];
-    let historicoCompleto = [];
-    let currentFilter = 'all';
-    let currentTab = 'dashboard';
+let newsData = [];
+let historicoCompleto = [];
+let currentFilter = 'all';
+let currentTab = 'dashboard';
 
-    async function buscarNoticias() {
-      const termo = document.getElementById('termoBusca').value.trim();
-      if (!termo) {
-        alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.).');
-        return;
-      }
+async function buscarNoticias() {
+  const termo = document.getElementById('termoBusca').value.trim();
+  if (!termo) {
+    alert('Informe um termo para busca (ex.: MPGO, GAECO Goiás, etc.).');
+    return;
+  }
 
-      showStatus(`Buscando "${termo}" nas últimas 24h...`, 'loading');
+  showStatus(`Buscando "${termo}" nas últimas 24h...`, 'loading');
 
-      try {
-        const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
-        if (!resp.ok) {
-          console.error('Resposta inválida da API MPGO:', resp);
-          throw new Error('HTTP ' + resp.status);
-        }
-        const dados = await resp.json();
-
-        newsData = dados.map(item => ({
-          title: item.title,
-          content: item.content,
-          url: item.url,
-          source: item.source,
-          date: item.date,
-          sentiment: 'neutral',
-          riskScore: item.risco_score != null ? Number(item.risco_score).toFixed(1) : '0.0',
-          riskLevel: item.risco_classificacao || 'low',
-          techniques: item.elementos_contrapropaganda || [],
-          gravity: item.sintese_tecnica || '',
-          mpRole: item.mp_role || 'neutro',
-          mpAgente: item.mp_role === 'autor',
-          mpAlvo: item.mp_role === 'alvo'
-        }));
-
-        updateDashboard();
-        document.getElementById('clearBtn').style.display = 'inline-flex';
-        document.getElementById('tabsContainer').style.display = 'flex';
-        showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
-        setTimeout(hideStatus, 3000);
-      } catch (e) {
-        console.error(e);
-        showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
-        setTimeout(hideStatus, 4000);
-      }
+  try {
+    const resp = await fetch(`${API_BASE}/news-search?q=${encodeURIComponent(termo)}`);
+    if (!resp.ok) {
+      console.error('Resposta inválida da API MPGO:', resp);
+      throw new Error('HTTP ' + resp.status);
     }
+    const dados = await resp.json();
+
+    newsData = dados.map(item => ({
+      title: item.title,
+      content: item.content,
+      url: item.url,
+      source: item.source,
+      date: item.date,
+      sentiment: 'neutral',
+      riskScore: item.risco_score != null ? Number(item.risco_score).toFixed(1) : '0.0',
+      riskLevel: item.risco_classificacao || 'low',
+      techniques: item.elementos_contrapropaganda || [],
+      gravity: item.sintese_tecnica || '',
+      mpRole: item.mp_role || 'neutro',
+      mpAgente: item.mp_role === 'autor',
+      mpAlvo: item.mp_role === 'alvo'
+    }));
+
+    updateDashboard();
+    document.getElementById('clearBtn').style.display = 'inline-flex';
+    document.getElementById('tabsContainer').style.display = 'flex';
+    showStatus(`✅ ${newsData.length} notícias analisadas com IA`, 'ready');
+    setTimeout(hideStatus, 3000);
+  } catch (e) {
+    console.error(e);
+    showStatus('Erro ao buscar/analisar notícias. Tente novamente.', 'error');
+    setTimeout(hideStatus, 4000);
+  }
+}
 
     const propagandaTechniques = {
         'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
@@ -890,3 +890,4 @@
 
 </body>
 </html>
+
