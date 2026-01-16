@@ -1,40 +1,3 @@
-Entendi perfeitamente. Vamos resolver esses pontos:
-
-1. **A Mensagem "SEM CHAVE IA CONFIGURADA":**
-Isso apareceu porque o código do Worker que te passei *exige* que você configure a chave do Gemini no painel do Cloudflare para funcionar. Sem a chave, ele faz a busca no Google, mas não consegue passar para a IA analisar, aí ele devolve esse aviso de segurança.
-* **Solução:** Você precisa ir no Cloudflare > Workers > Settings > **Variables** e adicionar uma variável chamada `GEMINI_API_KEY` com a sua chave do Google AI Studio.
-
-
-2. **Telegram:**
-Sim, o código do Telegram está lá no final do arquivo `worker.js` (na parte `scheduled`). Para ele funcionar, você precisa garantir que adicionou as variáveis `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` nas mesmas configurações do Cloudflare. E também precisa configurar o **Trigger** (Cron) na aba "Triggers" para dizer *quando* ele deve disparar (ex: todo dia às 08:00).
-3. **Visual e Limpeza:**
-Abaixo está o **HTML Final Polido**.
-* 🗑️ **Removi:** Botão "Dados de Exemplo" e os filtros de Data (Início/Fim).
-* ✨ **Visual:** Melhorei as sombras, espaçamentos e deixei o botão de busca mais moderno e centralizado.
-* 🔍 **Filtros:** Mantive apenas os botões de Sentimento (Positivo/Neutro/Negativo).
-
-
-
----
-
-### Passo 1: Configure as Chaves (Correção do Erro)
-
-Antes de testar o novo HTML, vá no painel do Cloudflare Workers e garanta que estas variáveis estão lá:
-
-1. `GEMINI_API_KEY` (Sua chave do Google AI Studio - *Correção do erro "Sem chave"*)
-2. `GOOGLE_API_KEY` (Para o Custom Search)
-3. `GOOGLE_CSE_CX` (O ID do buscador)
-4. `YOUTUBE_API_KEY` (Para os vídeos)
-5. `TELEGRAM_BOT_TOKEN` (Para o envio automático)
-6. `TELEGRAM_CHAT_ID` (Quem recebe)
-
----
-
-### Passo 2: O Novo HTML (Copie e Cole)
-
-Substitua todo o seu `index.html` por este código mais limpo e bonito:
-
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -706,3 +669,4 @@ Substitua todo o seu `index.html` por este código mais limpo e bonito:
 </html>
 
 ```
+
