@@ -369,9 +369,9 @@
                placeholder='Ex.: MPGO OR "gaeco goiás" OR "cyro terra peres"'>
       </div>
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="buscarTalkwalker()">📡 Talkwalker (alerta MPGO)</button>
-        <button class="btn btn-secondary" onclick="buscarNewsAPI()">📰 Imprensa geral (NewsAPI)</button>
-        <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo (local)</button>
+        <button class="btn btn-primary" onclick="buscarNoticias()">🕵️ Investigação Completa (IA)</button>
+        
+        <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo</button>
         <button class="btn btn-danger" onclick="clearData()" style="display: none;" id="clearBtn">🗑️ Limpar</button>
       </div>
     </div>
@@ -421,7 +421,7 @@
 
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl); flex-wrap: wrap; gap: var(--spacing-md);">
-        <h3 style="margin: 0;">Últimas Notícias Analisadas</h3>
+        <h3 style="margin: 0;">Últimas Notícias (Agrupadas por Evento)</h3>
         <div class="filters">
           <input type="date" id="dataIni">
           <input type="date" id="dataFim">
@@ -437,10 +437,10 @@
           <thead>
           <tr>
             <th>Data</th>
-            <th>Título</th>
-            <th>Fonte</th>
+            <th>Evento / Síntese</th>
+            <th>Fontes</th>
             <th>Sentimento</th>
-            <th>Risco</th>
+            <th>Risco (IA)</th>
             <th>Ações</th>
           </tr>
           </thead>
@@ -448,7 +448,7 @@
         </table>
       </div>
       <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary);">
-        <span id="tableEmpty">Clique em um dos botões de busca ou em "Dados de Exemplo" para começar</span>
+        <span id="tableEmpty">Clique em "Investigação Completa" para varrer a web e analisar riscos.</span>
       </div>
     </div>
   </div>
@@ -466,212 +466,160 @@ let historicoCompleto = [];
 let currentFilter = 'all';
 let currentTab = 'dashboard';
 
-async function buscarTalkwalker() {
-  try {
-    showStatus('Buscando no Talkwalker e aplicando análise local...', 'loading');
-
-    const resp = await fetch(API_BASE + '/talkwalker-search');
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-
-    const data = await resp.json();
-    if (!data.ok || !Array.isArray(data.resultados)) {
-      console.error('Resposta inesperada de /talkwalker-search:', data);
-      throw new Error('Formato inesperado');
-    }
-
-    newsData = data.resultados.map(analyzeNewsItem);
-    updateDashboard();
-
-    document.getElementById('clearBtn').style.display = 'inline-flex';
-    document.getElementById('tabsContainer').style.display = 'flex';
-
-    showStatus('✅ Análise concluída com notícias do Talkwalker', 'ready');
-    setTimeout(hideStatus, 3000);
-  } catch (e) {
-    console.error('Erro ao buscar/analisar notícias (Talkwalker):', e);
-    alert('Erro ao buscar/analisar notícias do Talkwalker. Tente novamente.');
-    showStatus('Erro ao buscar/analisar notícias.', 'error');
+// ============================================
+// FUNÇÃO PRINCIPAL: BUSCA UNIFICADA (WORKER)
+// ============================================
+async function buscarNoticias() {
+  const termo = document.getElementById('termoBusca').value.trim();
+  if (!termo) {
+    alert('Informe um termo para busca (ex.: MPGO, GAECO).');
+    return;
   }
-}
 
-async function buscarNewsAPI() {
-  const termo = document.getElementById('termoBusca').value || 'mpgo or gaeco';
+  // 1. Feedback visual
+  showStatus(`🕵️ Investigando "${termo}" no Google, YouTube e RSS...`, 'loading');
 
   try {
-    showStatus('Buscando na imprensa geral (NewsAPI)...', 'loading');
-
-    const resp = await fetch(
-      API_BASE + '/news-search?q=' + encodeURIComponent(termo)
-    );
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    // 2. Chamada ao endpoint unificado
+    const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
+    
+    if (!resp.ok) {
+        const errData = await resp.json().catch(()=>({})); 
+        throw new Error(errData.erro || 'Erro na conexão com a API');
+    }
 
     const data = await resp.json();
-    if (!data.ok || !Array.isArray(data.resultados)) {
-      console.error('Resposta inesperada de /news-search:', data);
-      throw new Error('Formato inesperado');
-    }
 
-    newsData = data.resultados.map(analyzeNewsItem);
+    // 3. Mapeamento (Backend Gemini JSON -> Frontend Dashboard)
+    newsData = data.results.map(item => ({
+      title: item.title,
+      // O conteúdo agora é a síntese técnica feita pela IA
+      content: item.content || item.sintese_tecnica || "Sem resumo disponível",
+      url: item.url,
+      source: item.source, // Ex: "G1 (+3 fontes)"
+      date: item.date,
+      
+      // Mapeia o sentimento
+      sentiment: mapSentiment(item.sentiment),
+      
+      // Mapeia o risco
+      riskScore: (item.risco_score || 0).toFixed(1),
+      riskLevel: mapRiskLevel(item.risco_classificacao),
+      
+      // Técnicas de contrapropaganda
+      techniques: item.elementos_contrapropaganda || [],
+      
+      // Gravidade
+      gravity: generateGravityDescription(mapRiskLevel(item.risco_classificacao)),
+      
+      mpRole: item.mp_role || 'neutro'
+    }));
+
     updateDashboard();
-
+    
+    // Mostra controles
     document.getElementById('clearBtn').style.display = 'inline-flex';
     document.getElementById('tabsContainer').style.display = 'flex';
+    
+    // Mensagem de sucesso
+    showStatus(`✅ ${data.total_raw} menções reduzidas a ${data.total_clusters} eventos principais analisados.`, 'ready');
+    setTimeout(hideStatus, 5000);
 
-    showStatus('✅ Notícias da imprensa carregadas', 'ready');
-    setTimeout(hideStatus, 3000);
   } catch (e) {
-    console.error('Erro ao buscar/analisar notícias (NewsAPI):', e);
-    alert('Erro ao buscar na imprensa geral. Tente novamente.');
-    showStatus('Erro ao buscar na imprensa geral.', 'error');
+    console.error(e);
+    showStatus('Erro: ' + e.message, 'error');
   }
 }
 
-const propagandaTechniques = {
-  'falsa dicotomia': ['ou ', 'tudo ou nada', 'preto no branco', 'extremismo'],
-  'apelo emocional': ['indignação', 'medo', 'raiva', 'horror', 'tristeza', 'chocante'],
-  'generalização': ['todos', 'ninguém', 'sempre', 'nunca', 'todos os', 'nenhum'],
-  'desinformação': ['falso', 'mentira', 'fake', 'inventado', 'manipulado'],
-  'estereótipo': ['corrupto', 'bandidos', 'inimigo', 'vermelho', 'elite'],
-  'omissão contexto': ['sem explicar', 'sem mencionar', 'ignorando que', 'escondendo'],
-  'ad hominem': ['incompetente', 'corrupto', 'ladrão', 'idiota', 'burro'],
-  'fonte não confiável': ['segundo blogueiro', 'fonte anônima', 'dizem que']
-};
+// ============================================
+// HELPERS DE MAPEAMENTO (Backend -> CSS)
+// ============================================
 
-const sentimentLexicon = {
-  positive: ['excelente', 'ótimo', 'sucesso', 'eficaz', 'importante', 'reconhecido', 'eficiente', 'recupera', 'devolução', 'gratuito', 'facilitando'],
-  negative: ['fracasso', 'corrupção', 'incompetência', 'escândalo', 'denúncia', 'investigação', 'crítica', 'estupro', 'suspensa', 'esquema'],
-  neutral: ['informou', 'disse', 'declarou', 'realizou', 'participou']
-};
-
-function analyzeNewsItem(item) {
-  const full = (item.title + ' ' + item.content).toLowerCase();
-
-  const mpAgente = [
-    'mp-go investiga',
-    'mpgo investiga',
-    'ministério público de goiás investiga',
-    'mp-go denuncia',
-    'mpgo denuncia',
-    'ofereceu denúncia',
-    'oferece denúncia',
-    'ofereceu denuncia',
-    'oferece denuncia',
-    'ajuizou ação',
-    'ajuizou acao',
-    'propôs ação',
-    'propôs acao',
-    'propõe ação',
-    'propõe acao',
-    'deflagrou operação',
-    'deflagra operação',
-    'deflagrou operacao',
-    'deflagra operacao',
-    'realizou operação',
-    'realiza operação',
-    'realizou operacao',
-    'realiza operacao',
-    'mp-go recupera',
-    'mpgo recupera',
-    'mp-go emite',
-    'mp-go lança',
-    'mpgo lança'
-  ].some(p => full.includes(p));
-
-  const mpAlvo =
-    full.includes('mp-go é criticado') ||
-    full.includes('mp-go é acusado') ||
-    full.includes('críticas ao mp-go') ||
-    full.includes('criticas ao mp-go') ||
-    full.includes('criticou o mp-go') ||
-    full.includes('criticou o ministério público de goiás') ||
-    full.includes('residente jurídico critica o mpgo') ||
-    full.includes('residente juridico critica o mpgo') ||
-    full.includes('atraso no pagamento de bolsas do mpgo');
-
-  let sentimentoScore = 0;
-  Object.keys(sentimentLexicon).forEach(tipo => {
-    sentimentLexicon[tipo].forEach(palavra => {
-      if (full.includes(palavra)) {
-        if (tipo === 'negative') sentimentoScore -= 1;
-        if (tipo === 'positive') sentimentoScore += 1;
-      }
-    });
-  });
-
-  if (mpAgente) {
-    if (sentimentoScore < 0) {
-      sentimentoScore = 0;
-    }
-    if (sentimentoScore >= 0) {
-      sentimentoScore = 3;
-    }
-  }
-
-  let sentimento = 'neutral';
-  if (sentimentoScore > 0.5) sentimento = 'positive';
-  else if (sentimentoScore < -0.5) sentimento = 'negative';
-
-  const detectedTechniques = [];
-  Object.entries(propagandaTechniques).forEach(([technique, keywords]) => {
-    const matches = keywords.filter(keyword => full.includes(keyword)).length;
-    if (matches > 0) {
-      const name = technique.replace(/\b\w/g, c => c.toUpperCase());
-      detectedTechniques.push(name);
-    }
-  });
-
-  let riskScore = 0;
-
-  const citaMP =
-    full.includes('mpgo') ||
-    full.includes('mp-go') ||
-    full.includes('ministério público de goiás') ||
-    full.includes('ministério público de goias') ||
-    full.includes('gaeco');
-
-  if (sentimento === 'negative') riskScore += 2;
-  if (sentimento === 'positive') riskScore -= 2;
-
-  riskScore += detectedTechniques.length * 1.0;
-
-  if (citaMP) riskScore += 1;
-
-  if (mpAgente && !mpAlvo) {
-    riskScore -= 5;
-    riskScore = Math.min(riskScore, 3);
-  } else if (mpAlvo && !mpAgente) {
-    riskScore += 3;
-  }
-
-  riskScore = Math.max(0, Math.min(10, riskScore));
-
-  let riskLevel;
-  if (riskScore >= 8) riskLevel = 'critical';
-  else if (riskScore >= 6) riskLevel = 'high';
-  else if (riskScore >= 3) riskLevel = 'medium';
-  else riskLevel = 'low';
-
-  return {
-    ...item,
-    sentiment: sentimento,
-    riskScore: riskScore.toFixed(1),
-    riskLevel,
-    techniques: detectedTechniques,
-    gravity: generateGravityDescription(riskLevel, detectedTechniques),
-    mpRole: mpAgente ? 'autor' : (mpAlvo ? 'alvo' : 'nenhum'),
-    mpAgente,
-    mpAlvo
-  };
+function mapRiskLevel(level) {
+    if(!level) return 'low';
+    level = level.toLowerCase().trim();
+    // Gemini pode retornar em PT-BR
+    if(level === 'critico' || level === 'crítico') return 'critical';
+    if(level === 'alto' || level === 'high') return 'high';
+    if(level === 'medio' || level === 'médio' || level === 'medium') return 'medium';
+    return 'low';
 }
 
-function generateGravityDescription(riskLevel, techniques) {
+function mapSentiment(s) {
+    if (!s) return 'neutral';
+    s = s.toLowerCase();
+    if (s.includes('positive') || s.includes('positivo')) return 'positive';
+    if (s.includes('negative') || s.includes('negativo')) return 'negative';
+    return 'neutral';
+}
+
+// ============================================
+// LÓGICA DE DADOS DE EXEMPLO (LOCAL)
+// ============================================
+
+const demoData = [
+  { 
+      title: "Operação do MPGO desarticula esquema (Demo)", 
+      content: "Ação conjunta combate fraudes.", 
+      url: "#", 
+      source: "O Popular", 
+      date: new Date().toISOString() 
+  },
+  { 
+      title: "Críticas à atuação do promotor em caso X (Demo)", 
+      content: "Advogados reclamam de excessos.", 
+      url: "#", 
+      source: "Blog Local", 
+      date: new Date().toISOString() 
+  }
+];
+
+async function loadDemoData() {
+  showStatus('Carregando dados de exemplo...', 'loading');
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // Usa a função analyzeNewsItemLocal apenas para o demo
+  newsData = demoData.map(analyzeNewsItemLocal);
+  updateDashboard();
+  document.getElementById('clearBtn').style.display = 'inline-flex';
+  document.getElementById('tabsContainer').style.display = 'flex';
+  showStatus('✅ Dados de exemplo carregados', 'ready');
+  setTimeout(hideStatus, 3000);
+}
+
+// Análise simples regex (apenas para o botão DEMO funcionar sem gastar API)
+function analyzeNewsItemLocal(item) {
+    const full = (item.title + ' ' + item.content).toLowerCase();
+    let sentiment = 'neutral';
+    if(full.includes('crítica') || full.includes('reclama')) sentiment = 'negative';
+    if(full.includes('desarticula') || full.includes('combate')) sentiment = 'positive';
+    
+    let riskLevel = 'low';
+    let riskScore = 2;
+    if(sentiment === 'negative') { riskLevel = 'high'; riskScore = 7; }
+    
+    return {
+        ...item,
+        sentiment,
+        riskScore: riskScore.toFixed(1),
+        riskLevel,
+        techniques: [],
+        gravity: generateGravityDescription(riskLevel),
+        mpRole: 'neutro'
+    };
+}
+
+// ============================================
+// DASHBOARD & UI UTILS (MANTIDO DO ORIGINAL)
+// ============================================
+
+function generateGravityDescription(riskLevel) {
   const descriptions = {
     critical: "Exposição crítica à reputação institucional - ação imediata requerida",
     high: "Risco elevado com potencial de escalada - monitoramento intensivo",
     medium: "Risco moderado - acompanhamento recomendado",
     low: "Risco baixo - monitoramento rotineiro suficiente"
   };
-  return descriptions[riskLevel];
+  return descriptions[riskLevel] || descriptions['low'];
 }
 
 function showStatus(message, type = 'ready') {
@@ -688,17 +636,6 @@ function switchTab(tabName, ev) {
   if (ev && ev.target) ev.target.classList.add('active');
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById(tabName + 'Tab').classList.add('active');
-}
-
-async function loadDemoData() {
-  showStatus('Carregando dados de exemplo...', 'loading');
-  await new Promise(resolve => setTimeout(resolve, 500));
-  newsData = demoData.map(analyzeNewsItem);
-  updateDashboard();
-  document.getElementById('clearBtn').style.display = 'inline-flex';
-  document.getElementById('tabsContainer').style.display = 'flex';
-  showStatus('✅ Análise concluída com dados de exemplo', 'ready');
-  setTimeout(hideStatus, 3000);
 }
 
 function clearData() {
@@ -723,7 +660,9 @@ function updateDashboard() {
 
 function updateRiskCounters() {
   const counters = { critical:0, high:0, medium:0, low:0 };
-  newsData.forEach(item => counters[item.riskLevel]++);
+  newsData.forEach(item => {
+      if(counters[item.riskLevel] !== undefined) counters[item.riskLevel]++;
+  });
   const container = document.getElementById('riskCounters');
   container.innerHTML = `
     <div class="card">
@@ -775,19 +714,23 @@ function updateRiskIndex() {
   document.getElementById('riskScore').textContent = avgRisk.toFixed(1);
   document.getElementById('riskClassification').textContent = riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1);
   document.getElementById('riskLabel').textContent = avgRisk.toFixed(1);
-  document.getElementById('riskFill').style.width = `${avgRisk * 10}%`;
+  document.getElementById('riskFill').style.width = `${Math.min(avgRisk * 10, 100)}%`;
   document.getElementById('riskFill').className = `risk-fill ${riskLevel}`;
 }
 
 function updateCharts() {
   const sentimentCanvas = document.getElementById('sentimentChart');
   const riskCanvas = document.getElementById('riskChart');
+  
+  // Limpa canvas para evitar sobreposição
   const sctx = sentimentCanvas.getContext('2d');
   const rctx = riskCanvas.getContext('2d');
   sctx.clearRect(0, 0, sentimentCanvas.width, sentimentCanvas.height);
   rctx.clearRect(0, 0, riskCanvas.width, riskCanvas.height);
+  
   if (newsData.length === 0) return;
 
+  // Gráfico Barras Sentimento
   const sentimentData = {
     positive: newsData.filter(n => n.sentiment === 'positive').length,
     neutral: newsData.filter(n => n.sentiment === 'neutral').length,
@@ -813,8 +756,11 @@ function updateCharts() {
     }
   });
 
+  // Gráfico Pizza Risco
   const riskData = { critical:0, high:0, medium:0, low:0 };
-  newsData.forEach(item => riskData[item.riskLevel]++);
+  newsData.forEach(item => {
+      if(riskData[item.riskLevel] !== undefined) riskData[item.riskLevel]++;
+  });
   let startAngle = 0;
   const riskColors = { critical: '#dc2626', high: '#ea580c', medium: '#eab308', low: '#16a34a' };
   const total = newsData.length;
@@ -846,16 +792,19 @@ function updateNewsTable() {
   emptyMsg.style.display = 'none';
   tbody.innerHTML = filteredData.map(item => `
     <tr>
-      <td>${item.date}</td>
-      <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-        ${item.title}
+      <td>${item.date.slice(0,10)}</td>
+      <td style="max-width: 300px;">
+        <div style="font-weight:bold; color:var(--color-text-primary);">${item.title}</div>
+        <div style="font-size:0.85em; color:var(--color-text-secondary); margin-top:4px; line-height:1.4;">
+            ${item.content}
+        </div>
       </td>
       <td><strong>${item.source}</strong></td>
       <td><span class="sentiment-badge sentiment-${item.sentiment}">${item.sentiment.toUpperCase()}</span></td>
       <td>
         <span class="risk-badge risk-${item.riskLevel}">
           <span class="risk-score">${item.riskScore}</span>
-          ${item.riskLevel.charAt(0).toUpperCase() + item.riskLevel.slice(1)}
+          ${item.riskLevel.toUpperCase()}
         </span>
       </td>
       <td>
@@ -885,15 +834,12 @@ function updateTechniquesTab() {
       <div class="technique-item">
         <div class="technique-name">${technique}</div>
         <div>📰 Detectada em <strong>${count}</strong> notícia${count > 1 ? 's' : ''}</div>
-        <div style="font-size: var(--font-size-sm); color: var(--color-secondary); margin-top: var(--spacing-sm);">
-          Técnica clássica de contrapropaganda do Ministério da Justiça
-        </div>
       </div>
     `).join('');
 }
 
 function gerarResumoPeriodo() {
-  alert('Placeholder: aqui entra a geração de TXT com resumo do período.');
+  alert('Funcionalidade em desenvolvimento: Exportação PDF/TXT do dossiê.');
 }
 
 document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
