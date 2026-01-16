@@ -1,856 +1,708 @@
+Entendi perfeitamente. Vamos resolver esses pontos:
+
+1. **A Mensagem "SEM CHAVE IA CONFIGURADA":**
+Isso apareceu porque o código do Worker que te passei *exige* que você configure a chave do Gemini no painel do Cloudflare para funcionar. Sem a chave, ele faz a busca no Google, mas não consegue passar para a IA analisar, aí ele devolve esse aviso de segurança.
+* **Solução:** Você precisa ir no Cloudflare > Workers > Settings > **Variables** e adicionar uma variável chamada `GEMINI_API_KEY` com a sua chave do Google AI Studio.
+
+
+2. **Telegram:**
+Sim, o código do Telegram está lá no final do arquivo `worker.js` (na parte `scheduled`). Para ele funcionar, você precisa garantir que adicionou as variáveis `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` nas mesmas configurações do Cloudflare. E também precisa configurar o **Trigger** (Cron) na aba "Triggers" para dizer *quando* ele deve disparar (ex: todo dia às 08:00).
+3. **Visual e Limpeza:**
+Abaixo está o **HTML Final Polido**.
+* 🗑️ **Removi:** Botão "Dados de Exemplo" e os filtros de Data (Início/Fim).
+* ✨ **Visual:** Melhorei as sombras, espaçamentos e deixei o botão de busca mais moderno e centralizado.
+* 🔍 **Filtros:** Mantive apenas os botões de Sentimento (Positivo/Neutro/Negativo).
+
+
+
+---
+
+### Passo 1: Configure as Chaves (Correção do Erro)
+
+Antes de testar o novo HTML, vá no painel do Cloudflare Workers e garanta que estas variáveis estão lá:
+
+1. `GEMINI_API_KEY` (Sua chave do Google AI Studio - *Correção do erro "Sem chave"*)
+2. `GOOGLE_API_KEY` (Para o Custom Search)
+3. `GOOGLE_CSE_CX` (O ID do buscador)
+4. `YOUTUBE_API_KEY` (Para os vídeos)
+5. `TELEGRAM_BOT_TOKEN` (Para o envio automático)
+6. `TELEGRAM_CHAT_ID` (Quem recebe)
+
+---
+
+### Passo 2: O Novo HTML (Copie e Cole)
+
+Substitua todo o seu `index.html` por este código mais limpo e bonito:
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MPGO Monitor - Análise de Reputação Executiva</title>
+  <title>MPGO Monitor - Inteligência Reputacional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --color-critical: #dc2626;
-      --color-high: #ea580c;
-      --color-medium: #eab308;
-      --color-low: #16a34a;
-      --color-success: #059669;
-      --color-warning: #d97706;
-      --color-danger: #dc2626;
-      --color-primary: #1e40af;
-      --color-secondary: #64748b;
-      --color-background: #f8fafc;
-      --color-surface: #ffffff;
-      --color-surface-2: #f1f5f9;
-      --color-text-primary: #0f172a;
-      --color-text-secondary: #475569;
-      --color-border: #e2e8f0;
-      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-size-sm: 0.875rem;
-      --font-size-base: 1rem;
-      --font-size-lg: 1.125rem;
-      --font-size-xl: 1.25rem;
-      --font-size-2xl: 1.5rem;
-      --font-weight-normal: 400;
-      --font-weight-medium: 500;
-      --font-weight-semibold: 600;
-      --font-weight-bold: 700;
-      --spacing-xs: 0.5rem;
-      --spacing-sm: 0.75rem;
-      --spacing-md: 1rem;
-      --spacing-lg: 1.25rem;
-      --spacing-xl: 1.5rem;
-      --spacing-2xl: 2rem;
-      --spacing-3xl: 3rem;
+      /* Cores Institucionais e Semânticas */
+      --mp-blue: #003366;       /* Azul MP */
+      --mp-blue-light: #004d99;
+      --bg-page: #f3f4f6;
+      --bg-card: #ffffff;
+      
+      --risk-critical: #ef4444; /* Vermelho forte */
+      --risk-high: #f97316;     /* Laranja */
+      --risk-medium: #eab308;   /* Amarelo */
+      --risk-low: #22c55e;      /* Verde */
+      
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-      --border-radius: 0.5rem;
-      --border-radius-lg: 0.75rem;
-      --border-radius-xl: 1rem;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      
+      --radius: 12px;
     }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
-      font-family: var(--font-family);
-      background: var(--color-background);
-      color: var(--color-text-primary);
-      line-height: 1.6;
-      font-size: var(--font-size-base);
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding-bottom: 40px;
     }
+
+    /* HEADER */
     .header {
-      background: linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%);
+      background: var(--mp-blue);
       color: white;
-      padding: var(--spacing-2xl) var(--spacing-3xl);
-      box-shadow: var(--shadow-xl);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      padding: 1.5rem 0;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
     }
     .header-content {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 0 1.5rem;
       display: flex;
       align-items: center;
-      gap: var(--spacing-xl);
+      gap: 1rem;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-bold);
+    .logo-badge {
+      font-size: 2rem;
+      background: rgba(255,255,255,0.1);
+      padding: 8px;
+      border-radius: 8px;
     }
-    .logo-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(255,255,255,0.2);
-      border-radius: var(--border-radius-xl);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--font-size-xl);
-      font-weight: bold;
-    }
-    .header-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); }
-    .main-container {
-      max-width: 1400px;
+    .header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header p { font-size: 0.875rem; opacity: 0.8; font-weight: 400; }
+
+    /* LAYOUT PRINCIPAL */
+    .container {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: var(--spacing-xl);
+      padding: 0 1.5rem;
     }
-    .input-section {
-      background: var(--color-surface);
-      border-radius: var(--border-radius-xl);
-      padding: var(--spacing-2xl);
-      margin-bottom: var(--spacing-2xl);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--color-border);
-    }
-    .input-group { display: flex; flex-direction: column; gap: var(--spacing-lg); }
-    @media (min-width: 768px) {
-      .input-group { flex-direction: row; align-items: end; }
-      .input-group .input-field { flex: 1; }
-    }
-    .input-field { flex: 1; }
-    .input-field label {
-      display: block;
-      margin-bottom: var(--spacing-sm);
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-text-primary);
-      font-size: var(--font-size-sm);
-    }
-    .input-field input {
-      width: 100%;
-      padding: var(--spacing-md) var(--spacing-lg);
-      border: 2px solid var(--color-border);
-      border-radius: var(--border-radius-lg);
-      font-size: var(--font-size-base);
-      transition: all 0.2s ease;
-      background: var(--color-surface);
-    }
-    .input-field input:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
-    }
-    .btn {
-      padding: var(--spacing-lg) var(--spacing-2xl);
-      border: none;
-      border-radius: var(--border-radius-lg);
-      font-size: var(--font-size-base);
-      font-weight: var(--font-weight-semibold);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      text-decoration: none;
-      min-height: 52px;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%);
-      color: white;
-      box-shadow: var(--shadow-lg);
-    }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-xl); }
-    .btn-secondary {
-      background: var(--color-surface-2);
-      color: var(--color-text-primary);
-      border: 2px solid var(--color-border);
-    }
-    .btn-secondary:hover {
-      background: var(--color-surface);
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-    .btn-danger { background: var(--color-danger); color: white; }
-    .btn-group { display: flex; gap: var(--spacing-md); flex-wrap: wrap; }
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--border-radius);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      margin-top: var(--spacing-md);
-    }
-    .status-ready { background: rgba(22, 163, 74, 0.1); color: var(--color-success); }
-    .status-loading { background: rgba(245, 158, 11, 0.1); color: var(--color-warning); }
-    .status-error { background: rgba(220, 38, 38, 0.1); color: var(--color-danger); }
-    .tabs {
-      display: none;
-      background: var(--color-surface);
-      border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+
+    /* ÁREA DE BUSCA */
+    .search-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
       box-shadow: var(--shadow-md);
-      margin-bottom: 0;
-      overflow: hidden;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
     }
-    .tab {
+    .search-input-group {
       flex: 1;
-      padding: var(--spacing-lg) var(--spacing-xl);
-      background: none;
-      border: none;
-      font-weight: var(--font-weight-semibold);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: var(--color-text-secondary);
     }
-    .tab.active { background: var(--color-primary); color: white; }
-    .tab-content {
-      background: var(--color-surface);
-      border-radius: 0 0 var(--border-radius-xl) var(--border-radius-xl);
-      padding: var(--spacing-2xl);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--color-border);
-      border-top: none;
-      display: none;
-    }
-    .tab-content.active { display: block; }
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: var(--spacing-xl);
-      margin-bottom: var(--spacing-2xl);
-    }
-    .card {
-      background: var(--color-surface);
-      border-radius: var(--border-radius-xl);
-      padding: var(--spacing-xl);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--color-border);
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-    }
-    .risk-badge {
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--border-radius);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-bold);
-      text-transform: uppercase;
-    }
-    .risk-critical { background: rgba(220, 38, 38, 0.1); color: var(--color-critical); }
-    .risk-high { background: rgba(234, 88, 12, 0.1); color: var(--color-high); }
-    .risk-medium { background: rgba(234, 179, 8, 0.1); color: var(--color-medium); }
-    .risk-low { background: rgba(22, 163, 74, 0.1); color: var(--color-low); }
-    .metric-value {
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-bold);
-      color: var(--color-text-primary);
-    }
-    .risk-index-container { text-align: center; }
-    .risk-gauge {
-      width: 100%; height: 20px;
-      background: var(--color-surface-2);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: var(--spacing-lg) 0;
-      position: relative;
-    }
-    .risk-fill { height: 100%; transition: width 1s ease; position: relative; }
-    .risk-fill.critical { background: linear-gradient(90deg, var(--color-critical), #b91c1c); }
-    .risk-fill.high { background: linear-gradient(90deg, var(--color-high), #c2410c); }
-    .risk-fill.medium { background: linear-gradient(90deg, var(--color-medium), #ca8a04); }
-    .risk-fill.low { background: linear-gradient(90deg, var(--color-low), #15803d); }
-    .risk-label {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-weight: var(--font-weight-bold);
-      font-size: var(--font-size-lg);
-      color: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-    .chart-container {
-      height: 300px;
-      position: relative;
-      background: var(--color-surface-2);
-      border-radius: var(--border-radius-lg);
-      padding: var(--spacing-xl);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: var(--spacing-md);
-    }
-    .sentiment-chart, .risk-chart { width: 100%; height: 250px; }
-    .filters {
-      display: flex;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-xl);
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .filter-btn {
-      padding: var(--spacing-sm) var(--spacing-lg);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      font-size: var(--font-size-sm);
-    }
-    .filter-btn.active {
-      background: var(--color-primary);
-      color: white;
-      border-color: var(--color-primary);
-    }
-    .table-container {
-      overflow-x: auto;
-      background: var(--color-surface);
-      border-radius: var(--border-radius-lg);
-      box-shadow: var(--shadow-md);
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th, td {
-      padding: var(--spacing-lg);
-      text-align: left;
-      border-bottom: 1px solid var(--color-border);
-    }
-    th {
-      background: var(--color-surface-2);
-      font-weight: var(--font-weight-semibold);
-      font-size: var(--font-size-sm);
+    .search-input-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--color-text-secondary);
     }
-    tr:hover { background: rgba(30, 64, 175, 0.02); }
-    .sentiment-badge {
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: var(--border-radius);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-semibold);
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s;
     }
-    .sentiment-positive { background: rgba(22, 163, 74, 0.1); color: var(--color-success); }
-    .sentiment-neutral { background: rgba(100, 116, 139, 0.1); color: var(--color-secondary); }
-    .sentiment-negative { background: rgba(220, 38, 38, 0.1); color: var(--color-danger); }
-    .risk-score { font-weight: var(--font-weight-bold); font-size: var(--font-size-lg); }
-    .techniques-grid {
+    .search-input:focus {
+      outline: none;
+      border-color: var(--mp-blue);
+      box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+    }
+    
+    .btn-search {
+      background: var(--mp-blue);
+      color: white;
+      border: none;
+      padding: 0 2rem;
+      height: 52px; /* Altura para alinhar com o input */
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 1.2rem; /* Compensar o label */
+    }
+    .btn-search:hover { background: var(--mp-blue-light); transform: translateY(-1px); }
+    .btn-search:active { transform: translateY(0); }
+
+    .btn-clear {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      padding: 0 1rem;
+      height: 52px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.2rem;
+      display: none; /* Só aparece quando tem dados */
+    }
+
+    /* STATUS BAR */
+    .status-bar {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.75rem;
+      border-radius: 8px;
+      display: none;
+      text-align: center;
+    }
+    .status-loading { background: #eff6ff; color: var(--mp-blue); }
+    .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
+    .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
+
+    /* DASHBOARD GRID */
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: var(--spacing-lg);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
-    .technique-item {
-      background: var(--color-surface-2);
-      border-left: 4px solid var(--color-warning);
-      padding: var(--spacing-lg);
-      border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0;
+    
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
     }
-    .technique-name {
-      font-weight: var(--font-weight-bold);
-      font-size: var(--font-size-lg);
-      margin-bottom: var(--spacing-sm);
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
     }
+
+    /* METRICAS */
+    .metric-big {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: auto;
+    }
+    .risk-meter-container { margin-top: auto; }
+    .risk-bar-bg {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .risk-bar-fill { height: 100%; width: 0%; transition: width 1s ease; }
+    
+    /* Cores de Risco */
+    .bg-critical { background: var(--risk-critical); }
+    .bg-high { background: var(--risk-high); }
+    .bg-medium { background: var(--risk-medium); }
+    .bg-low { background: var(--risk-low); }
+    
+    .text-critical { color: var(--risk-critical); }
+    .text-high { color: var(--risk-high); }
+    .text-medium { color: var(--risk-medium); }
+    .text-low { color: var(--risk-low); }
+
+    /* TABELA E FILTROS */
+    .results-section {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    .results-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { background: #f9fafb; }
+    .filter-btn.active {
+      background: var(--mp-blue);
+      color: white;
+      border-color: var(--mp-blue);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      padding: 1rem 1.5rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      background: #f9fafb;
+      border-bottom: 1px solid var(--border-color);
+    }
+    td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #f9fafb; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-sentiment-positive { background: #dcfce7; color: #166534; }
+    .badge-sentiment-neutral { background: #f3f4f6; color: #4b5563; }
+    .badge-sentiment-negative { background: #fee2e2; color: #991b1b; }
+    
+    .badge-risk { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .content-preview {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .source-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--mp-blue);
+      background: #eff6ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    
+    .btn-link {
+      color: var(--mp-blue);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    .btn-link:hover { text-decoration: underline; }
+
+    /* CHARTS */
+    .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
+
     @media (max-width: 768px) {
-      .main-container { padding: var(--spacing-md); }
-      .header-content { flex-direction: column; text-align: center; gap: var(--spacing-lg); }
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .btn-group { flex-direction: column; }
+      .search-card { flex-direction: column; align-items: stretch; }
+      .btn-search, .btn-clear { margin-top: 0; }
+      .filters { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+      td, th { padding: 1rem; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<header class="header">
-  <div class="header-content">
-    <div class="logo">
-      <div class="logo-icon">🚨</div>
+
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-badge">⚖️</div>
       <div>
-        <div class="header-title">MPGO Monitor</div>
-        <div style="font-size: var(--font-size-sm); opacity: 0.9;">Análise Executiva de Reputação</div>
+        <h1>MPGO Monitor</h1>
+        <p>Centro de Inteligência e Análise Reputacional</p>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<main class="main-container">
-  <section class="input-section">
-    <div class="input-group">
-      <div class="input-field">
-        <label for="termoBusca">Termo de busca (últimas 24h)</label>
-        <input type="text" id="termoBusca"
-               placeholder='Ex.: MPGO OR "gaeco goiás" OR "cyro terra peres"'>
+  <div class="container">
+    
+    <div class="search-card">
+      <div class="search-input-group">
+        <label>Monitoramento de Tópico (Últimas 24h)</label>
+        <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Operação X", "Ministério Público"'>
       </div>
-      <div class="btn-group">
-        <button class="btn btn-primary" onclick="buscarNoticias()">🕵️ Investigação Completa (IA)</button>
-        
-        <button class="btn btn-secondary" onclick="loadDemoData()">🎯 Dados de Exemplo</button>
-        <button class="btn btn-danger" onclick="clearData()" style="display: none;" id="clearBtn">🗑️ Limpar</button>
-      </div>
+      <button class="btn-search" onclick="buscarNoticias()">
+        🔍 Investigar (IA)
+      </button>
+      <button class="btn-clear" id="clearBtn" onclick="clearData()">
+        Limpar
+      </button>
     </div>
-    <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
-  </section>
+    <div id="statusIndicator" class="status-bar"></div>
 
-  <div class="tabs" id="tabsContainer">
-    <button class="tab active" onclick="switchTab('dashboard', event)">Dashboard</button>
-    <button class="tab" onclick="switchTab('techniques', event)">Técnicas Detectadas</button>
-  </div>
-
-  <div id="dashboardTab" class="tab-content active">
-    <div class="dashboard-grid" id="riskCounters"></div>
-
-    <div class="dashboard-grid">
-      <div class="card" style="grid-column: span 2;">
-        <div class="card-header">
-          <div class="risk-badge risk-critical">📊</div>
-          <div>
-            <h3 style="margin: 0; font-size: var(--font-size-lg);">Índice Geral de Risco</h3>
-            <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Média ponderada das últimas 24h</div>
-          </div>
-        </div>
-        <div class="risk-index-container">
-          <div class="risk-gauge">
-            <div class="risk-fill" id="riskFill" style="width: 0%;">
-              <div class="risk-label" id="riskLabel">0</div>
+    <div id="dashboardContent" style="display: none;">
+      
+      <div class="grid">
+        <div class="card">
+          <h3>Risco Ponderado</h3>
+          <div class="risk-meter-container">
+            <div style="display: flex; justify-content: space-between; align-items: end;">
+              <span class="metric-big" id="riskScore">0.0</span>
+              <span style="font-weight: 600; margin-bottom: 8px;" id="riskLabel">BAIXO</span>
+            </div>
+            <div class="risk-bar-bg">
+              <div class="risk-bar-fill bg-low" id="riskFill"></div>
             </div>
           </div>
-          <div id="riskScore" class="metric-value">0.0</div>
-          <div id="riskClassification" style="font-size: var(--font-size-sm); opacity: 0.7;">Sem dados</div>
+        </div>
+
+        <div class="card">
+          <h3>Sentimento</h3>
+          <div class="chart-box">
+            <canvas id="sentimentChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Gravidade</h3>
+          <div class="chart-box">
+            <canvas id="riskChart"></canvas>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <h3 style="margin-bottom: var(--spacing-lg);">Distribuição de Sentimento</h3>
-        <div class="chart-container">
-          <canvas id="sentimentChart" class="sentiment-chart"></canvas>
+
+      <div class="results-section">
+        <div class="results-header">
+          <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de Eventos Detectados</h3>
+          <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="negative">🔴 Negativo</button>
+            <button class="filter-btn" data-filter="neutral">⚪ Neutro</button>
+            <button class="filter-btn" data-filter="positive">🟢 Positivo</button>
+          </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+          <table id="newsTable">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Data</th>
+                <th style="width: 45%;">Evento / Síntese Técnica</th>
+                <th style="width: 15%;">Sentimento</th>
+                <th style="width: 15%;">Risco (IA)</th>
+                <th style="width: 10%;">Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              </tbody>
+          </table>
+        </div>
+        <div id="tableEmpty" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+          Nenhum resultado encontrado para os filtros atuais.
         </div>
       </div>
-      <div class="card">
-        <h3 style="margin-bottom: var(--spacing-lg);">Distribuição de Risco</h3>
-        <div class="chart-container">
-          <canvas id="riskChart" class="risk-chart"></canvas>
-        </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl); flex-wrap: wrap; gap: var(--spacing-md);">
-        <h3 style="margin: 0;">Últimas Notícias (Agrupadas por Evento)</h3>
-        <div class="filters">
-          <input type="date" id="dataIni">
-          <input type="date" id="dataFim">
-          <button class="filter-btn active" data-filter="all">Todas</button>
-          <button class="filter-btn" data-filter="positive">Positivo</button>
-          <button class="filter-btn" data-filter="neutral">Neutro</button>
-          <button class="filter-btn" data-filter="negative">Negativo</button>
-          <button class="filter-btn" onclick="gerarResumoPeriodo()">Resumo / TXT</button>
-        </div>
-      </div>
-      <div class="table-container">
-        <table id="newsTable">
-          <thead>
-          <tr>
-            <th>Data</th>
-            <th>Evento / Síntese</th>
-            <th>Fontes</th>
-            <th>Sentimento</th>
-            <th>Risco (IA)</th>
-            <th>Ações</th>
-          </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary);">
-        <span id="tableEmpty">Clique em "Investigação Completa" para varrer a web e analisar riscos.</span>
-      </div>
-    </div>
-  </div>
+    </div> </div>
 
-  <div id="techniquesTab" class="tab-content">
-    <div class="techniques-grid" id="techniquesList"></div>
-  </div>
-</main>
-
-<script>
-const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
-
-let newsData = [];
-let historicoCompleto = [];
-let currentFilter = 'all';
-let currentTab = 'dashboard';
-
-// ============================================
-// FUNÇÃO PRINCIPAL: BUSCA UNIFICADA (WORKER)
-// ============================================
-async function buscarNoticias() {
-  const termo = document.getElementById('termoBusca').value.trim();
-  if (!termo) {
-    alert('Informe um termo para busca (ex.: MPGO, GAECO).');
-    return;
-  }
-
-  // 1. Feedback visual
-  showStatus(`🕵️ Investigando "${termo}" no Google, YouTube e RSS...`, 'loading');
-
-  try {
-    // 2. Chamada ao endpoint unificado
-    const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
+  <script>
+    // ============================================
+    // CONFIGURAÇÃO
+    // ============================================
+    const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
     
-    if (!resp.ok) {
-        const errData = await resp.json().catch(()=>({})); 
-        throw new Error(errData.erro || 'Erro na conexão com a API');
+    let newsData = [];
+    let currentFilter = 'all';
+    
+    // Instâncias dos Gráficos
+    let chartSentiment = null;
+    let chartRisk = null;
+
+    // ============================================
+    // FUNÇÃO PRINCIPAL
+    // ============================================
+    async function buscarNoticias() {
+      const termo = document.getElementById('termoBusca').value.trim();
+      if (!termo) {
+        alert('Por favor, digite um termo para investigar.');
+        return;
+      }
+
+      showStatus(`Conectando aos satélites de busca (Google, YouTube, RSS) para o termo "${termo}"...`, 'loading');
+
+      try {
+        const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
+        
+        if (!resp.ok) {
+            const errData = await resp.json().catch(()=>({})); 
+            throw new Error(errData.erro || 'Erro na conexão com a API');
+        }
+
+        const data = await resp.json();
+
+        // Processamento dos dados
+        newsData = data.results.map(item => ({
+          title: item.title,
+          content: item.content || item.sintese_tecnica || "Sem resumo disponível. Verifique se a chave da IA está ativa.",
+          url: item.url,
+          source: item.source,
+          date: item.date,
+          sentiment: mapSentiment(item.sentiment),
+          riskScore: (item.risco_score || 0).toFixed(1),
+          riskLevel: mapRiskLevel(item.risco_classificacao),
+        }));
+
+        // Atualiza UI
+        document.getElementById('dashboardContent').style.display = 'block';
+        document.getElementById('clearBtn').style.display = 'inline-block';
+        
+        updateDashboard();
+        
+        showStatus(`✅ Análise concluída: ${data.total_raw} menções consolidadas em ${data.total_clusters} eventos principais.`, 'ready');
+
+      } catch (e) {
+        console.error(e);
+        showStatus('Erro: ' + e.message, 'error');
+        if(e.message.includes('chave')) {
+          alert('Atenção: Configure a GEMINI_API_KEY no Cloudflare Workers.');
+        }
+      }
     }
 
-    const data = await resp.json();
-
-    // 3. Mapeamento (Backend Gemini JSON -> Frontend Dashboard)
-    newsData = data.results.map(item => ({
-      title: item.title,
-      // O conteúdo agora é a síntese técnica feita pela IA
-      content: item.content || item.sintese_tecnica || "Sem resumo disponível",
-      url: item.url,
-      source: item.source, // Ex: "G1 (+3 fontes)"
-      date: item.date,
-      
-      // Mapeia o sentimento
-      sentiment: mapSentiment(item.sentiment),
-      
-      // Mapeia o risco
-      riskScore: (item.risco_score || 0).toFixed(1),
-      riskLevel: mapRiskLevel(item.risco_classificacao),
-      
-      // Técnicas de contrapropaganda
-      techniques: item.elementos_contrapropaganda || [],
-      
-      // Gravidade
-      gravity: generateGravityDescription(mapRiskLevel(item.risco_classificacao)),
-      
-      mpRole: item.mp_role || 'neutro'
-    }));
-
-    updateDashboard();
-    
-    // Mostra controles
-    document.getElementById('clearBtn').style.display = 'inline-flex';
-    document.getElementById('tabsContainer').style.display = 'flex';
-    
-    // Mensagem de sucesso
-    showStatus(`✅ ${data.total_raw} menções reduzidas a ${data.total_clusters} eventos principais analisados.`, 'ready');
-    setTimeout(hideStatus, 5000);
-
-  } catch (e) {
-    console.error(e);
-    showStatus('Erro: ' + e.message, 'error');
-  }
-}
-
-// ============================================
-// HELPERS DE MAPEAMENTO (Backend -> CSS)
-// ============================================
-
-function mapRiskLevel(level) {
-    if(!level) return 'low';
-    level = level.toLowerCase().trim();
-    // Gemini pode retornar em PT-BR
-    if(level === 'critico' || level === 'crítico') return 'critical';
-    if(level === 'alto' || level === 'high') return 'high';
-    if(level === 'medio' || level === 'médio' || level === 'medium') return 'medium';
-    return 'low';
-}
-
-function mapSentiment(s) {
-    if (!s) return 'neutral';
-    s = s.toLowerCase();
-    if (s.includes('positive') || s.includes('positivo')) return 'positive';
-    if (s.includes('negative') || s.includes('negativo')) return 'negative';
-    return 'neutral';
-}
-
-// ============================================
-// LÓGICA DE DADOS DE EXEMPLO (LOCAL)
-// ============================================
-
-const demoData = [
-  { 
-      title: "Operação do MPGO desarticula esquema (Demo)", 
-      content: "Ação conjunta combate fraudes.", 
-      url: "#", 
-      source: "O Popular", 
-      date: new Date().toISOString() 
-  },
-  { 
-      title: "Críticas à atuação do promotor em caso X (Demo)", 
-      content: "Advogados reclamam de excessos.", 
-      url: "#", 
-      source: "Blog Local", 
-      date: new Date().toISOString() 
-  }
-];
-
-async function loadDemoData() {
-  showStatus('Carregando dados de exemplo...', 'loading');
-  await new Promise(resolve => setTimeout(resolve, 500));
-  // Usa a função analyzeNewsItemLocal apenas para o demo
-  newsData = demoData.map(analyzeNewsItemLocal);
-  updateDashboard();
-  document.getElementById('clearBtn').style.display = 'inline-flex';
-  document.getElementById('tabsContainer').style.display = 'flex';
-  showStatus('✅ Dados de exemplo carregados', 'ready');
-  setTimeout(hideStatus, 3000);
-}
-
-// Análise simples regex (apenas para o botão DEMO funcionar sem gastar API)
-function analyzeNewsItemLocal(item) {
-    const full = (item.title + ' ' + item.content).toLowerCase();
-    let sentiment = 'neutral';
-    if(full.includes('crítica') || full.includes('reclama')) sentiment = 'negative';
-    if(full.includes('desarticula') || full.includes('combate')) sentiment = 'positive';
-    
-    let riskLevel = 'low';
-    let riskScore = 2;
-    if(sentiment === 'negative') { riskLevel = 'high'; riskScore = 7; }
-    
-    return {
-        ...item,
-        sentiment,
-        riskScore: riskScore.toFixed(1),
-        riskLevel,
-        techniques: [],
-        gravity: generateGravityDescription(riskLevel),
-        mpRole: 'neutro'
-    };
-}
-
-// ============================================
-// DASHBOARD & UI UTILS (MANTIDO DO ORIGINAL)
-// ============================================
-
-function generateGravityDescription(riskLevel) {
-  const descriptions = {
-    critical: "Exposição crítica à reputação institucional - ação imediata requerida",
-    high: "Risco elevado com potencial de escalada - monitoramento intensivo",
-    medium: "Risco moderado - acompanhamento recomendado",
-    low: "Risco baixo - monitoramento rotineiro suficiente"
-  };
-  return descriptions[riskLevel] || descriptions['low'];
-}
-
-function showStatus(message, type = 'ready') {
-  const indicator = document.getElementById('statusIndicator');
-  indicator.textContent = message;
-  indicator.className = `status-indicator status-${type}`;
-  indicator.style.display = 'flex';
-}
-function hideStatus() { document.getElementById('statusIndicator').style.display = 'none'; }
-
-function switchTab(tabName, ev) {
-  currentTab = tabName;
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  if (ev && ev.target) ev.target.classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById(tabName + 'Tab').classList.add('active');
-}
-
-function clearData() {
-  newsData = [];
-  historicoCompleto = [];
-  document.getElementById('clearBtn').style.display = 'none';
-  document.getElementById('tabsContainer').style.display = 'none';
-  updateDashboard();
-  showStatus('Dados limpos.', 'ready');
-  setTimeout(hideStatus, 2000);
-}
-
-function updateDashboard() {
-  const existentes = new Set(historicoCompleto.map(n => n.url));
-  newsData.forEach(n => { if (!existentes.has(n.url)) historicoCompleto.push(n); });
-  updateRiskCounters();
-  updateRiskIndex();
-  updateCharts();
-  updateNewsTable();
-  updateTechniquesTab();
-}
-
-function updateRiskCounters() {
-  const counters = { critical:0, high:0, medium:0, low:0 };
-  newsData.forEach(item => {
-      if(counters[item.riskLevel] !== undefined) counters[item.riskLevel]++;
-  });
-  const container = document.getElementById('riskCounters');
-  container.innerHTML = `
-    <div class="card">
-      <div class="card-header">
-        <div class="risk-badge risk-critical">🔴</div>
-        <h3 style="margin:0;">Crítico</h3>
-      </div>
-      <div class="metric-value">${counters.critical}</div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="risk-badge risk-high">🟠</div>
-        <h3 style="margin:0;">Alto</h3>
-      </div>
-      <div class="metric-value">${counters.high}</div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="risk-badge risk-medium">🟡</div>
-        <h3 style="margin:0;">Médio</h3>
-      </div>
-      <div class="metric-value">${counters.medium}</div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="risk-badge risk-low">🟢</div>
-        <h3 style="margin:0;">Baixo</h3>
-      </div>
-      <div class="metric-value">${counters.low}</div>
-    </div>
-  `;
-}
-
-function updateRiskIndex() {
-  if (newsData.length === 0) {
-    document.getElementById('riskScore').textContent = '0.0';
-    document.getElementById('riskClassification').textContent = 'Sem dados';
-    document.getElementById('riskFill').style.width = '0%';
-    document.getElementById('riskFill').className = 'risk-fill';
-    document.getElementById('riskLabel').textContent = '0';
-    return;
-  }
-  const avgRisk = newsData.reduce((s, i) => s + parseFloat(i.riskScore), 0) / newsData.length;
-  const levelsOrder = ['low','medium','high','critical'];
-  let riskLevel = 'low';
-  newsData.forEach(i => {
-    if (levelsOrder.indexOf(i.riskLevel) > levelsOrder.indexOf(riskLevel)) riskLevel = i.riskLevel;
-  });
-  document.getElementById('riskScore').textContent = avgRisk.toFixed(1);
-  document.getElementById('riskClassification').textContent = riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1);
-  document.getElementById('riskLabel').textContent = avgRisk.toFixed(1);
-  document.getElementById('riskFill').style.width = `${Math.min(avgRisk * 10, 100)}%`;
-  document.getElementById('riskFill').className = `risk-fill ${riskLevel}`;
-}
-
-function updateCharts() {
-  const sentimentCanvas = document.getElementById('sentimentChart');
-  const riskCanvas = document.getElementById('riskChart');
-  
-  // Limpa canvas para evitar sobreposição
-  const sctx = sentimentCanvas.getContext('2d');
-  const rctx = riskCanvas.getContext('2d');
-  sctx.clearRect(0, 0, sentimentCanvas.width, sentimentCanvas.height);
-  rctx.clearRect(0, 0, riskCanvas.width, riskCanvas.height);
-  
-  if (newsData.length === 0) return;
-
-  // Gráfico Barras Sentimento
-  const sentimentData = {
-    positive: newsData.filter(n => n.sentiment === 'positive').length,
-    neutral: newsData.filter(n => n.sentiment === 'neutral').length,
-    negative: newsData.filter(n => n.sentiment === 'negative').length
-  };
-  const barHeight = 40;
-  const startY = 80;
-  const colors = { positive: '#16a34a', neutral: '#64748b', negative: '#dc2626' };
-  const labels = { positive: 'Positivo', neutral: 'Neutro', negative: 'Negativo' };
-
-  Object.entries(sentimentData).forEach(([type, value], index) => {
-    const barWidth = newsData.length ? (value / newsData.length) * 300 : 0;
-    sctx.fillStyle = colors[type];
-    sctx.fillRect(50, startY + index * barHeight, barWidth, barHeight - 10);
-    sctx.fillStyle = 'black';
-    sctx.font = 'bold 14px sans-serif';
-    sctx.textAlign = 'left';
-    sctx.fillText(labels[type], 10, startY + index * barHeight + 25);
-    if (value > 0) {
-      sctx.fillStyle = 'white';
-      sctx.textAlign = 'center';
-      sctx.fillText(`${value}`, 50 + barWidth/2, startY + index * barHeight + 20);
+    // ============================================
+    // ATUALIZAÇÃO DA INTERFACE
+    // ============================================
+    function updateDashboard() {
+      updateMetrics();
+      updateCharts();
+      updateTable();
     }
-  });
 
-  // Gráfico Pizza Risco
-  const riskData = { critical:0, high:0, medium:0, low:0 };
-  newsData.forEach(item => {
-      if(riskData[item.riskLevel] !== undefined) riskData[item.riskLevel]++;
-  });
-  let startAngle = 0;
-  const riskColors = { critical: '#dc2626', high: '#ea580c', medium: '#eab308', low: '#16a34a' };
-  const total = newsData.length;
-  Object.entries(riskData).forEach(([level, value]) => {
-    if (value > 0) {
-      const sliceAngle = (value / total) * 2 * Math.PI;
-      rctx.beginPath();
-      rctx.moveTo(125, 125);
-      rctx.arc(125, 125, 100, startAngle, startAngle + sliceAngle);
-      rctx.closePath();
-      rctx.fillStyle = riskColors[level];
-      rctx.fill();
-      startAngle += sliceAngle;
+    function updateMetrics() {
+      if (newsData.length === 0) return;
+      
+      // Cálculo de Risco Médio
+      const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
+      
+      const scoreEl = document.getElementById('riskScore');
+      const labelEl = document.getElementById('riskLabel');
+      const fillEl = document.getElementById('riskFill');
+      
+      scoreEl.textContent = avgRisk.toFixed(1);
+      
+      let levelClass = 'bg-low';
+      let labelText = 'BAIXO';
+      
+      if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
+      else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
+      else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
+      
+      labelEl.textContent = labelText;
+      labelEl.className = levelClass.replace('bg-', 'text-'); // Muda cor do texto
+      
+      fillEl.className = `risk-bar-fill ${levelClass}`;
+      setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 100);
     }
-  });
-}
 
-function updateNewsTable() {
-  const filteredData = newsData.filter(item =>
-    currentFilter === 'all' || item.sentiment === currentFilter
-  );
-  const tbody = document.querySelector('#newsTable tbody');
-  const emptyMsg = document.getElementById('tableEmpty');
-  if (filteredData.length === 0) {
-    tbody.innerHTML = '';
-    emptyMsg.style.display = 'block';
-    return;
-  }
-  emptyMsg.style.display = 'none';
-  tbody.innerHTML = filteredData.map(item => `
-    <tr>
-      <td>${item.date.slice(0,10)}</td>
-      <td style="max-width: 300px;">
-        <div style="font-weight:bold; color:var(--color-text-primary);">${item.title}</div>
-        <div style="font-size:0.85em; color:var(--color-text-secondary); margin-top:4px; line-height:1.4;">
-            ${item.content}
-        </div>
-      </td>
-      <td><strong>${item.source}</strong></td>
-      <td><span class="sentiment-badge sentiment-${item.sentiment}">${item.sentiment.toUpperCase()}</span></td>
-      <td>
-        <span class="risk-badge risk-${item.riskLevel}">
-          <span class="risk-score">${item.riskScore}</span>
-          ${item.riskLevel.toUpperCase()}
-        </span>
-      </td>
-      <td>
-        <a href="${item.url}" target="_blank" class="btn" style="padding: var(--spacing-xs) var(--spacing-md); font-size: var(--font-size-sm);">
-          📄 Ver
-        </a>
-      </td>
-    </tr>
-  `).join('');
-}
+    function updateTable() {
+      const tbody = document.querySelector('#newsTable tbody');
+      const emptyDiv = document.getElementById('tableEmpty');
+      
+      const filtered = newsData.filter(item => 
+        currentFilter === 'all' || item.sentiment === currentFilter
+      );
 
-function updateTechniquesTab() {
-  const allTechniques = {};
-  newsData.forEach(item => {
-    (item.techniques || []).forEach(tech => {
-      allTechniques[tech] = (allTechniques[tech] || 0) + 1;
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        emptyDiv.style.display = 'block';
+        return;
+      }
+      
+      emptyDiv.style.display = 'none';
+      tbody.innerHTML = filtered.map(item => `
+        <tr>
+          <td>
+            <div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div>
+          </td>
+          <td>
+            <span class="source-tag">${item.source}</span>
+            <div style="font-weight:600; margin-bottom:4px;">${item.title}</div>
+            <div class="content-preview">${item.content}</div>
+          </td>
+          <td>
+            <span class="badge badge-sentiment-${item.sentiment}">
+              ${translateSentiment(item.sentiment)}
+            </span>
+          </td>
+          <td>
+            <div class="badge-risk">
+              <div class="dot bg-${item.riskLevel}"></div>
+              <span class="text-${item.riskLevel}">
+                ${item.riskScore}
+              </span>
+            </div>
+          </td>
+          <td>
+            <a href="${item.url}" target="_blank" class="btn-link">Acessar ↗</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateCharts() {
+      // 1. Sentimento
+      const sentData = [
+        newsData.filter(n => n.sentiment === 'positive').length,
+        newsData.filter(n => n.sentiment === 'neutral').length,
+        newsData.filter(n => n.sentiment === 'negative').length
+      ];
+      
+      const ctxSent = document.getElementById('sentimentChart');
+      if (chartSentiment) chartSentiment.destroy();
+      chartSentiment = new Chart(ctxSent, {
+        type: 'doughnut',
+        data: {
+          labels: ['Positivo', 'Neutro', 'Negativo'],
+          datasets: [{
+            data: sentData,
+            backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+      });
+
+      // 2. Risco
+      const riskCounts = { critical:0, high:0, medium:0, low:0 };
+      newsData.forEach(n => riskCounts[n.riskLevel]++);
+      
+      const ctxRisk = document.getElementById('riskChart');
+      if (chartRisk) chartRisk.destroy();
+      chartRisk = new Chart(ctxRisk, {
+        type: 'bar',
+        data: {
+          labels: ['Baixo', 'Médio', 'Alto', 'Crítico'],
+          datasets: [{
+            label: 'Eventos',
+            data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical],
+            backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
+            borderRadius: 4
+          }]
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          scales: { y: { beginAtZero: true, grid: { display: false } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // ============================================
+    // UTILS
+    // ============================================
+    function clearData() {
+      newsData = [];
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('clearBtn').style.display = 'none';
+      document.getElementById('statusIndicator').style.display = 'none';
+      document.getElementById('termoBusca').value = '';
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('statusIndicator');
+      el.textContent = msg;
+      el.className = `status-bar status-${type}`;
+      el.style.display = 'block';
+    }
+
+    function mapRiskLevel(level) {
+      if(!level) return 'low';
+      level = level.toLowerCase();
+      if(level.includes('critico') || level.includes('crítico')) return 'critical';
+      if(level.includes('alto') || level.includes('high')) return 'high';
+      if(level.includes('medio') || level.includes('médio')) return 'medium';
+      return 'low';
+    }
+
+    function mapSentiment(s) {
+      if(!s) return 'neutral';
+      if(s.includes('pos')) return 'positive';
+      if(s.includes('neg')) return 'negative';
+      return 'neutral';
+    }
+
+    function translateSentiment(s) {
+      if(s === 'positive') return 'Positivo';
+      if(s === 'negative') return 'Negativo';
+      return 'Neutro';
+    }
+
+    function formatDate(isoStr) {
+      if(!isoStr) return '-';
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // Filtros
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        updateTable();
+      });
     });
-  });
-  const container = document.getElementById('techniquesList');
-  if (Object.keys(allTechniques).length === 0) {
-    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-3xl); color: var(--color-text-secondary);">Nenhuma técnica de propaganda detectada</div>';
-    return;
-  }
-  container.innerHTML = Object.entries(allTechniques)
-    .sort((a, b) => b[1] - a[1])
-    .map(([technique, count]) => `
-      <div class="technique-item">
-        <div class="technique-name">${technique}</div>
-        <div>📰 Detectada em <strong>${count}</strong> notícia${count > 1 ? 's' : ''}</div>
-      </div>
-    `).join('');
-}
-
-function gerarResumoPeriodo() {
-  alert('Funcionalidade em desenvolvimento: Exportação PDF/TXT do dossiê.');
-}
-
-document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
-  btn.addEventListener('click', (ev) => {
-    document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
-    ev.target.classList.add('active');
-    currentFilter = ev.target.getAttribute('data-filter');
-    updateNewsTable();
-  });
-});
-</script>
-
+  </script>
 </body>
 </html>
+
+```
