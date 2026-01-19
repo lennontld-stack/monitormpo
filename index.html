@@ -10,25 +10,20 @@
   
   <style>
     :root {
-      /* Cores Institucionais e Semânticas */
-      --mp-blue: #003366;       /* Azul MP */
+      --mp-blue: #003366;
       --mp-blue-light: #004d99;
       --bg-page: #f3f4f6;
       --bg-card: #ffffff;
-      
-      --risk-critical: #ef4444; /* Vermelho forte */
-      --risk-high: #f97316;     /* Laranja */
-      --risk-medium: #eab308;   /* Amarelo */
-      --risk-low: #22c55e;      /* Verde */
-      
+      --risk-critical: #ef4444;
+      --risk-high: #f97316;
+      --risk-medium: #eab308;
+      --risk-low: #22c55e;
       --text-main: #111827;
       --text-muted: #6b7280;
       --border-color: #e5e7eb;
-      
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-      
       --radius: 12px;
     }
 
@@ -41,7 +36,6 @@
       padding-bottom: 40px;
     }
 
-    /* HEADER */
     .header {
       background: var(--mp-blue);
       color: white;
@@ -66,14 +60,12 @@
     .header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
     .header p { font-size: 0.875rem; opacity: 0.8; font-weight: 400; }
 
-    /* LAYOUT PRINCIPAL */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 1.5rem;
     }
 
-    /* ÁREA DE BUSCA */
     .search-card {
       background: var(--bg-card);
       border-radius: var(--radius);
@@ -85,9 +77,7 @@
       margin-bottom: 2rem;
       border: 1px solid var(--border-color);
     }
-    .search-input-group {
-      flex: 1;
-    }
+    .search-input-group { flex: 1; }
     .search-input-group label {
       display: block;
       font-size: 0.75rem;
@@ -110,13 +100,12 @@
       border-color: var(--mp-blue);
       box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
     }
-    
     .btn-search {
       background: var(--mp-blue);
       color: white;
       border: none;
       padding: 0 2rem;
-      height: 52px; /* Altura para alinhar com o input */
+      height: 52px;
       border-radius: 8px;
       font-weight: 600;
       font-size: 1rem;
@@ -125,7 +114,7 @@
       align-items: center;
       gap: 0.5rem;
       transition: background 0.2s, transform 0.1s;
-      margin-top: 1.2rem; /* Compensar o label */
+      margin-top: 1.2rem;
     }
     .btn-search:hover { background: var(--mp-blue-light); transform: translateY(-1px); }
     .btn-search:active { transform: translateY(0); }
@@ -140,10 +129,9 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 1.2rem;
-      display: none; /* Só aparece quando tem dados */
+      display: none;
     }
 
-    /* STATUS BAR */
     .status-bar {
       margin-top: 1rem;
       font-size: 0.875rem;
@@ -157,14 +145,12 @@
     .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
     .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
 
-    /* DASHBOARD GRID */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
-    
     .card {
       background: var(--bg-card);
       border-radius: var(--radius);
@@ -182,7 +168,6 @@
       text-transform: uppercase;
     }
 
-    /* METRICAS */
     .metric-big {
       font-size: 2.5rem;
       font-weight: 800;
@@ -198,19 +183,16 @@
       margin-top: 0.5rem;
     }
     .risk-bar-fill { height: 100%; width: 0%; transition: width 1s ease; }
-    
-    /* Cores de Risco */
+
     .bg-critical { background: var(--risk-critical); }
     .bg-high { background: var(--risk-high); }
     .bg-medium { background: var(--risk-medium); }
     .bg-low { background: var(--risk-low); }
-    
     .text-critical { color: var(--risk-critical); }
     .text-high { color: var(--risk-high); }
     .text-medium { color: var(--risk-medium); }
     .text-low { color: var(--risk-low); }
 
-    /* TABELA E FILTROS */
     .results-section {
       background: var(--bg-card);
       border-radius: var(--radius);
@@ -227,10 +209,7 @@
       flex-wrap: wrap;
       gap: 1rem;
     }
-    .filters {
-      display: flex;
-      gap: 0.5rem;
-    }
+    .filters { display: flex; gap: 0.5rem; }
     .filter-btn {
       background: transparent;
       border: 1px solid var(--border-color);
@@ -279,7 +258,7 @@
     .badge-sentiment-positive { background: #dcfce7; color: #166534; }
     .badge-sentiment-neutral { background: #f3f4f6; color: #4b5563; }
     .badge-sentiment-negative { background: #fee2e2; color: #991b1b; }
-    
+
     .badge-risk { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; }
     .dot { width: 8px; height: 8px; border-radius: 50%; }
 
@@ -303,17 +282,71 @@
       border-radius: 4px;
       margin-bottom: 4px;
     }
-    
+
     .btn-link {
       color: var(--mp-blue);
       text-decoration: none;
       font-weight: 600;
       font-size: 0.875rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
     }
     .btn-link:hover { text-decoration: underline; }
 
-    /* CHARTS */
     .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
+
+    /* Modal de Fontes */
+    #fontesModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    #fontesModalInner {
+      background: #ffffff;
+      max-width: 700px;
+      width: 90%;
+      padding: 1.5rem 1.75rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+    }
+    #fontesLista {
+      margin-top: 1rem;
+      max-height: 350px;
+      overflow-y: auto;
+      padding-left: 1rem;
+    }
+    #fontesLista li {
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-main);
+    }
+    #fontesLista a {
+      color: var(--mp-blue);
+      text-decoration: none;
+      word-break: break-all;
+    }
+    #fontesLista a:hover { text-decoration: underline; }
+    .modal-footer {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      border-radius: 8px;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
     @media (max-width: 768px) {
       .search-card { flex-direction: column; align-items: stretch; }
@@ -337,7 +370,6 @@
   </header>
 
   <div class="container">
-    
     <div class="search-card">
       <div class="search-input-group">
         <label>Monitoramento de Tópico (Últimas 24h)</label>
@@ -353,7 +385,6 @@
     <div id="statusIndicator" class="status-bar"></div>
 
     <div id="dashboardContent" style="display: none;">
-      
       <div class="grid">
         <div class="card">
           <h3>Risco Ponderado</h3>
@@ -402,36 +433,39 @@
                 <th style="width: 45%;">Evento / Síntese Técnica</th>
                 <th style="width: 15%;">Sentimento</th>
                 <th style="width: 15%;">Risco (IA)</th>
-                <th style="width: 10%;">Link</th>
+                <th style="width: 10%;">Fontes</th>
               </tr>
             </thead>
-            <tbody>
-              </tbody>
+            <tbody></tbody>
           </table>
         </div>
         <div id="tableEmpty" style="padding: 3rem; text-align: center; color: var(--text-muted);">
           Nenhum resultado encontrado para os filtros atuais.
         </div>
       </div>
+    </div>
+  </div>
 
-    </div> </div>
+  <!-- Modal de Fontes -->
+  <div id="fontesModal">
+    <div id="fontesModalInner">
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
+      <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
+      <ul id="fontesLista"></ul>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="fecharFontes()">Fechar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // ============================================
-    // CONFIGURAÇÃO
-    // ============================================
     const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
-    
+
     let newsData = [];
     let currentFilter = 'all';
-    
-    // Instâncias dos Gráficos
     let chartSentiment = null;
     let chartRisk = null;
 
-    // ============================================
-    // FUNÇÃO PRINCIPAL
-    // ============================================
     async function buscarNoticias() {
       const termo = document.getElementById('termoBusca').value.trim();
       if (!termo) {
@@ -443,16 +477,15 @@
 
       try {
         const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
-        
+
         if (!resp.ok) {
-            const errData = await resp.json().catch(()=>({})); 
-            throw new Error(errData.erro || 'Erro na conexão com a API');
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.erro || 'Erro na conexão com a API');
         }
 
         const data = await resp.json();
 
-        // Processamento dos dados
-        newsData = data.results.map(item => ({
+        newsData = (data.results || []).map(item => ({
           title: item.title,
           content: item.content || item.sintese_tecnica || "Sem resumo disponível. Verifique se a chave da IA está ativa.",
           url: item.url,
@@ -461,28 +494,32 @@
           sentiment: mapSentiment(item.sentiment),
           riskScore: (item.risco_score || 0).toFixed(1),
           riskLevel: mapRiskLevel(item.risco_classificacao),
+          sources: Array.isArray(item.sources) ? item.sources : []
         }));
 
-        // Atualiza UI
+        if (newsData.length === 0) {
+          showStatus('Nenhum evento relevante encontrado nas últimas 24h.', 'ready');
+          document.getElementById('dashboardContent').style.display = 'none';
+          document.getElementById('clearBtn').style.display = 'inline-block';
+          return;
+        }
+
         document.getElementById('dashboardContent').style.display = 'block';
         document.getElementById('clearBtn').style.display = 'inline-block';
-        
+
         updateDashboard();
-        
+
         showStatus(`✅ Análise concluída: ${data.total_raw} menções consolidadas em ${data.total_clusters} eventos principais.`, 'ready');
 
       } catch (e) {
         console.error(e);
         showStatus('Erro: ' + e.message, 'error');
-        if(e.message.includes('chave')) {
+        if (e.message.includes('chave')) {
           alert('Atenção: Configure a GEMINI_API_KEY no Cloudflare Workers.');
         }
       }
     }
 
-    // ============================================
-    // ATUALIZAÇÃO DA INTERFACE
-    // ============================================
     function updateDashboard() {
       updateMetrics();
       updateCharts();
@@ -491,26 +528,25 @@
 
     function updateMetrics() {
       if (newsData.length === 0) return;
-      
-      // Cálculo de Risco Médio
+
       const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
-      
+
       const scoreEl = document.getElementById('riskScore');
       const labelEl = document.getElementById('riskLabel');
       const fillEl = document.getElementById('riskFill');
-      
+
       scoreEl.textContent = avgRisk.toFixed(1);
-      
+
       let levelClass = 'bg-low';
       let labelText = 'BAIXO';
-      
+
       if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
       else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
       else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
-      
+
       labelEl.textContent = labelText;
-      labelEl.className = levelClass.replace('bg-', 'text-'); // Muda cor do texto
-      
+      labelEl.className = levelClass.replace('bg-', 'text-');
+
       fillEl.className = `risk-bar-fill ${levelClass}`;
       setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 100);
     }
@@ -518,8 +554,8 @@
     function updateTable() {
       const tbody = document.querySelector('#newsTable tbody');
       const emptyDiv = document.getElementById('tableEmpty');
-      
-      const filtered = newsData.filter(item => 
+
+      const filtered = newsData.filter(item =>
         currentFilter === 'all' || item.sentiment === currentFilter
       );
 
@@ -528,12 +564,20 @@
         emptyDiv.style.display = 'block';
         return;
       }
-      
+
       emptyDiv.style.display = 'none';
-      tbody.innerHTML = filtered.map(item => `
+      tbody.innerHTML = filtered.map((item, idx) => {
+        const totalFontes = item.sources ? item.sources.length : 0;
+        const labelFontes = totalFontes > 1
+          ? `${item.source} · ${totalFontes} fontes`
+          : item.source;
+
+        return `
         <tr>
           <td>
-            <div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div>
+            <div style="font-size:0.85rem; color:var(--text-muted);">
+              ${formatDate(item.date)}
+            </div>
           </td>
           <td>
             <span class="source-tag">${item.source}</span>
@@ -554,20 +598,22 @@
             </div>
           </td>
           <td>
-            <a href="${item.url}" target="_blank" class="btn-link">Acessar ↗</a>
+            <button class="btn-link" onclick="abrirFontes(${idx})">
+              Ver fontes (${totalFontes || 1})
+            </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function updateCharts() {
-      // 1. Sentimento
       const sentData = [
         newsData.filter(n => n.sentiment === 'positive').length,
         newsData.filter(n => n.sentiment === 'neutral').length,
         newsData.filter(n => n.sentiment === 'negative').length
       ];
-      
+
       const ctxSent = document.getElementById('sentimentChart');
       if (chartSentiment) chartSentiment.destroy();
       chartSentiment = new Chart(ctxSent, {
@@ -583,10 +629,9 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
       });
 
-      // 2. Risco
       const riskCounts = { critical:0, high:0, medium:0, low:0 };
       newsData.forEach(n => riskCounts[n.riskLevel]++);
-      
+
       const ctxRisk = document.getElementById('riskChart');
       if (chartRisk) chartRisk.destroy();
       chartRisk = new Chart(ctxRisk, {
@@ -609,9 +654,6 @@
       });
     }
 
-    // ============================================
-    // UTILS
-    // ============================================
     function clearData() {
       newsData = [];
       document.getElementById('dashboardContent').style.display = 'none';
@@ -628,34 +670,79 @@
     }
 
     function mapRiskLevel(level) {
-      if(!level) return 'low';
+      if (!level) return 'low';
       level = level.toLowerCase();
-      if(level.includes('critico') || level.includes('crítico')) return 'critical';
-      if(level.includes('alto') || level.includes('high')) return 'high';
-      if(level.includes('medio') || level.includes('médio')) return 'medium';
+      if (level.includes('critico') || level.includes('crítico')) return 'critical';
+      if (level.includes('alto') || level.includes('high')) return 'high';
+      if (level.includes('medio') || level.includes('médio')) return 'medium';
       return 'low';
     }
 
     function mapSentiment(s) {
-      if(!s) return 'neutral';
-      if(s.includes('pos')) return 'positive';
-      if(s.includes('neg')) return 'negative';
+      if (!s) return 'neutral';
+      s = s.toString().toLowerCase();
+      if (s.includes('pos')) return 'positive';
+      if (s.includes('neg')) return 'negative';
       return 'neutral';
     }
 
     function translateSentiment(s) {
-      if(s === 'positive') return 'Positivo';
-      if(s === 'negative') return 'Negativo';
+      if (s === 'positive') return 'Positivo';
+      if (s === 'negative') return 'Negativo';
       return 'Neutro';
     }
 
     function formatDate(isoStr) {
-      if(!isoStr) return '-';
+      if (!isoStr) return '-';
       const d = new Date(isoStr);
-      return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+      if (isNaN(d.getTime())) return isoStr;
+      return d.toLocaleDateString('pt-BR') + ' ' +
+             d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Filtros
+    // Modal de fontes
+    function abrirFontes(index) {
+      const item = newsData[index];
+      if (!item) return;
+
+      const modal = document.getElementById('fontesModal');
+      const lista = document.getElementById('fontesLista');
+      const resumo = document.getElementById('fontesModalResumo');
+
+      resumo.textContent = item.title;
+      lista.innerHTML = '';
+
+      let fontes = item.sources;
+      if (!Array.isArray(fontes) || fontes.length === 0) {
+        fontes = [{ source: item.source, url: item.url, date: item.date }];
+      }
+
+      lista.innerHTML = fontes.map((f, i) => {
+        const rotuloFonte = f.source || 'Fonte';
+        const dataFmt = f.date ? formatDate(f.date) : '';
+        const url = f.url || f.link || '#';
+        return `
+          <li>
+            <strong>${i + 1}. ${rotuloFonte}</strong>
+            ${dataFmt ? ` – <span style="color:var(--text-muted);">${dataFmt}</span>` : ''}
+            <br>
+            <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
+          </li>
+        `;
+      }).join('');
+
+      modal.style.display = 'flex';
+    }
+
+    function fecharFontes() {
+      document.getElementById('fontesModal').style.display = 'none';
+    }
+
+    // Fecha modal clicando fora
+    document.getElementById('fontesModal').addEventListener('click', (e) => {
+      if (e.target.id === 'fontesModal') fecharFontes();
+    });
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -667,6 +754,3 @@
   </script>
 </body>
 </html>
-
-```
-
