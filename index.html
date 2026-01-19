@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MPGO CSI-Gcontra - Análise Reputacional</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>MPGO Monitor - Inteligência Reputacional</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
@@ -20,168 +18,51 @@
       --risk-low: #22c55e;
       --text-main: #111827;
       --text-muted: #6b7280;
-      --border-color: #e5e7eb;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
       --radius: 12px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-page);
-      color: var(--text-main);
-      padding-bottom: 40px;
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
 
-    .header {
-      background: var(--mp-blue);
-      color: white;
-      padding: 1.5rem 0;
-      box-shadow: var(--shadow-md);
-      margin-bottom: 2rem;
-    }
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .logo-badge {
-      font-size: 2rem;
-      background: rgba(255,255,255,0.1);
-      padding: 8px;
-      border-radius: 8px;
-    }
-    .header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
-    .header p { font-size: 0.875rem; opacity: 0.8; font-weight: 400; }
+    .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 2rem; }
+    .header-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .logo-badge { font-size: 2rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
+    .header h1 { font-size: 1.25rem; font-weight: 700; }
+    .header p { font-size: 0.875rem; opacity: 0.8; }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
+    /* Barra de Busca e Ações */
     .search-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 2rem;
-      border: 1px solid var(--border-color);
+      background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; border: 1px solid #e5e7eb;
     }
     .search-input-group { flex: 1; }
-    .search-input-group label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .search-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.2s;
-    }
-    .search-input:focus {
-      outline: none;
-      border-color: var(--mp-blue);
-      box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
-    }
-    .btn-search {
-      background: var(--mp-blue);
-      color: white;
-      border: none;
-      padding: 0 2rem;
-      height: 52px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 1.2rem;
-    }
-    .btn-search:hover { background: var(--mp-blue-light); transform: translateY(-1px); }
-    .btn-search:active { transform: translateY(0); }
+    .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
+    .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+    .search-input:focus { outline: none; border-color: var(--mp-blue); }
 
-    .btn-clear {
-      background: #fee2e2;
-      color: #dc2626;
-      border: none;
-      padding: 0 1rem;
-      height: 52px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 1.2rem;
-      display: none;
-    }
+    .btn-action { height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer; padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s; }
+    .btn-search { background: var(--mp-blue); color: white; }
+    .btn-search:hover { background: var(--mp-blue-light); }
+    
+    .btn-report { background: #4b5563; color: white; display: none; } /* Botão Relatório */
+    .btn-report:hover { background: #374151; }
 
-    .status-bar {
-      margin-top: 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      padding: 0.75rem;
-      border-radius: 8px;
-      display: none;
-      text-align: center;
-    }
+    .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
+    
+    .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
     .status-loading { background: #eff6ff; color: var(--mp-blue); }
     .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
     .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-    }
-    .card h3 {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; }
 
-    .metric-big {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-top: auto;
-    }
+    .metric-big { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: auto; }
     .risk-meter-container { margin-top: auto; }
-    .risk-bar-bg {
-      height: 12px;
-      background: #e5e7eb;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-top: 0.5rem;
-    }
+    .risk-bar-bg { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
     .risk-bar-fill { height: 100%; width: 0%; transition: width 1s ease; }
 
     .bg-critical { background: var(--risk-critical); }
@@ -193,68 +74,21 @@
     .text-medium { color: var(--risk-medium); }
     .text-low { color: var(--risk-low); }
 
-    .results-section {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-    }
-    .results-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
+    .results-section { background: var(--bg-card); border-radius: var(--radius); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; overflow: hidden; }
+    .results-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    
     .filters { display: flex; gap: 0.5rem; }
-    .filter-btn {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    .filter-btn { background: transparent; border: 1px solid #e5e7eb; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; }
     .filter-btn:hover { background: #f9fafb; }
-    .filter-btn.active {
-      background: var(--mp-blue);
-      color: white;
-      border-color: var(--mp-blue);
-    }
+    .filter-btn.active { background: var(--mp-blue); color: white; border-color: var(--mp-blue); }
 
     table { width: 100%; border-collapse: collapse; }
-    th {
-      text-align: left;
-      padding: 1rem 1.5rem;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      font-weight: 600;
-      background: #f9fafb;
-      border-bottom: 1px solid var(--border-color);
-    }
-    td {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      vertical-align: top;
-    }
+    th { text-align: left; padding: 1rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
     tr:last-child td { border-bottom: none; }
     tr:hover { background: #f9fafb; }
 
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
     .badge-sentiment-positive { background: #dcfce7; color: #166534; }
     .badge-sentiment-neutral { background: #f3f4f6; color: #4b5563; }
     .badge-sentiment-negative { background: #fee2e2; color: #991b1b; }
@@ -262,95 +96,38 @@
     .badge-risk { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; }
     .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-    .content-preview {
-      margin-top: 0.25rem;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .source-tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--mp-blue);
-      background: #eff6ff;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-bottom: 4px;
-    }
-
-    .btn-link {
-      color: var(--mp-blue);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.875rem;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-    }
+    .content-preview { margin-top: 0.25rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+    .source-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--mp-blue); background: #eff6ff; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px; }
+    .btn-link { color: var(--mp-blue); text-decoration: none; font-weight: 600; font-size: 0.875rem; cursor: pointer; background: none; border: none; padding: 0; }
     .btn-link:hover { text-decoration: underline; }
-
     .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
 
-    /* Modal de Fontes */
-    #fontesModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-    #fontesModalInner {
-      background: #ffffff;
-      max-width: 700px;
-      width: 90%;
-      padding: 1.5rem 1.75rem;
-      border-radius: 12px;
-      box-shadow: var(--shadow-lg);
-    }
-    #fontesLista {
-      margin-top: 1rem;
-      max-height: 350px;
-      overflow-y: auto;
-      padding-left: 1rem;
-    }
-    #fontesLista li {
-      margin-bottom: 0.75rem;
-      font-size: 0.875rem;
-      color: var(--text-main);
-    }
-    #fontesLista a {
-      color: var(--mp-blue);
-      text-decoration: none;
-      word-break: break-all;
-    }
-    #fontesLista a:hover { text-decoration: underline; }
-    .modal-footer {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-    }
-    .btn-secondary {
-      background: #e5e7eb;
-      border-radius: 8px;
-      border: none;
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
+    /* Modal Fontes */
+    #fontesModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 50; }
+    #fontesModalInner { background: #ffffff; max-width: 700px; width: 90%; padding: 1.5rem 1.75rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
+    #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
+    #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
+    
+    /* Estilos de Impressão (Relatório) */
+    @media print {
+      body { background: white; padding: 0; }
+      .header, .search-card, .filters, .btn-link { display: none !important; }
+      .results-section { box-shadow: none; border: none; }
+      .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
+      #dashboardContent { display: block !important; }
+      h3 { color: black !important; }
+      td, th { border-color: #000 !important; }
+      /* Mostra cabeçalho simples na impressão */
+      body::before {
+        content: "Relatório de Monitoramento - MPGO";
+        display: block; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center;
+      }
     }
 
     @media (max-width: 768px) {
       .search-card { flex-direction: column; align-items: stretch; }
-      .btn-search, .btn-clear { margin-top: 0; }
+      .btn-action { margin-top: 0.5rem; }
       .filters { width: 100%; overflow-x: auto; padding-bottom: 4px; }
       td, th { padding: 1rem; }
     }
@@ -364,7 +141,7 @@
       <div class="logo-badge">⚖️</div>
       <div>
         <h1>MPGO Monitor</h1>
-        <p>Cordenadoria de Segurança Institucional e Inteligência - Análise Reputacional</p>
+        <p>Centro de Inteligência e Análise Reputacional</p>
       </div>
     </div>
   </header>
@@ -375,13 +152,19 @@
         <label>Monitoramento de Tópico (Últimas 24h)</label>
         <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Operação X", "Ministério Público"'>
       </div>
-      <button class="btn-search" onclick="buscarNoticias()">
+      <button class="btn-action btn-search" onclick="buscarNoticias()">
         🔍 Investigar (IA)
       </button>
-      <button class="btn-clear" id="clearBtn" onclick="clearData()">
+      
+      <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">
+        📄 Gerar Relatório
+      </button>
+      
+      <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">
         Limpar
       </button>
     </div>
+    
     <div id="statusIndicator" class="status-bar"></div>
 
     <div id="dashboardContent" style="display: none;">
@@ -398,19 +181,13 @@
             </div>
           </div>
         </div>
-
         <div class="card">
           <h3>Sentimento</h3>
-          <div class="chart-box">
-            <canvas id="sentimentChart"></canvas>
-          </div>
+          <div class="chart-box"><canvas id="sentimentChart"></canvas></div>
         </div>
-
         <div class="card">
           <h3>Gravidade</h3>
-          <div class="chart-box">
-            <canvas id="riskChart"></canvas>
-          </div>
+          <div class="chart-box"><canvas id="riskChart"></canvas></div>
         </div>
       </div>
 
@@ -440,20 +217,19 @@
           </table>
         </div>
         <div id="tableEmpty" style="padding: 3rem; text-align: center; color: var(--text-muted);">
-          Nenhum resultado encontrado para os filtros atuais.
+          Nenhum resultado encontrado.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de Fontes -->
   <div id="fontesModal">
     <div id="fontesModalInner">
       <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
       <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
       <ul id="fontesLista"></ul>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="fecharFontes()">Fechar</button>
+      <div style="margin-top:1.5rem; text-align:right;">
+        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharFontes()">Fechar</button>
       </div>
     </div>
   </div>
@@ -468,26 +244,21 @@
 
     async function buscarNoticias() {
       const termo = document.getElementById('termoBusca').value.trim();
-      if (!termo) {
-        alert('Por favor, digite um termo para investigar.');
-        return;
-      }
+      if (!termo) { alert('Digite um termo para investigar.'); return; }
 
-      showStatus(`Conectando aos satélites de busca (Google, YouTube, RSS) para o termo "${termo}"...`, 'loading');
-
+      showStatus(`Investigando "${termo}" em Google, YouTube e RSS...`, 'loading');
+      
       try {
         const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
-
         if (!resp.ok) {
           const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.erro || 'Erro na conexão com a API');
+          throw new Error(errData.erro || 'Erro na conexão');
         }
 
         const data = await resp.json();
-
         newsData = (data.results || []).map(item => ({
           title: item.title,
-          content: item.content || item.sintese_tecnica || "Sem resumo disponível. Verifique se a chave da IA está ativa.",
+          content: item.content || item.sintese_tecnica || "Sem resumo.",
           url: item.url,
           source: item.source,
           date: item.date,
@@ -500,24 +271,28 @@
         if (newsData.length === 0) {
           showStatus('Nenhum evento relevante encontrado nas últimas 24h.', 'ready');
           document.getElementById('dashboardContent').style.display = 'none';
-          document.getElementById('clearBtn').style.display = 'inline-block';
+          document.getElementById('reportBtn').style.display = 'none';
+          document.getElementById('clearBtn').style.display = 'inline-flex';
           return;
         }
 
         document.getElementById('dashboardContent').style.display = 'block';
-        document.getElementById('clearBtn').style.display = 'inline-block';
+        document.getElementById('clearBtn').style.display = 'inline-flex';
+        document.getElementById('reportBtn').style.display = 'inline-flex'; // Mostra botão relatório
 
         updateDashboard();
-
-        showStatus(`✅ Análise concluída: ${data.total_raw} menções consolidadas em ${data.total_clusters} eventos principais.`, 'ready');
+        showStatus(`✅ Análise concluída: ${data.total_raw} menções em ${data.total_clusters} eventos.`, 'ready');
 
       } catch (e) {
         console.error(e);
         showStatus('Erro: ' + e.message, 'error');
-        if (e.message.includes('chave')) {
-          alert('Atenção: Configure a GEMINI_API_KEY no Cloudflare Workers.');
-        }
+        if (e.message.includes('chave')) alert('Verifique as chaves no Cloudflare.');
       }
+    }
+
+    function gerarRelatorio() {
+      // Abre a janela de impressão do navegador (salvar como PDF)
+      window.print();
     }
 
     function updateDashboard() {
@@ -528,25 +303,19 @@
 
     function updateMetrics() {
       if (newsData.length === 0) return;
-
       const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
-
       const scoreEl = document.getElementById('riskScore');
       const labelEl = document.getElementById('riskLabel');
       const fillEl = document.getElementById('riskFill');
 
       scoreEl.textContent = avgRisk.toFixed(1);
-
-      let levelClass = 'bg-low';
-      let labelText = 'BAIXO';
-
+      let levelClass = 'bg-low'; let labelText = 'BAIXO';
       if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
       else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
       else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
 
       labelEl.textContent = labelText;
       labelEl.className = levelClass.replace('bg-', 'text-');
-
       fillEl.className = `risk-bar-fill ${levelClass}`;
       setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 100);
     }
@@ -554,56 +323,35 @@
     function updateTable() {
       const tbody = document.querySelector('#newsTable tbody');
       const emptyDiv = document.getElementById('tableEmpty');
-
-      const filtered = newsData.filter(item =>
-        currentFilter === 'all' || item.sentiment === currentFilter
-      );
+      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
 
       if (filtered.length === 0) {
         tbody.innerHTML = '';
         emptyDiv.style.display = 'block';
         return;
       }
-
       emptyDiv.style.display = 'none';
       tbody.innerHTML = filtered.map((item, idx) => {
         const totalFontes = item.sources ? item.sources.length : 0;
-        const labelFontes = totalFontes > 1
-          ? `${item.source} · ${totalFontes} fontes`
-          : item.source;
-
         return `
         <tr>
-          <td>
-            <div style="font-size:0.85rem; color:var(--text-muted);">
-              ${formatDate(item.date)}
-            </div>
-          </td>
+          <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
           <td>
             <span class="source-tag">${item.source}</span>
             <div style="font-weight:600; margin-bottom:4px;">${item.title}</div>
             <div class="content-preview">${item.content}</div>
           </td>
-          <td>
-            <span class="badge badge-sentiment-${item.sentiment}">
-              ${translateSentiment(item.sentiment)}
-            </span>
-          </td>
+          <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
           <td>
             <div class="badge-risk">
               <div class="dot bg-${item.riskLevel}"></div>
-              <span class="text-${item.riskLevel}">
-                ${item.riskScore}
-              </span>
+              <span class="text-${item.riskLevel}">${item.riskScore}</span>
             </div>
           </td>
           <td>
-            <button class="btn-link" onclick="abrirFontes(${idx})">
-              Ver fontes (${totalFontes || 1})
-            </button>
+            <button class="btn-link" onclick="abrirFontes(${idx})">Ver fontes (${totalFontes || 1})</button>
           </td>
-        </tr>
-      `;
+        </tr>`;
       }).join('');
     }
 
@@ -613,44 +361,22 @@
         newsData.filter(n => n.sentiment === 'neutral').length,
         newsData.filter(n => n.sentiment === 'negative').length
       ];
-
       const ctxSent = document.getElementById('sentimentChart');
       if (chartSentiment) chartSentiment.destroy();
       chartSentiment = new Chart(ctxSent, {
         type: 'doughnut',
-        data: {
-          labels: ['Positivo', 'Neutro', 'Negativo'],
-          datasets: [{
-            data: sentData,
-            backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'],
-            borderWidth: 0
-          }]
-        },
+        data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
       });
 
       const riskCounts = { critical:0, high:0, medium:0, low:0 };
       newsData.forEach(n => riskCounts[n.riskLevel]++);
-
       const ctxRisk = document.getElementById('riskChart');
       if (chartRisk) chartRisk.destroy();
       chartRisk = new Chart(ctxRisk, {
         type: 'bar',
-        data: {
-          labels: ['Baixo', 'Médio', 'Alto', 'Crítico'],
-          datasets: [{
-            label: 'Eventos',
-            data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical],
-            backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
-            borderRadius: 4
-          }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          scales: { y: { beginAtZero: true, grid: { display: false } } },
-          plugins: { legend: { display: false } }
-        }
+        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
       });
     }
 
@@ -658,23 +384,22 @@
       newsData = [];
       document.getElementById('dashboardContent').style.display = 'none';
       document.getElementById('clearBtn').style.display = 'none';
+      document.getElementById('reportBtn').style.display = 'none';
       document.getElementById('statusIndicator').style.display = 'none';
       document.getElementById('termoBusca').value = '';
     }
 
     function showStatus(msg, type) {
       const el = document.getElementById('statusIndicator');
-      el.textContent = msg;
-      el.className = `status-bar status-${type}`;
-      el.style.display = 'block';
+      el.textContent = msg; el.className = `status-bar status-${type}`; el.style.display = 'block';
     }
 
     function mapRiskLevel(level) {
       if (!level) return 'low';
       level = level.toLowerCase();
-      if (level.includes('critico') || level.includes('crítico')) return 'critical';
-      if (level.includes('alto') || level.includes('high')) return 'high';
-      if (level.includes('medio') || level.includes('médio')) return 'medium';
+      if (level.includes('critico')) return 'critical';
+      if (level.includes('alto')) return 'high';
+      if (level.includes('medio')) return 'medium';
       return 'low';
     }
 
@@ -695,54 +420,26 @@
     function formatDate(isoStr) {
       if (!isoStr) return '-';
       const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return isoStr;
-      return d.toLocaleDateString('pt-BR') + ' ' +
-             d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      return isNaN(d.getTime()) ? isoStr : d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Modal de fontes
     function abrirFontes(index) {
       const item = newsData[index];
       if (!item) return;
-
-      const modal = document.getElementById('fontesModal');
       const lista = document.getElementById('fontesLista');
-      const resumo = document.getElementById('fontesModalResumo');
-
-      resumo.textContent = item.title;
-      lista.innerHTML = '';
-
+      document.getElementById('fontesModalResumo').textContent = item.title;
       let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) {
-        fontes = [{ source: item.source, url: item.url, date: item.date }];
-      }
-
-      lista.innerHTML = fontes.map((f, i) => {
-        const rotuloFonte = f.source || 'Fonte';
-        const dataFmt = f.date ? formatDate(f.date) : '';
-        const url = f.url || f.link || '#';
-        return `
-          <li>
-            <strong>${i + 1}. ${rotuloFonte}</strong>
-            ${dataFmt ? ` – <span style="color:var(--text-muted);">${dataFmt}</span>` : ''}
-            <br>
-            <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
-          </li>
-        `;
-      }).join('');
-
-      modal.style.display = 'flex';
+      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
+      
+      lista.innerHTML = fontes.map((f, i) => `
+        <li>
+          <strong>${i + 1}. ${f.source || 'Fonte'}</strong> ${f.date ? ` – <span style="color:var(--text-muted);">${formatDate(f.date)}</span>` : ''}<br>
+          <a href="${f.url || f.link || '#'}" target="_blank">${f.url || f.link || '#'}</a>
+        </li>`).join('');
+      document.getElementById('fontesModal').style.display = 'flex';
     }
-
-    function fecharFontes() {
-      document.getElementById('fontesModal').style.display = 'none';
-    }
-
-    // Fecha modal clicando fora
-    document.getElementById('fontesModal').addEventListener('click', (e) => {
-      if (e.target.id === 'fontesModal') fecharFontes();
-    });
-
+    function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
+    document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -754,5 +451,3 @@
   </script>
 </body>
 </html>
-
-
