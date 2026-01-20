@@ -166,6 +166,14 @@
     </div>
     
     <div id="statusIndicator" class="status-bar"></div>
+    <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 2rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
+            📊 Briefing de Inteligência
+            <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
+        </h3>
+        <div id="briefingText" style="font-size: 1rem; line-height: 1.6; color: #374151; white-space: pre-line;">
+            </div>
+    </div>
 
     <div id="dashboardContent" style="display: none;">
       <div class="grid">
@@ -267,6 +275,22 @@
           riskLevel: mapRiskLevel(item.risco_classificacao),
           sources: Array.isArray(item.sources) ? item.sources : []
         }));
+        // ... (código existente) ...
+        const data = await resp.json();
+
+        // NOVO: Exibe o Relatório Executivo se ele veio
+        if (data.executive_briefing) {
+            const reportDiv = document.getElementById('executiveReport');
+            const reportText = document.getElementById('briefingText');
+            // Formata o texto removendo os asteriscos do Markdown do Telegram
+            reportText.innerHTML = data.executive_briefing
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrito
+                .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Itálico
+            reportDiv.style.display = 'block';
+        } else {
+            document.getElementById('executiveReport').style.display = 'none';
+        }
+        // ... (resto do código) ...
 
         if (newsData.length === 0) {
           showStatus('Nenhum evento relevante encontrado nas últimas 24h.', 'ready');
@@ -451,3 +475,4 @@
   </script>
 </body>
 </html>
+
