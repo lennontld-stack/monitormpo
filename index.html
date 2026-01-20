@@ -1,479 +1,279 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MPGO Monitor - Gerência de Contrainteligência </title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --mp-blue: #003366;
-      --mp-blue-light: #004d99;
-      --bg-page: #f3f4f6;
-      --bg-card: #ffffff;
-      --risk-critical: #ef4444;
-      --risk-high: #f97316;
-      --risk-medium: #eab308;
-      --risk-low: #22c55e;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-      --radius: 12px;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
+export default {
+  // 1. O SITE (Requisições HTTP do seu Painel)
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
 
-    .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 2rem; }
-    .header-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; }
-    .logo-badge { font-size: 2rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
-    .header h1 { font-size: 1.25rem; font-weight: 700; }
-    .header p { font-size: 0.875rem; opacity: 0.8; }
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-
-    /* Barra de Busca e Ações */
-    .search-card {
-      background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; border: 1px solid #e5e7eb;
-    }
-    .search-input-group { flex: 1; }
-    .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
-    .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
-    .search-input:focus { outline: none; border-color: var(--mp-blue); }
-
-    .btn-action { height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer; padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s; }
-    .btn-search { background: var(--mp-blue); color: white; }
-    .btn-search:hover { background: var(--mp-blue-light); }
-    
-    .btn-report { background: #4b5563; color: white; display: none; } /* Botão Relatório */
-    .btn-report:hover { background: #374151; }
-
-    .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
-    
-    .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
-    .status-loading { background: #eff6ff; color: var(--mp-blue); }
-    .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
-    .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
-    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; }
-
-    .metric-big { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: auto; }
-    .risk-meter-container { margin-top: auto; }
-    .risk-bar-bg { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
-    .risk-bar-fill { height: 100%; width: 0%; transition: width 1s ease; }
-
-    .bg-critical { background: var(--risk-critical); }
-    .bg-high { background: var(--risk-high); }
-    .bg-medium { background: var(--risk-medium); }
-    .bg-low { background: var(--risk-low); }
-    .text-critical { color: var(--risk-critical); }
-    .text-high { color: var(--risk-high); }
-    .text-medium { color: var(--risk-medium); }
-    .text-low { color: var(--risk-low); }
-
-    .results-section { background: var(--bg-card); border-radius: var(--radius); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; overflow: hidden; }
-    .results-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-    
-    .filters { display: flex; gap: 0.5rem; }
-    .filter-btn { background: transparent; border: 1px solid #e5e7eb; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; }
-    .filter-btn:hover { background: #f9fafb; }
-    .filter-btn.active { background: var(--mp-blue); color: white; border-color: var(--mp-blue); }
-
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 1rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-    td { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover { background: #f9fafb; }
-
-    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-    .badge-sentiment-positive { background: #dcfce7; color: #166534; }
-    .badge-sentiment-neutral { background: #f3f4f6; color: #4b5563; }
-    .badge-sentiment-negative { background: #fee2e2; color: #991b1b; }
-
-    .badge-risk { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-
-    .content-preview { margin-top: 0.25rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
-    .source-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--mp-blue); background: #eff6ff; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px; }
-    .btn-link { color: var(--mp-blue); text-decoration: none; font-weight: 600; font-size: 0.875rem; cursor: pointer; background: none; border: none; padding: 0; }
-    .btn-link:hover { text-decoration: underline; }
-    .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
-
-    /* Modal Fontes */
-    #fontesModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 50; }
-    #fontesModalInner { background: #ffffff; max-width: 700px; width: 90%; padding: 1.5rem 1.75rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
-    #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
-    #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
-    #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
-    
-    /* Estilos de Impressão (Relatório) */
-    @media print {
-      body { background: white; padding: 0; }
-      .header, .search-card, .filters, .btn-link { display: none !important; }
-      .results-section { box-shadow: none; border: none; }
-      .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
-      #dashboardContent { display: block !important; }
-      h3 { color: black !important; }
-      td, th { border-color: #000 !important; }
-      /* Mostra cabeçalho simples na impressão */
-      body::before {
-        content: "Relatório de Monitoramento - MPGO";
-        display: block; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .search-card { flex-direction: column; align-items: stretch; }
-      .btn-action { margin-top: 0.5rem; }
-      .filters { width: 100%; overflow-x: auto; padding-bottom: 4px; }
-      td, th { padding: 1rem; }
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-
-  <header class="header">
-    <div class="header-content">
-      <div class="logo-badge">⚖️</div>
-      <div>
-        <h1>MPGO Monitor</h1>
-        <p>Cordenadoria de Segurança Institucional e Inteligência - Análise Reputacional</p>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="search-card">
-      <div class="search-input-group">
-        <label>Monitoramento de Tópico (Últimas 24h)</label>
-        <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Operação X", "Ministério Público"'>
-      </div>
-      <button class="btn-action btn-search" onclick="buscarNoticias()">
-        🔍 Investigar (IA)
-      </button>
-      
-      <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">
-        📄 Gerar Relatório
-      </button>
-      
-      <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">
-        Limpar
-      </button>
-    </div>
-    
-    <div id="statusIndicator" class="status-bar"></div>
-    <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 2rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
-            📊 Briefing de Inteligência
-            <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
-        </h3>
-        <div id="briefingText" style="font-size: 1rem; line-height: 1.6; color: #374151; white-space: pre-line;">
-            </div>
-    </div>
-
-    <div id="dashboardContent" style="display: none;">
-      <div class="grid">
-        <div class="card">
-          <h3>Risco Ponderado</h3>
-          <div class="risk-meter-container">
-            <div style="display: flex; justify-content: space-between; align-items: end;">
-              <span class="metric-big" id="riskScore">0.0</span>
-              <span style="font-weight: 600; margin-bottom: 8px;" id="riskLabel">BAIXO</span>
-            </div>
-            <div class="risk-bar-bg">
-              <div class="risk-bar-fill bg-low" id="riskFill"></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Sentimento</h3>
-          <div class="chart-box"><canvas id="sentimentChart"></canvas></div>
-        </div>
-        <div class="card">
-          <h3>Gravidade</h3>
-          <div class="chart-box"><canvas id="riskChart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="results-section">
-        <div class="results-header">
-          <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de Eventos Detectados</h3>
-          <div class="filters">
-            <button class="filter-btn active" data-filter="all">Todos</button>
-            <button class="filter-btn" data-filter="negative">🔴 Negativo</button>
-            <button class="filter-btn" data-filter="neutral">⚪ Neutro</button>
-            <button class="filter-btn" data-filter="positive">🟢 Positivo</button>
-          </div>
-        </div>
-        
-        <div style="overflow-x: auto;">
-          <table id="newsTable">
-            <thead>
-              <tr>
-                <th style="width: 15%;">Data</th>
-                <th style="width: 45%;">Evento / Síntese Técnica</th>
-                <th style="width: 15%;">Sentimento</th>
-                <th style="width: 15%;">Risco (IA)</th>
-                <th style="width: 10%;">Fontes</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="tableEmpty" style="padding: 3rem; text-align: center; color: var(--text-muted);">
-          Nenhum resultado encontrado.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="fontesModal">
-    <div id="fontesModalInner">
-      <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
-      <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
-      <ul id="fontesLista"></ul>
-      <div style="margin-top:1.5rem; text-align:right;">
-        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharFontes()">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
-
-    let newsData = [];
-    let currentFilter = 'all';
-    let chartSentiment = null;
-    let chartRisk = null;
-
-    async function buscarNoticias() {
-      const termo = document.getElementById('termoBusca').value.trim();
-      if (!termo) { alert('Digite um termo para investigar.'); return; }
-
-      showStatus(`Investigando "${termo}" em Google, YouTube e RSS...`, 'loading');
-      
+    if (url.pathname === '/unified-search') {
+      const q = url.searchParams.get('q') || '';
       try {
-        const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.erro || 'Erro na conexão');
+        // Roda a busca principal
+        const searchData = await runSearchRoutine(q, env);
+        
+        // CORREÇÃO: Gera o briefing se houver resultados
+        // Usamos 'searchData' aqui, não 'data'
+        if (searchData.results && searchData.results.length > 0) {
+           // Pega as top 5 mais relevantes para criar o resumo
+           const briefing = await gerarBriefingTelegram(searchData.results.slice(0, 5), env);
+           // Anexa o briefing ao JSON de resposta
+           searchData.executive_briefing = briefing;
         }
 
-        const data = await resp.json();
-        newsData = (data.results || []).map(item => ({
-          title: item.title,
-          content: item.content || item.sintese_tecnica || "Sem resumo.",
-          url: item.url,
-          source: item.source,
-          date: item.date,
-          sentiment: mapSentiment(item.sentiment),
-          riskScore: (item.risco_score || 0).toFixed(1),
-          riskLevel: mapRiskLevel(item.risco_classificacao),
-          sources: Array.isArray(item.sources) ? item.sources : []
-        }));
-        // ... (código existente) ...
-        const data = await resp.json();
-
-        // NOVO: Exibe o Relatório Executivo se ele veio
-        if (data.executive_briefing) {
-            const reportDiv = document.getElementById('executiveReport');
-            const reportText = document.getElementById('briefingText');
-            // Formata o texto removendo os asteriscos do Markdown do Telegram
-            reportText.innerHTML = data.executive_briefing
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrito
-                .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Itálico
-            reportDiv.style.display = 'block';
-        } else {
-            document.getElementById('executiveReport').style.display = 'none';
-        }
-        // ... (resto do código) ...
-
-        if (newsData.length === 0) {
-          showStatus('Nenhum evento relevante encontrado nas últimas 24h.', 'ready');
-          document.getElementById('dashboardContent').style.display = 'none';
-          document.getElementById('reportBtn').style.display = 'none';
-          document.getElementById('clearBtn').style.display = 'inline-flex';
-          return;
-        }
-
-        document.getElementById('dashboardContent').style.display = 'block';
-        document.getElementById('clearBtn').style.display = 'inline-flex';
-        document.getElementById('reportBtn').style.display = 'inline-flex'; // Mostra botão relatório
-
-        updateDashboard();
-        showStatus(`✅ Análise concluída: ${data.total_raw} menções em ${data.total_clusters} eventos.`, 'ready');
-
+        return new Response(JSON.stringify(searchData), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       } catch (e) {
-        console.error(e);
-        showStatus('Erro: ' + e.message, 'error');
-        if (e.message.includes('chave')) alert('Verifique as chaves no Cloudflare.');
+        return new Response(JSON.stringify({ ok: false, erro: e.toString() }), { status: 500, headers: corsHeaders });
       }
     }
+    return new Response(JSON.stringify({ ok: false, erro: 'Rota desconhecida' }), { status: 404 });
+  },
 
-    function gerarRelatorio() {
-      // Abre a janela de impressão do navegador (salvar como PDF)
-      window.print();
-    }
+  // 2. O ROBÔ (Agendamento Automático - CRON)
+  async scheduled(event, env, ctx) {
+    console.log("[CRON] Iniciando monitoramento automático...");
+    const TERMOS_MONITORAMENTO = ["Ministério Público de Goiás", "GAECO Goiás", "MPGO"];
+    const termo = "Ministério Público Goiás"; 
 
-    function updateDashboard() {
-      updateMetrics();
-      updateCharts();
-      updateTable();
-    }
+    try {
+      const data = await runSearchRoutine(termo, env);
+      const noticias = data.results || [];
 
-    function updateMetrics() {
-      if (newsData.length === 0) return;
-      const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
-      const scoreEl = document.getElementById('riskScore');
-      const labelEl = document.getElementById('riskLabel');
-      const fillEl = document.getElementById('riskFill');
-
-      scoreEl.textContent = avgRisk.toFixed(1);
-      let levelClass = 'bg-low'; let labelText = 'BAIXO';
-      if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
-      else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
-      else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
-
-      labelEl.textContent = labelText;
-      labelEl.className = levelClass.replace('bg-', 'text-');
-      fillEl.className = `risk-bar-fill ${levelClass}`;
-      setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 100);
-    }
-
-    function updateTable() {
-      const tbody = document.querySelector('#newsTable tbody');
-      const emptyDiv = document.getElementById('tableEmpty');
-      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = '';
-        emptyDiv.style.display = 'block';
+      if (noticias.length === 0) {
+        console.log("[CRON] Nenhuma notícia nova relevante.");
         return;
       }
-      emptyDiv.style.display = 'none';
-      tbody.innerHTML = filtered.map((item, idx) => {
-        const totalFontes = item.sources ? item.sources.length : 0;
-        return `
-        <tr>
-          <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
-          <td>
-            <span class="source-tag">${item.source}</span>
-            <div style="font-weight:600; margin-bottom:4px;">${item.title}</div>
-            <div class="content-preview">${item.content}</div>
-          </td>
-          <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
-          <td>
-            <div class="badge-risk">
-              <div class="dot bg-${item.riskLevel}"></div>
-              <span class="text-${item.riskLevel}">${item.riskScore}</span>
-            </div>
-          </td>
-          <td>
-            <button class="btn-link" onclick="abrirFontes(${idx})">Ver fontes (${totalFontes || 1})</button>
-          </td>
-        </tr>`;
-      }).join('');
-    }
 
-    function updateCharts() {
-      const sentData = [
-        newsData.filter(n => n.sentiment === 'positive').length,
-        newsData.filter(n => n.sentiment === 'neutral').length,
-        newsData.filter(n => n.sentiment === 'negative').length
-      ];
-      const ctxSent = document.getElementById('sentimentChart');
-      if (chartSentiment) chartSentiment.destroy();
-      chartSentiment = new Chart(ctxSent, {
-        type: 'doughnut',
-        data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+      const noticiasRelevantes = noticias.filter(n => 
+        n.risco_classificacao === 'alto' || 
+        n.risco_classificacao === 'critico' || 
+        n.risco_classificacao === 'medio'
+      );
+
+      if (noticiasRelevantes.length === 0) return;
+
+      const relatorioExecutivo = await gerarBriefingTelegram(noticiasRelevantes, env);
+
+      let msg = `🚨 *MPGO MONITOR - ALERTA DE INTELIGÊNCIA*\n`;
+      msg += `📅 ${new Date().toLocaleDateString('pt-BR')} \n\n`;
+      msg += `${relatorioExecutivo}\n\n`;
+      msg += `➖➖➖➖➖➖➖➖➖➖\n*DETALHE DOS EVENTOS:*\n\n`;
+
+      noticiasRelevantes.slice(0, 5).forEach((n, i) => {
+        const riscoEmoji = n.risco_classificacao === 'critico' ? '🔴' : (n.risco_classificacao === 'alto' ? '🟠' : '🟡');
+        msg += `${riscoEmoji} *${n.title}*\n`;
+        msg += `🔗 [Acessar Fonte](${n.url})\n\n`;
       });
+      msg += `🔍 _Acesse o painel para ver todas as ${data.total_raw} menções._`;
 
-      const riskCounts = { critical:0, high:0, medium:0, low:0 };
-      newsData.forEach(n => riskCounts[n.riskLevel]++);
-      const ctxRisk = document.getElementById('riskChart');
-      if (chartRisk) chartRisk.destroy();
-      chartRisk = new Chart(ctxRisk, {
-        type: 'bar',
-        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
-      });
-    }
+      await sendTelegramMessage(msg, env);
+      console.log("[CRON] Relatório enviado.");
 
-    function clearData() {
-      newsData = [];
-      document.getElementById('dashboardContent').style.display = 'none';
-      document.getElementById('clearBtn').style.display = 'none';
-      document.getElementById('reportBtn').style.display = 'none';
-      document.getElementById('statusIndicator').style.display = 'none';
-      document.getElementById('termoBusca').value = '';
+    } catch (e) {
+      console.error("[CRON] Erro fatal:", e);
     }
+  }
+};
 
-    function showStatus(msg, type) {
-      const el = document.getElementById('statusIndicator');
-      el.textContent = msg; el.className = `status-bar status-${type}`; el.style.display = 'block';
-    }
+// =======================================================================
+// LÓGICA CENTRAL
+// =======================================================================
 
-    function mapRiskLevel(level) {
-      if (!level) return 'low';
-      level = level.toLowerCase();
-      if (level.includes('critico')) return 'critical';
-      if (level.includes('alto')) return 'high';
-      if (level.includes('medio')) return 'medium';
-      return 'low';
-    }
+async function runSearchRoutine(query, env) {
+  const [google, youtube, rss] = await Promise.all([
+    fetchGoogleCSE(query, env).catch(e => [{ title: "Erro Google", isError: true, error: e.message }]),
+    fetchYouTube(query, env).catch(() => []),
+    fetchTalkwalkerRSS(env).catch(() => [])
+  ]);
 
-    function mapSentiment(s) {
-      if (!s) return 'neutral';
-      s = s.toString().toLowerCase();
-      if (s.includes('pos')) return 'positive';
-      if (s.includes('neg')) return 'negative';
-      return 'neutral';
-    }
+  let rawItems = [...google, ...youtube, ...rss];
+  if (rawItems.length > 1) rawItems = rawItems.filter(i => !i.isError);
 
-    function translateSentiment(s) {
-      if (s === 'positive') return 'Positivo';
-      if (s === 'negative') return 'Negativo';
-      return 'Neutro';
-    }
+  if (rawItems.length === 0 || (rawItems.length === 1 && rawItems[0].isError)) {
+    return { ok: true, results: [], total_raw: 0, debug_msg: "Nada encontrado." };
+  }
 
-    function formatDate(isoStr) {
-      if (!isoStr) return '-';
-      const d = new Date(isoStr);
-      return isNaN(d.getTime()) ? isoStr : d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    }
+  const clusteredEvents = clusterItems(rawItems);
+  const topEvents = clusteredEvents.slice(0, 10); 
 
-    function abrirFontes(index) {
-      const item = newsData[index];
-      if (!item) return;
-      const lista = document.getElementById('fontesLista');
-      document.getElementById('fontesModalResumo').textContent = item.title;
-      let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
-      
-      lista.innerHTML = fontes.map((f, i) => `
-        <li>
-          <strong>${i + 1}. ${f.source || 'Fonte'}</strong> ${f.date ? ` – <span style="color:var(--text-muted);">${formatDate(f.date)}</span>` : ''}<br>
-          <a href="${f.url || f.link || '#'}" target="_blank">${f.url || f.link || '#'}</a>
-        </li>`).join('');
-      document.getElementById('fontesModal').style.display = 'flex';
-    }
-    function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
-    document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        currentFilter = e.target.getAttribute('data-filter');
-        updateTable();
-      });
+  const analyzedResults = await Promise.all(
+    topEvents.map(event => analyzeRiskWithChatGPT(event, env))
+  );
+
+  return {
+    ok: true,
+    total_raw: rawItems.length,
+    total_clusters: clusteredEvents.length,
+    results: analyzedResults
+  };
+}
+
+// =======================================================================
+// FUNÇÕES AUXILIARES (BUSCA)
+// =======================================================================
+
+async function fetchGoogleCSE(query, env) {
+  if (!env.GOOGLE_API_KEY || !env.GOOGLE_CSE_CX) return [];
+  const cleanCX = env.GOOGLE_CSE_CX.trim();
+  const cleanKey = env.GOOGLE_API_KEY.trim();
+  const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${cleanCX}&key=${cleanKey}&num=10&gl=br&hl=pt&dateRestrict=d2&sort=date`;
+  const resp = await fetch(url);
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  if (!data.items) return [];
+
+  const currentYear = new Date().getFullYear();
+  const oldYears = [(currentYear - 1).toString(), (currentYear - 2).toString(), '2023', '2024'];
+  const timeLimit = new Date(Date.now() - 48 * 60 * 60 * 1000).getTime();
+
+  return data.items.map(item => {
+      let realDate = null;
+      if (item.pagemap?.metatags?.length > 0) {
+        const t = item.pagemap.metatags[0];
+        const d = t['article:published_time'] || t['og:published_time'] || t['date'] || t['pubdate'];
+        if (d) realDate = new Date(d);
+      }
+      if (!realDate || isNaN(realDate.getTime())) realDate = new Date();
+
+      return {
+        title: item.title, link: item.link, url: item.link, source: item.displayLink || 'Google News',
+        date: realDate.toISOString(), snippet: item.snippet, type: 'news', originalTimestamp: realDate.getTime()
+      };
+    }).filter(item => {
+      const txt = (item.title + ' ' + item.snippet).toLowerCase();
+      if (oldYears.some(y => txt.includes(y))) return false;
+      if (item.originalTimestamp < timeLimit) return false;
+      return true;
     });
-  </script>
-</body>
-</html>
+}
 
+async function fetchYouTube(query, env) {
+  if (!env.YOUTUBE_API_KEY) return [];
+  const yesterday = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${env.YOUTUBE_API_KEY}&type=video&maxResults=5&relevanceLanguage=pt&publishedAfter=${yesterday}`;
+  const resp = await fetch(url);
+  const data = await resp.json();
+  if (!data.items) return [];
+  return data.items.map(i => ({
+    title: i.snippet.title, link: `https://youtu.be/${i.id.videoId}`, url: `https://youtu.be/${i.id.videoId}`,
+    source: 'YouTube', date: i.snippet.publishedAt, snippet: i.snippet.description, type: 'video'
+  }));
+}
 
+async function fetchTalkwalkerRSS(env) {
+  const FEED_URL = 'https://alerts.talkwalker.com/alerts/rss/INTV3F27HNZBMIXMI3PCZBF7RRQY6BTVLUDLUOQ223BDP2WHYQ4D46LMZIECUZBXUCNVFMELHWEKK83';
+  const resp = await fetch(FEED_URL);
+  const xml = await resp.text();
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+  let match;
+  const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const block = match[1];
+    const title = (block.match(/<title>([\s\S]*?)<\/title>/)?.[1] || '').replace('<![CDATA[','').replace(']]>','').trim();
+    const link = (block.match(/<link>(.*?)<\/link>/)?.[1] || '').trim();
+    const dateStr = (block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || '');
+    const dateObj = dateStr ? new Date(dateStr) : new Date();
+    if (dateObj.getTime() > cutoff && title) {
+      items.push({ title, link, url: link, source: 'Talkwalker', date: dateObj.toISOString(), snippet: title, type: 'rss' });
+    }
+  }
+  return items;
+}
+
+function clusterItems(items) {
+  const clusters = [];
+  items.forEach(item => {
+    if(item.isError) return;
+    const found = clusters.find(c => similarity(c.mainTitle, item.title) > 0.4);
+    if(found) { 
+      found.sources.push(item);
+      if(item.type === 'news' || new Date(item.date) > new Date(found.date)) {
+         found.mainTitle = item.title; found.link = item.link; found.url = item.link; found.content = item.snippet; found.date = item.date;
+      }
+    } else {
+      clusters.push({ mainTitle: item.title, link: item.link, url: item.link, date: item.date, source: item.source, content: item.snippet || item.title, sources: [item] });
+    }
+  });
+  return clusters;
+}
+
+function similarity(s1, s2) {
+  if (!s1 || !s2) return 0;
+  const w1 = s1.toLowerCase().split(/\W+/);
+  const w2 = s2.toLowerCase().split(/\W+/);
+  const intersection = w1.filter(x => w2.includes(x) && x.length > 3);
+  return intersection.length / ((w1.length + w2.length) / 2);
+}
+
+// =======================================================================
+// INTELIGÊNCIA ARTIFICIAL (ChatGPT)
+// =======================================================================
+
+async function analyzeRiskWithChatGPT(eventItem, env) {
+  const baseObject = { ...eventItem, title: eventItem.mainTitle, url: eventItem.link, content: eventItem.content || "Sem resumo", risco_score: 50, risco_classificacao: 'medio', sentiment: 'neutral' };
+  if (!env.OPENAI_API_KEY) return { ...baseObject, content: "⚠️ Sem Chave OpenAI" };
+
+  try {
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: "Analista de risco MPGO. Retorne JSON." },
+          { role: "user", content: `Analise: "${eventItem.mainTitle}". Resumo: ${eventItem.content}. JSON: { "sintese_tecnica": "1 frase pt-br", "risco_classificacao": "baixo|medio|alto|critico", "risco_score": 0-100, "sentimento": "positive|neutral|negative" }` }
+        ],
+        temperature: 0.2
+      })
+    });
+    const data = await resp.json();
+    const res = JSON.parse(data.choices[0].message.content);
+    return { ...baseObject, ...res, url: eventItem.link, title: eventItem.mainTitle, content: res.sintese_tecnica, source: `${eventItem.source} (+${eventItem.sources.length-1})` };
+  } catch (e) {
+    return baseObject;
+  }
+}
+
+async function gerarBriefingTelegram(noticias, env) {
+  if (!env.OPENAI_API_KEY) return "⚠️ *Resumo Automático Indisponível (Sem Chave)*";
+  const listaTexto = noticias.map(n => `- ${n.title} (Risco: ${n.risco_classificacao})`).join('\n');
+  try {
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "Você é um Assessor de Comunicação Sênior do Ministério Público. Escreva um briefing executivo de 1 parágrafo para o Procurador-Geral." },
+          { role: "user", content: `Com base nestas notícias:\n${listaTexto}\n\nEscreva um resumo executivo. Comece com "📊 *Cenário Atual:*". Seja breve e direto.` }
+        ],
+        temperature: 0.5
+      })
+    });
+    const data = await resp.json();
+    return data.choices[0].message.content;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function sendTelegramMessage(text, env) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: env.TELEGRAM_CHAT_ID,
+      text: text,
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true
+    })
+  });
+}
