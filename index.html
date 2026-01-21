@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MPGO Monitor - Inteligência Reputacional</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --mp-blue: #003366;
@@ -21,7 +21,7 @@
       --radius: 12px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
 
     .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 2rem; }
@@ -35,7 +35,7 @@
     /* Barra de Busca e Ações */
     .search-card {
       background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; border: 1px solid #e5e7eb;
     }
     .search-input-group { flex: 1; }
     .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
@@ -45,12 +45,12 @@
     .btn-action { height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer; padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s; }
     .btn-search { background: var(--mp-blue); color: white; }
     .btn-search:hover { background: var(--mp-blue-light); }
-    
-    .btn-report { background: #4b5563; color: white; display: none; } /* Botão Relatório */
+
+    .btn-report { background: #4b5563; color: white; display: none; }
     .btn-report:hover { background: #374151; }
 
     .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
-    
+
     .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
     .status-loading { background: #eff6ff; color: var(--mp-blue); }
     .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
@@ -76,7 +76,7 @@
 
     .results-section { background: var(--bg-card); border-radius: var(--radius); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; overflow: hidden; }
     .results-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-    
+
     .filters { display: flex; gap: 0.5rem; }
     .filter-btn { background: transparent; border: 1px solid #e5e7eb; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; }
     .filter-btn:hover { background: #f9fafb; }
@@ -108,7 +108,13 @@
     #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
     #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
     #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
-    
+
+    /* Modal Análise */
+    #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 60; }
+    #analiseModalInner { background: #ffffff; max-width: 800px; width: 92%; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    #analiseConteudo { margin-top: 1rem; font-size: 0.9rem; line-height: 1.6; color: #111827; }
+    .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
+
     /* Estilos de Impressão (Relatório) */
     @media print {
       body { background: white; padding: 0; }
@@ -118,10 +124,10 @@
       #dashboardContent { display: block !important; }
       h3 { color: black !important; }
       td, th { border-color: #000 !important; }
-      
+
       /* Mostra o resumo no topo da impressão */
       #executiveReport { display: block !important; border: 1px solid #ccc !important; box-shadow: none !important; }
-      
+
       body::before {
         content: "Relatório de Monitoramento - MPGO";
         display: block; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center;
@@ -135,16 +141,17 @@
       td, th { padding: 1rem; }
     }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
 
+<body>
   <header class="header">
     <div class="header-content">
       <div class="logo-badge">⚖️</div>
       <div>
         <h1>MPGO Monitor</h1>
-        <p>Coordenadoria de Segurança Institucional e Intteligência - Análise Reputacional</p>
+        <p>Coordenadoria de Segurança Institucional e Inteligência - Análise Reputacional</p>
       </div>
     </div>
   </header>
@@ -158,26 +165,26 @@
       <button class="btn-action btn-search" onclick="buscarNoticias()">
         🔍 Investigar (IA)
       </button>
-      
+
       <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">
         📄 Gerar Relatório
       </button>
-      
+
       <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">
         Limpar
       </button>
     </div>
-    
+
     <div id="statusIndicator" class="status-bar"></div>
 
     <div id="dashboardContent" style="display: none;">
-    
+
       <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 2rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-          <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
-              📊 Briefing de Inteligência
-              <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
-          </h3>
-          <div id="briefingText" style="font-size: 1rem; line-height: 1.6; color: #374151; white-space: pre-line;"></div>
+        <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
+          📊 Briefing de Inteligência
+          <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
+        </h3>
+        <div id="briefingText" style="font-size: 1rem; line-height: 1.6; color: #374151; white-space: pre-line;"></div>
       </div>
 
       <div class="grid">
@@ -203,6 +210,24 @@
         </div>
       </div>
 
+      <!-- Painel Estratégico: Narrativas / Ações / Watchlist -->
+      <div class="grid">
+        <div class="card">
+          <h3>Narrativas em Circulação</h3>
+          <ul id="narrativesList" style="font-size:0.9rem; line-height:1.5; padding-left: 1rem;"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Ações Recomendadas</h3>
+          <ul id="actionsList" style="font-size:0.9rem; line-height:1.5; padding-left: 1rem;"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Watchlist</h3>
+          <div id="watchlistBox" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+      </div>
+
       <div class="results-section">
         <div class="results-header">
           <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de Eventos Detectados</h3>
@@ -213,7 +238,7 @@
             <button class="filter-btn" data-filter="positive">🟢 Positivo</button>
           </div>
         </div>
-        
+
         <div style="overflow-x: auto;">
           <table id="newsTable">
             <thead>
@@ -222,12 +247,13 @@
                 <th style="width: 45%;">Evento / Síntese Técnica</th>
                 <th style="width: 15%;">Sentimento</th>
                 <th style="width: 15%;">Risco (IA)</th>
-                <th style="width: 10%;">Fontes</th>
+                <th style="width: 10%;">Ações</th>
               </tr>
             </thead>
             <tbody></tbody>
           </table>
         </div>
+
         <div id="tableEmpty" style="padding: 3rem; text-align: center; color: var(--text-muted);">
           Nenhum resultado encontrado.
         </div>
@@ -235,6 +261,7 @@
     </div>
   </div>
 
+  <!-- Modal Fontes -->
   <div id="fontesModal">
     <div id="fontesModalInner">
       <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
@@ -242,6 +269,17 @@
       <ul id="fontesLista"></ul>
       <div style="margin-top:1.5rem; text-align:right;">
         <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharFontes()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Análise -->
+  <div id="analiseModal">
+    <div id="analiseModalInner">
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise Estratégica</h3>
+      <div id="analiseConteudo"></div>
+      <div style="margin-top:1.25rem; text-align:right;">
+        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharAnalise()">Fechar</button>
       </div>
     </div>
   </div>
@@ -259,7 +297,7 @@
       if (!termo) { alert('Digite um termo para investigar.'); return; }
 
       showStatus(`Investigando "${termo}" em Google, YouTube e RSS...`, 'loading');
-      
+
       try {
         const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
         if (!resp.ok) {
@@ -268,16 +306,21 @@
         }
 
         const data = await resp.json();
+
         newsData = (data.results || []).map(item => ({
           title: item.title,
           content: item.content || item.sintese_tecnica || "Sem resumo.",
           url: item.url,
           source: item.source,
           date: item.date,
-          sentiment: mapSentiment(item.sentiment),
+          sentiment: mapSentiment(item.sentimento || item.sentiment),
           riskScore: (item.risco_score || 0).toFixed(1),
           riskLevel: mapRiskLevel(item.risco_classificacao),
-          sources: Array.isArray(item.sources) ? item.sources : []
+          sources: Array.isArray(item.sources) ? item.sources : [],
+          narrativa: item.narrativa_principal || '',
+          sensiveis: Array.isArray(item.pontos_sensiveis) ? item.pontos_sensiveis : [],
+          vetores: Array.isArray(item.vetores_provaveis) ? item.vetores_provaveis : [],
+          mensagemBase: item.mensagem_base_sugerida || ''
         }));
 
         if (newsData.length === 0) {
@@ -292,27 +335,28 @@
         document.getElementById('clearBtn').style.display = 'inline-flex';
         document.getElementById('reportBtn').style.display = 'inline-flex';
 
-        // ATIVA O RELATÓRIO EXECUTIVO
+        // Briefing: exibição em texto puro (sem converter markdown)
         if (data.executive_briefing) {
-            const reportDiv = document.getElementById('executiveReport');
-            const reportText = document.getElementById('briefingText');
-            // Formata Markdown básico do ChatGPT
-            reportText.innerHTML = data.executive_briefing
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
-            reportDiv.style.display = 'block';
+          document.getElementById('briefingText').textContent = data.executive_briefing;
+          document.getElementById('executiveReport').style.display = 'block';
         } else {
-            document.getElementById('executiveReport').style.display = 'none';
+          document.getElementById('executiveReport').style.display = 'none';
         }
 
         updateDashboard();
-        showStatus(`✅ Análise concluída: ${data.total_raw} menções em ${data.total_clusters} eventos.`, 'ready');
+
+        // Painel estratégico a partir do report do Worker (se existir)
+        if (data.report) {
+          renderStrategicPanels(data.report);
+        } else {
+          renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
+        }
+
+        showStatus(`Análise concluída: ${data.total_raw || 0} menções em ${data.total_clusters || 0} eventos.`, 'ready');
 
       } catch (e) {
         console.error(e);
         showStatus('Erro: ' + e.message, 'error');
-        if (e.message.includes('chave')) alert('Verifique as chaves no Cloudflare.');
       }
     }
 
@@ -334,7 +378,9 @@
       const fillEl = document.getElementById('riskFill');
 
       scoreEl.textContent = avgRisk.toFixed(1);
-      let levelClass = 'bg-low'; let labelText = 'BAIXO';
+
+      let levelClass = 'bg-low';
+      let labelText = 'BAIXO';
       if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
       else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
       else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
@@ -348,7 +394,12 @@
     function updateTable() {
       const tbody = document.querySelector('#newsTable tbody');
       const emptyDiv = document.getElementById('tableEmpty');
-      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
+
+      const filtered = newsData
+        .filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
+
+      // Ordena por risco desc
+      filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
 
       if (filtered.length === 0) {
         tbody.innerHTML = '';
@@ -356,25 +407,28 @@
         return;
       }
       emptyDiv.style.display = 'none';
+
       tbody.innerHTML = filtered.map((item, idx) => {
         const totalFontes = item.sources ? item.sources.length : 0;
         return `
         <tr>
           <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
           <td>
-            <span class="source-tag">${item.source}</span>
-            <div style="font-weight:600; margin-bottom:4px;">${item.title}</div>
-            <div class="content-preview">${item.content}</div>
+            <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
+            <div style="font-weight:600; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
+            <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
           </td>
           <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
           <td>
             <div class="badge-risk">
               <div class="dot bg-${item.riskLevel}"></div>
-              <span class="text-${item.riskLevel}">${item.riskScore}</span>
+              <span class="text-${item.riskLevel}">${sanitizeHtml(item.riskScore)}</span>
             </div>
           </td>
           <td>
-            <button class="btn-link" onclick="abrirFontes(${idx})">Ver fontes (${totalFontes || 1})</button>
+            <button class="btn-link" onclick="abrirFontes(${idx})">Fontes (${totalFontes || 1})</button><br>
+            <button class="btn-link" onclick="abrirAnalise(${idx})">Análise</button><br>
+            <a class="btn-link" href="${sanitizeAttr(item.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>
           </td>
         </tr>`;
       }).join('');
@@ -386,24 +440,119 @@
         newsData.filter(n => n.sentiment === 'neutral').length,
         newsData.filter(n => n.sentiment === 'negative').length
       ];
+
       const ctxSent = document.getElementById('sentimentChart');
       if (chartSentiment) chartSentiment.destroy();
       chartSentiment = new Chart(ctxSent, {
         type: 'doughnut',
-        data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }] },
+        data: {
+          labels: ['Positivo', 'Neutro', 'Negativo'],
+          datasets: [{
+            data: sentData,
+            backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
       });
 
       const riskCounts = { critical:0, high:0, medium:0, low:0 };
       newsData.forEach(n => riskCounts[n.riskLevel]++);
+
       const ctxRisk = document.getElementById('riskChart');
       if (chartRisk) chartRisk.destroy();
       chartRisk = new Chart(ctxRisk, {
         type: 'bar',
-        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
+        data: {
+          labels: ['Baixo', 'Médio', 'Alto', 'Crítico'],
+          datasets: [{
+            label: 'Eventos',
+            data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical],
+            backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, grid: { display: false } } },
+          plugins: { legend: { display: false } }
+        }
       });
     }
+
+    function renderStrategicPanels(report) {
+      const nList = document.getElementById('narrativesList');
+      const aList = document.getElementById('actionsList');
+      const wBox = document.getElementById('watchlistBox');
+
+      // Narrativas
+      if (report?.narratives?.length) {
+        nList.innerHTML = report.narratives.map(n =>
+          `<li>• ${sanitizeHtml(n.text)} <span style="color:var(--text-muted)">(${sanitizeHtml(String(n.count))})</span></li>`
+        ).join('');
+      } else {
+        nList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma narrativa relevante detectada.</li>`;
+      }
+
+      // Ações
+      if (report?.recommended_actions?.length) {
+        aList.innerHTML = report.recommended_actions.map(a =>
+          `<li>• ${sanitizeHtml(a)}</li>`
+        ).join('');
+      } else {
+        aList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma ação sugerida.</li>`;
+      }
+
+      // Watchlist
+      if (report?.watchlist?.length) {
+        wBox.innerHTML = report.watchlist.map(t =>
+          `<span class="chip">${sanitizeHtml(t)}</span>`
+        ).join('');
+      } else {
+        wBox.innerHTML = `<span style="color:var(--text-muted)">—</span>`;
+      }
+    }
+
+    function abrirAnalise(index) {
+      const item = newsData[index];
+      if (!item) return;
+
+      const sensiveis = Array.isArray(item.sensiveis) && item.sensiveis.length
+        ? `<ul style="margin-top:6px; padding-left: 1.1rem;">${item.sensiveis.map(s => `<li>${sanitizeHtml(s)}</li>`).join('')}</ul>`
+        : `<div style="color:var(--text-muted); margin-top:6px;">—</div>`;
+
+      const vetores = Array.isArray(item.vetores) && item.vetores.length
+        ? item.vetores.map(v => `<span class="chip">${sanitizeHtml(v)}</span>`).join(' ')
+        : `<span style="color:var(--text-muted)">—</span>`;
+
+      const msgBase = item.mensagemBase
+        ? sanitizeHtml(item.mensagemBase)
+        : '—';
+
+      document.getElementById('analiseConteudo').innerHTML = `
+        <div style="font-weight:600; margin-bottom:6px;">Evento</div>
+        <div style="color:#374151;">${sanitizeHtml(item.title || '')}</div>
+
+        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Narrativa identificada</div>
+        <div style="color:#374151;">${sanitizeHtml(item.narrativa || '—')}</div>
+
+        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Pontos sensíveis</div>
+        ${sensiveis}
+
+        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Vetores prováveis</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">${vetores}</div>
+
+        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Mensagem institucional sugerida</div>
+        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">
+          ${msgBase}
+        </div>
+      `;
+
+      document.getElementById('analiseModal').style.display = 'flex';
+    }
+
+    function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
 
     function clearData() {
       newsData = [];
@@ -412,11 +561,15 @@
       document.getElementById('reportBtn').style.display = 'none';
       document.getElementById('statusIndicator').style.display = 'none';
       document.getElementById('termoBusca').value = '';
+      if (chartSentiment) { chartSentiment.destroy(); chartSentiment = null; }
+      if (chartRisk) { chartRisk.destroy(); chartRisk = null; }
     }
 
     function showStatus(msg, type) {
       const el = document.getElementById('statusIndicator');
-      el.textContent = msg; el.className = `status-bar status-${type}`; el.style.display = 'block';
+      el.textContent = msg;
+      el.className = `status-bar status-${type}`;
+      el.style.display = 'block';
     }
 
     function mapRiskLevel(level) {
@@ -451,20 +604,34 @@
     function abrirFontes(index) {
       const item = newsData[index];
       if (!item) return;
+
       const lista = document.getElementById('fontesLista');
-      document.getElementById('fontesModalResumo').textContent = item.title;
+      document.getElementById('fontesModalResumo').textContent = item.title || '';
+
       let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
-      
+      if (!Array.isArray(fontes) || fontes.length === 0) {
+        fontes = [{ source: item.source, url: item.url, date: item.date }];
+      }
+
       lista.innerHTML = fontes.map((f, i) => `
         <li>
-          <strong>${i + 1}. ${f.source || 'Fonte'}</strong> ${f.date ? ` – <span style="color:var(--text-muted);">${formatDate(f.date)}</span>` : ''}<br>
-          <a href="${f.url || f.link || '#'}" target="_blank">${f.url || f.link || '#'}</a>
+          <div style="font-weight:700;">${i + 1}. ${sanitizeHtml(f.source || 'Fonte')}</div>
+          ${f.date ? `<div style="color:var(--text-muted); font-size:0.85rem; margin-top:2px;">${sanitizeHtml(formatDate(f.date))}</div>` : ''}
+          <div style="margin-top:6px;">
+            <a href="${sanitizeAttr(f.url || f.link || '#')}" target="_blank" rel="noopener noreferrer">${sanitizeHtml(f.url || f.link || '#')}</a>
+          </div>
         </li>`).join('');
+
       document.getElementById('fontesModal').style.display = 'flex';
     }
+
     function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
+
+    // Eventos: fechar modais clicando fora
     document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
+    document.getElementById('analiseModal').addEventListener('click', (e) => { if (e.target.id === 'analiseModal') fecharAnalise(); });
+
+    // Filtros de sentimento
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -473,7 +640,23 @@
         updateTable();
       });
     });
+
+    // Sanitização básica (evita injeção por conteúdo vindo de fontes/IA)
+    function sanitizeHtml(str) {
+      const s = (str === null || str === undefined) ? '' : String(str);
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    function sanitizeAttr(url) {
+      const u = (url === null || url === undefined) ? '' : String(url);
+      // bloqueia javascript: e data:
+      if (/^\s*(javascript:|data:)/i.test(u)) return '#';
+      return u.replace(/"/g, '%22');
+    }
   </script>
 </body>
 </html>
-
