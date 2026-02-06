@@ -118,7 +118,7 @@
     /* Estilos de Impressão (Relatório) */
     @media print {
       body { background: white; padding: 0; }
-      .header, .search-card, .filters, .btn-link { display: none !important; }
+      .header, .search-card, .filters, .btn-link, #alertsSection { display: none !important; }
       .results-section { box-shadow: none; border: none; }
       .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
       #dashboardContent { display: block !important; }
@@ -173,6 +173,84 @@
       <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">
         Limpar
       </button>
+    </div>
+
+    <!-- NOVO: Gerenciador de Alertas -->
+    <div id="alertsSection" class="results-section" style="margin-bottom: 1.5rem;">
+      <div class="results-header">
+        <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Alertas Permanentes (CRON)</h3>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input id="adminToken" class="search-input" style="height:38px; max-width:280px;"
+                 placeholder="Token admin (opcional)" />
+          <button class="filter-btn" onclick="loadAlerts()">🔄 Atualizar</button>
+        </div>
+      </div>
+
+      <div style="padding: 1rem 1.5rem; border-bottom:1px solid #e5e7eb;">
+        <div style="display:grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap:10px;">
+          <input id="alertName" class="search-input" style="height:42px;" placeholder="Nome do alerta (ex.: Cyro Terra)" />
+          <input id="alertQuery" class="search-input" style="height:42px;" placeholder='Termo (ex.: "Cyro Terra Peres")' />
+          <select id="alertMinRisk" class="search-input" style="height:42px;">
+            <option value="medio" selected>Médio+</option>
+            <option value="alto">Alto+</option>
+            <option value="critico">Crítico</option>
+            <option value="baixo">Baixo+</option>
+          </select>
+          <button class="btn-action btn-search" style="height:42px; margin-top:0;" onclick="createAlert()">
+            ➕ Criar alerta
+          </button>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+            <input type="checkbox" id="alertAuthorityOverride" checked />
+            Forçar alerta se for autoridade (Cyro Terra)
+          </label>
+
+          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+            Intervalo (min):
+            <input id="alertInterval" type="number" value="30" min="5" max="1440"
+                   class="search-input" style="height:38px; width:120px;" />
+          </label>
+
+          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+            Tipo:
+            <select id="alertType" class="search-input" style="height:38px; width:180px;">
+              <option value="institucional" selected>Institucional</option>
+              <option value="autoridade">Autoridade</option>
+              <option value="tema">Tema</option>
+              <option value="temporario">Temporário</option>
+            </select>
+          </label>
+
+          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+            Prioridade:
+            <input id="alertPriority" type="number" value="3" min="1" max="5"
+                   class="search-input" style="height:38px; width:90px;" />
+          </label>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="alertsTable">
+          <thead>
+            <tr>
+              <th style="width: 18%;">Nome</th>
+              <th style="width: 30%;">Termo</th>
+              <th style="width: 10%;">Intervalo</th>
+              <th style="width: 10%;">Risco</th>
+              <th style="width: 12%;">Tipo</th>
+              <th style="width: 10%;">Status</th>
+              <th style="width: 10%;">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="alertsEmpty" style="padding: 1.25rem 1.5rem; color:var(--text-muted); display:none;">
+        Nenhum alerta cadastrado.
+      </div>
     </div>
 
     <div id="statusIndicator" class="status-bar"></div>
@@ -335,7 +413,6 @@
         document.getElementById('clearBtn').style.display = 'inline-flex';
         document.getElementById('reportBtn').style.display = 'inline-flex';
 
-        // Briefing: exibição em texto puro (sem converter markdown)
         if (data.executive_briefing) {
           document.getElementById('briefingText').textContent = data.executive_briefing;
           document.getElementById('executiveReport').style.display = 'block';
@@ -345,7 +422,6 @@
 
         updateDashboard();
 
-        // Painel estratégico a partir do report do Worker (se existir)
         if (data.report) {
           renderStrategicPanels(data.report);
         } else {
@@ -360,9 +436,7 @@
       }
     }
 
-    function gerarRelatorio() {
-      window.print();
-    }
+    function gerarRelatorio() { window.print(); }
 
     function updateDashboard() {
       updateMetrics();
@@ -398,7 +472,6 @@
       const filtered = newsData
         .filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
 
-      // Ordena por risco desc
       filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
 
       if (filtered.length === 0) {
@@ -486,7 +559,6 @@
       const aList = document.getElementById('actionsList');
       const wBox = document.getElementById('watchlistBox');
 
-      // Narrativas
       if (report?.narratives?.length) {
         nList.innerHTML = report.narratives.map(n =>
           `<li>• ${sanitizeHtml(n.text)} <span style="color:var(--text-muted)">(${sanitizeHtml(String(n.count))})</span></li>`
@@ -495,7 +567,6 @@
         nList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma narrativa relevante detectada.</li>`;
       }
 
-      // Ações
       if (report?.recommended_actions?.length) {
         aList.innerHTML = report.recommended_actions.map(a =>
           `<li>• ${sanitizeHtml(a)}</li>`
@@ -504,7 +575,6 @@
         aList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma ação sugerida.</li>`;
       }
 
-      // Watchlist
       if (report?.watchlist?.length) {
         wBox.innerHTML = report.watchlist.map(t =>
           `<span class="chip">${sanitizeHtml(t)}</span>`
@@ -526,9 +596,7 @@
         ? item.vetores.map(v => `<span class="chip">${sanitizeHtml(v)}</span>`).join(' ')
         : `<span style="color:var(--text-muted)">—</span>`;
 
-      const msgBase = item.mensagemBase
-        ? sanitizeHtml(item.mensagemBase)
-        : '—';
+      const msgBase = item.mensagemBase ? sanitizeHtml(item.mensagemBase) : '—';
 
       document.getElementById('analiseConteudo').innerHTML = `
         <div style="font-weight:600; margin-bottom:6px;">Evento</div>
@@ -548,7 +616,6 @@
           ${msgBase}
         </div>
       `;
-
       document.getElementById('analiseModal').style.display = 'flex';
     }
 
@@ -627,11 +694,9 @@
 
     function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
 
-    // Eventos: fechar modais clicando fora
     document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
     document.getElementById('analiseModal').addEventListener('click', (e) => { if (e.target.id === 'analiseModal') fecharAnalise(); });
 
-    // Filtros de sentimento
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -641,7 +706,148 @@
       });
     });
 
+    // =========================
+    // ALERTAS (CRUD no KV_ALERTS)
+    // =========================
+    async function loadAlerts() {
+      try {
+        const resp = await fetch(`${API_BASE}/alerts`);
+        const data = await resp.json();
+        const alerts = data.alerts || [];
+        renderAlertsTable(alerts);
+      } catch (e) {
+        console.error(e);
+        alert("Falha ao carregar alertas.");
+      }
+    }
+
+    function getAdminToken() {
+      return (document.getElementById("adminToken")?.value || "").trim();
+    }
+
+    async function createAlert() {
+      const name = (document.getElementById("alertName").value || "").trim();
+      const query = (document.getElementById("alertQuery").value || "").trim();
+      const min_risk = document.getElementById("alertMinRisk").value;
+      const interval_minutes = parseInt(document.getElementById("alertInterval").value || "30", 10);
+      const type = document.getElementById("alertType").value;
+      const priority = parseInt(document.getElementById("alertPriority").value || "3", 10);
+      const authority_override = !!document.getElementById("alertAuthorityOverride").checked;
+
+      if (!query) { alert("Informe o termo (query)."); return; }
+
+      const payload = {
+        name: name || query,
+        query,
+        interval_minutes,
+        min_risk,
+        type,
+        priority,
+        focus: "institutional",
+        enabled: true,
+        authority_override
+      };
+
+      const token = getAdminToken();
+
+      try {
+        const resp = await fetch(`${API_BASE}/alerts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.ok === false) throw new Error(data.erro || "Erro ao criar alerta.");
+
+        document.getElementById("alertName").value = "";
+        document.getElementById("alertQuery").value = "";
+        await loadAlerts();
+        alert("Alerta criado.");
+      } catch (e) {
+        console.error(e);
+        alert("Falha: " + e.message);
+      }
+    }
+
+    async function toggleAlert(id, enabled) {
+      const token = getAdminToken();
+      try {
+        const resp = await fetch(`${API_BASE}/alerts/toggle`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ id, enabled })
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.ok === false) throw new Error(data.erro || "Erro ao alterar status.");
+        await loadAlerts();
+      } catch (e) {
+        console.error(e);
+        alert("Falha: " + e.message);
+      }
+    }
+
+    async function deleteAlert(id) {
+      if (!confirm("Excluir este alerta?")) return;
+      const token = getAdminToken();
+      try {
+        const resp = await fetch(`${API_BASE}/alerts?id=${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          headers: {
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          }
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.ok === false) throw new Error(data.erro || "Erro ao excluir.");
+        await loadAlerts();
+      } catch (e) {
+        console.error(e);
+        alert("Falha: " + e.message);
+      }
+    }
+
+    function renderAlertsTable(alerts) {
+      const tbody = document.querySelector("#alertsTable tbody");
+      const empty = document.getElementById("alertsEmpty");
+
+      if (!alerts.length) {
+        tbody.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      tbody.innerHTML = alerts.map(a => {
+        const status = a.enabled ? "Ativo" : "Pausado";
+        const btnText = a.enabled ? "Pausar" : "Ativar";
+        const btnAction = a.enabled ? `toggleAlert("${a.id}", false)` : `toggleAlert("${a.id}", true)`;
+
+        return `
+          <tr>
+            <td><div style="font-weight:600;">${sanitizeHtml(a.name || "-")}</div></td>
+            <td><div style="color:var(--text-muted);">${sanitizeHtml(a.query || "-")}</div></td>
+            <td>${sanitizeHtml(String(a.interval_minutes || 30))} min</td>
+            <td>${sanitizeHtml(a.min_risk || "medio")}</td>
+            <td>${sanitizeHtml(a.type || "tema")}</td>
+            <td>${sanitizeHtml(status)}</td>
+            <td style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button class="filter-btn" onclick='${btnAction}'>${sanitizeHtml(btnText)}</button>
+              <button class="filter-btn" style="border-color:#fecaca; color:#dc2626;" onclick='deleteAlert("${a.id}")'>Excluir</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // =========================
     // Sanitização básica (evita injeção por conteúdo vindo de fontes/IA)
+    // =========================
     function sanitizeHtml(str) {
       const s = (str === null || str === undefined) ? '' : String(str);
       return s
@@ -653,10 +859,14 @@
     }
     function sanitizeAttr(url) {
       const u = (url === null || url === undefined) ? '' : String(url);
-      // bloqueia javascript: e data:
       if (/^\s*(javascript:|data:)/i.test(u)) return '#';
       return u.replace(/"/g, '%22');
     }
+
+    // Auto-load alertas
+    window.addEventListener("load", () => {
+      loadAlerts();
+    });
   </script>
 </body>
 </html>
