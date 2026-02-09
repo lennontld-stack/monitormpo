@@ -21,7 +21,6 @@
       --radius: 12px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
 
     .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 2rem; }
@@ -32,7 +31,6 @@
 
     .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
-    /* Barra de Busca e Ações */
     .search-card {
       background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; border: 1px solid #e5e7eb;
@@ -45,10 +43,8 @@
     .btn-action { height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer; padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s; }
     .btn-search { background: var(--mp-blue); color: white; }
     .btn-search:hover { background: var(--mp-blue-light); }
-
     .btn-report { background: #4b5563; color: white; display: none; }
     .btn-report:hover { background: #374151; }
-
     .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
 
     .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
@@ -102,43 +98,38 @@
     .btn-link:hover { text-decoration: underline; }
     .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
 
-    /* Modal Fontes */
     #fontesModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 50; }
     #fontesModalInner { background: #ffffff; max-width: 700px; width: 90%; padding: 1.5rem 1.75rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
     #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
     #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
 
-    /* Modal Análise */
     #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 60; }
     #analiseModalInner { background: #ffffff; max-width: 800px; width: 92%; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     #analiseConteudo { margin-top: 1rem; font-size: 0.9rem; line-height: 1.6; color: #111827; }
     .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
 
-    /* Estilos de Impressão (Relatório) */
-    @media print {
-      body { background: white; padding: 0; }
-      .header, .search-card, .filters, .btn-link, #alertsSection { display: none !important; }
-      .results-section { box-shadow: none; border: none; }
-      .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
-      #dashboardContent { display: block !important; }
-      h3 { color: black !important; }
-      td, th { border-color: #000 !important; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .field label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform: uppercase; }
+    .field input, .field select { padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-size:0.95rem; }
+    .field input:focus, .field select:focus { outline:none; border-color: var(--mp-blue); }
+    .small-muted { color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; }
 
-      /* Mostra o resumo no topo da impressão */
-      #executiveReport { display: block !important; border: 1px solid #ccc !important; box-shadow: none !important; }
-
-      body::before {
-        content: "Relatório de Monitoramento - MPGO";
-        display: block; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center;
-      }
-    }
+    .btn-mini { border:1px solid #e5e7eb; background:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem; }
+    .btn-mini:hover { background:#f9fafb; }
+    .btn-mini.primary { background: var(--mp-blue); color:#fff; border-color: var(--mp-blue); }
+    .btn-mini.primary:hover { background: var(--mp-blue-light); }
+    .btn-mini.danger { background:#fee2e2; border-color:#fecaca; color:#b91c1c; }
+    .btn-mini.danger:hover { background:#fecaca; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #e5e7eb; font-size:0.75rem; color:#374151; background:#fff; }
 
     @media (max-width: 768px) {
       .search-card { flex-direction: column; align-items: stretch; }
       .btn-action { margin-top: 0.5rem; }
       .filters { width: 100%; overflow-x: auto; padding-bottom: 4px; }
       td, th { padding: 1rem; }
+      .form-row { grid-template-columns: 1fr; }
     }
   </style>
 
@@ -162,101 +153,94 @@
         <label>Monitoramento de Tópico (Últimas 48h)</label>
         <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Operação X", "Ministério Público"'>
       </div>
-      <button class="btn-action btn-search" onclick="buscarNoticias()">
-        🔍 Investigar (IA)
-      </button>
-
-      <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">
-        📄 Gerar Relatório
-      </button>
-
-      <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">
-        Limpar
-      </button>
-    </div>
-
-    <!-- NOVO: Gerenciador de Alertas -->
-    <div id="alertsSection" class="results-section" style="margin-bottom: 1.5rem;">
-      <div class="results-header">
-        <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Alertas Permanentes (CRON)</h3>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <input id="adminToken" class="search-input" style="height:38px; max-width:280px;"
-                 placeholder="Token admin (opcional)" />
-          <button class="filter-btn" onclick="loadAlerts()">🔄 Atualizar</button>
-        </div>
-      </div>
-
-      <div style="padding: 1rem 1.5rem; border-bottom:1px solid #e5e7eb;">
-        <div style="display:grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap:10px;">
-          <input id="alertName" class="search-input" style="height:42px;" placeholder="Nome do alerta (ex.: Cyro Terra)" />
-          <input id="alertQuery" class="search-input" style="height:42px;" placeholder='Termo (ex.: "Cyro Terra Peres")' />
-          <select id="alertMinRisk" class="search-input" style="height:42px;">
-            <option value="medio" selected>Médio+</option>
-            <option value="alto">Alto+</option>
-            <option value="critico">Crítico</option>
-            <option value="baixo">Baixo+</option>
-          </select>
-          <button class="btn-action btn-search" style="height:42px; margin-top:0;" onclick="createAlert()">
-            ➕ Criar alerta
-          </button>
-        </div>
-
-        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
-            <input type="checkbox" id="alertAuthorityOverride" checked />
-            Forçar alerta se for autoridade (Cyro Terra)
-          </label>
-
-          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
-            Intervalo (min):
-            <input id="alertInterval" type="number" value="30" min="5" max="1440"
-                   class="search-input" style="height:38px; width:120px;" />
-          </label>
-
-          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
-            Tipo:
-            <select id="alertType" class="search-input" style="height:38px; width:180px;">
-              <option value="institucional" selected>Institucional</option>
-              <option value="autoridade">Autoridade</option>
-              <option value="tema">Tema</option>
-              <option value="temporario">Temporário</option>
-            </select>
-          </label>
-
-          <label style="font-size:0.85rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
-            Prioridade:
-            <input id="alertPriority" type="number" value="3" min="1" max="5"
-                   class="search-input" style="height:38px; width:90px;" />
-          </label>
-        </div>
-      </div>
-
-      <div style="overflow-x:auto;">
-        <table id="alertsTable">
-          <thead>
-            <tr>
-              <th style="width: 18%;">Nome</th>
-              <th style="width: 30%;">Termo</th>
-              <th style="width: 10%;">Intervalo</th>
-              <th style="width: 10%;">Risco</th>
-              <th style="width: 12%;">Tipo</th>
-              <th style="width: 10%;">Status</th>
-              <th style="width: 10%;">Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div id="alertsEmpty" style="padding: 1.25rem 1.5rem; color:var(--text-muted); display:none;">
-        Nenhum alerta cadastrado.
-      </div>
+      <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar (IA)</button>
+      <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">📄 Gerar Relatório</button>
+      <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">Limpar</button>
     </div>
 
     <div id="statusIndicator" class="status-bar"></div>
 
-    <div id="dashboardContent" style="display: none;">
+    <!-- NOVO: GERENCIAR ALERTAS -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h3>Gerenciar alertas</h3>
+      <div class="small-muted" style="margin-bottom:10px;">
+        Cadastre termos como “Google Alerts”, mas com análise automática e envio via Telegram. Os alertas rodam conforme interval_minutes.
+      </div>
 
+      <div class="form-row">
+        <div class="field">
+          <label>Nome do alerta</label>
+          <input id="a_name" type="text" placeholder="Ex: MPGO - Institucional">
+        </div>
+        <div class="field">
+          <label>Query (termo)</label>
+          <input id="a_query" type="text" placeholder='Ex: "MPGO" ou "Cyro Terra Peres"'>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Foco</label>
+          <select id="a_focus">
+            <option value="institutional">institutional</option>
+            <option value="query">query</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Risco mínimo</label>
+          <select id="a_min_risk">
+            <option value="baixo">baixo</option>
+            <option value="medio" selected>medio</option>
+            <option value="alto">alto</option>
+            <option value="critico">critico</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Intervalo (min)</label>
+          <input id="a_interval" type="number" min="5" max="1440" value="30">
+        </div>
+        <div class="field">
+          <label>Prioridade (1-5)</label>
+          <input id="a_priority" type="number" min="1" max="5" value="3">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Habilitado</label>
+          <select id="a_enabled">
+            <option value="true" selected>true</option>
+            <option value="false">false</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Authority override</label>
+          <select id="a_authority">
+            <option value="false" selected>false</option>
+            <option value="true">true</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+        <button class="btn-mini primary" onclick="saveAlert()">Salvar alerta</button>
+        <button class="btn-mini" onclick="resetAlertForm()">Limpar formulário</button>
+        <span class="pill" id="editingPill" style="display:none;">Editando: <span id="editingId"></span></span>
+      </div>
+
+      <div style="margin-top:16px; border-top:1px solid #e5e7eb; padding-top:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div style="font-weight:700;">Alertas cadastrados</div>
+          <button class="btn-mini" onclick="loadAlerts()">Atualizar lista</button>
+        </div>
+        <div id="alertsBox" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div id="dashboardContent" style="display: none;">
       <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 2rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
         <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
           📊 Briefing de Inteligência
@@ -288,7 +272,6 @@
         </div>
       </div>
 
-      <!-- Painel Estratégico: Narrativas / Ações / Watchlist -->
       <div class="grid">
         <div class="card">
           <h3>Narrativas em Circulação</h3>
@@ -339,25 +322,23 @@
     </div>
   </div>
 
-  <!-- Modal Fontes -->
   <div id="fontesModal">
     <div id="fontesModalInner">
       <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
       <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
       <ul id="fontesLista"></ul>
       <div style="margin-top:1.5rem; text-align:right;">
-        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharFontes()">Fechar</button>
+        <button class="btn-mini" onclick="fecharFontes()">Fechar</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Análise -->
   <div id="analiseModal">
     <div id="analiseModalInner">
       <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise Estratégica</h3>
       <div id="analiseConteudo"></div>
       <div style="margin-top:1.25rem; text-align:right;">
-        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharAnalise()">Fechar</button>
+        <button class="btn-mini" onclick="fecharAnalise()">Fechar</button>
       </div>
     </div>
   </div>
@@ -370,6 +351,210 @@
     let chartSentiment = null;
     let chartRisk = null;
 
+    let editingAlertId = null;
+
+    // ----- init -----
+    window.addEventListener('load', () => {
+      loadAlerts();
+    });
+
+    // ======================================
+    // ALERTS UI
+    // ======================================
+    async function loadAlerts() {
+      const box = document.getElementById('alertsBox');
+      box.innerHTML = '<div class="small-muted">Carregando...</div>';
+
+      try {
+        const resp = await fetch(`${API_BASE}/alerts`);
+        const data = await resp.json();
+
+        if (!resp.ok || !data.ok) throw new Error(data.erro || 'Falha ao carregar alertas');
+
+        const alerts = Array.isArray(data.alerts) ? data.alerts : [];
+        if (!alerts.length) {
+          box.innerHTML = '<div class="small-muted">Nenhum alerta cadastrado.</div>';
+          return;
+        }
+
+        // ordena por prioridade desc
+        alerts.sort((a,b) => (Number(b.priority||0) - Number(a.priority||0)));
+
+        box.innerHTML = `
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:18%;">Nome</th>
+                  <th style="width:24%;">Query</th>
+                  <th style="width:10%;">Foco</th>
+                  <th style="width:10%;">Min risco</th>
+                  <th style="width:10%;">Intervalo</th>
+                  <th style="width:10%;">Status</th>
+                  <th style="width:18%;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${alerts.map(a => `
+                  <tr>
+                    <td>${sanitizeHtml(a.name || '')}<div class="small-muted">prio: ${sanitizeHtml(String(a.priority||''))}</div></td>
+                    <td>
+                      <button class="btn-link" onclick="fillSearchFromAlert('${sanitizeAttr(a.query||'')}')">${sanitizeHtml(a.query || '')}</button>
+                      <div class="small-muted">id: ${sanitizeHtml(a.id || '')}</div>
+                    </td>
+                    <td>${sanitizeHtml(a.focus || '')}</td>
+                    <td>${sanitizeHtml(a.min_risk || '')}</td>
+                    <td>${sanitizeHtml(String(a.interval_minutes || ''))}m</td>
+                    <td>${a.enabled ? '<span class="pill">on</span>' : '<span class="pill">off</span>'}</td>
+                    <td>
+                      <button class="btn-mini" onclick="editAlert('${sanitizeAttr(a.id)}')">Editar</button>
+                      <button class="btn-mini" onclick="toggleAlert('${sanitizeAttr(a.id)}', ${a.enabled ? 'false':'true'})">${a.enabled ? 'Desativar' : 'Ativar'}</button>
+                      <button class="btn-mini" onclick="runAlertNow('${sanitizeAttr(a.id)}')">Rodar</button>
+                      <button class="btn-mini danger" onclick="deleteAlert('${sanitizeAttr(a.id)}')">Excluir</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (e) {
+        box.innerHTML = `<div class="small-muted" style="color:#b91c1c;">Erro: ${sanitizeHtml(e.message)}</div>`;
+      }
+    }
+
+    function resetAlertForm() {
+      editingAlertId = null;
+      document.getElementById('a_name').value = '';
+      document.getElementById('a_query').value = '';
+      document.getElementById('a_focus').value = 'institutional';
+      document.getElementById('a_min_risk').value = 'medio';
+      document.getElementById('a_interval').value = 30;
+      document.getElementById('a_priority').value = 3;
+      document.getElementById('a_enabled').value = 'true';
+      document.getElementById('a_authority').value = 'false';
+      document.getElementById('editingPill').style.display = 'none';
+    }
+
+    async function editAlert(id) {
+      // busca lista e preenche form (simples e suficiente)
+      const resp = await fetch(`${API_BASE}/alerts`);
+      const data = await resp.json();
+      const alerts = Array.isArray(data.alerts) ? data.alerts : [];
+      const a = alerts.find(x => x.id === id);
+      if (!a) return;
+
+      editingAlertId = a.id;
+
+      document.getElementById('a_name').value = a.name || '';
+      document.getElementById('a_query').value = a.query || '';
+      document.getElementById('a_focus').value = a.focus || 'institutional';
+      document.getElementById('a_min_risk').value = a.min_risk || 'medio';
+      document.getElementById('a_interval').value = Number(a.interval_minutes || 30);
+      document.getElementById('a_priority').value = Number(a.priority || 3);
+      document.getElementById('a_enabled').value = String(!!a.enabled);
+      document.getElementById('a_authority').value = String(!!a.authority_override);
+
+      document.getElementById('editingId').textContent = a.id;
+      document.getElementById('editingPill').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function saveAlert() {
+      const payload = {
+        id: editingAlertId || undefined,
+        name: document.getElementById('a_name').value.trim(),
+        query: document.getElementById('a_query').value.trim(),
+        focus: document.getElementById('a_focus').value,
+        min_risk: document.getElementById('a_min_risk').value,
+        interval_minutes: Number(document.getElementById('a_interval').value || 30),
+        priority: Number(document.getElementById('a_priority').value || 3),
+        enabled: document.getElementById('a_enabled').value === 'true',
+        authority_override: document.getElementById('a_authority').value === 'true',
+        channels: ["telegram"]
+      };
+
+      if (!payload.name || !payload.query) {
+        alert('Preencha nome e query.');
+        return;
+      }
+
+      const resp = await fetch(`${API_BASE}/alerts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok || !data.ok) {
+        alert(data.erro || 'Falha ao salvar');
+        return;
+      }
+
+      resetAlertForm();
+      await loadAlerts();
+      alert('Alerta salvo.');
+    }
+
+    async function deleteAlert(id) {
+      if (!confirm('Excluir este alerta?')) return;
+
+      const resp = await fetch(`${API_BASE}/alerts?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok || !data.ok) {
+        alert(data.erro || 'Falha ao excluir');
+        return;
+      }
+      await loadAlerts();
+    }
+
+    async function toggleAlert(id, enabled) {
+      // Toggle via UPSERT simples: carrega, ajusta e salva
+      const resp = await fetch(`${API_BASE}/alerts`);
+      const data = await resp.json();
+      const alerts = Array.isArray(data.alerts) ? data.alerts : [];
+      const a = alerts.find(x => x.id === id);
+      if (!a) return;
+
+      a.enabled = !!enabled;
+
+      const resp2 = await fetch(`${API_BASE}/alerts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(a)
+      });
+      const data2 = await resp2.json().catch(() => ({}));
+
+      if (!resp2.ok || !data2.ok) {
+        alert(data2.erro || 'Falha ao alternar');
+        return;
+      }
+      await loadAlerts();
+    }
+
+    async function runAlertNow(id) {
+      const resp = await fetch(`${API_BASE}/run-alerts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.ok) {
+        alert(data.erro || 'Falha ao executar');
+        return;
+      }
+      alert('Alerta executado. Se houver novidades e passar no filtro, vai enviar no Telegram.');
+    }
+
+    function fillSearchFromAlert(q) {
+      document.getElementById('termoBusca').value = q;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ======================================
+    // BUSCA MANUAL (o que você já tinha)
+    // ======================================
     async function buscarNoticias() {
       const termo = document.getElementById('termoBusca').value.trim();
       if (!termo) { alert('Digite um termo para investigar.'); return; }
@@ -422,14 +607,10 @@
 
         updateDashboard();
 
-        if (data.report) {
-          renderStrategicPanels(data.report);
-        } else {
-          renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
-        }
+        if (data.report) renderStrategicPanels(data.report);
+        else renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
 
         showStatus(`Análise concluída: ${data.total_raw || 0} menções em ${data.total_clusters || 0} eventos.`, 'ready');
-
       } catch (e) {
         console.error(e);
         showStatus('Erro: ' + e.message, 'error');
@@ -438,11 +619,7 @@
 
     function gerarRelatorio() { window.print(); }
 
-    function updateDashboard() {
-      updateMetrics();
-      updateCharts();
-      updateTable();
-    }
+    function updateDashboard() { updateMetrics(); updateCharts(); updateTable(); }
 
     function updateMetrics() {
       if (newsData.length === 0) return;
@@ -469,9 +646,7 @@
       const tbody = document.querySelector('#newsTable tbody');
       const emptyDiv = document.getElementById('tableEmpty');
 
-      const filtered = newsData
-        .filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
-
+      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
       filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
 
       if (filtered.length === 0) {
@@ -520,11 +695,7 @@
         type: 'doughnut',
         data: {
           labels: ['Positivo', 'Neutro', 'Negativo'],
-          datasets: [{
-            data: sentData,
-            backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'],
-            borderWidth: 0
-          }]
+          datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
       });
@@ -538,19 +709,9 @@
         type: 'bar',
         data: {
           labels: ['Baixo', 'Médio', 'Alto', 'Crítico'],
-          datasets: [{
-            label: 'Eventos',
-            data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical],
-            backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
-            borderRadius: 4
-          }]
+          datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true, grid: { display: false } } },
-          plugins: { legend: { display: false } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
       });
     }
 
@@ -560,25 +721,19 @@
       const wBox = document.getElementById('watchlistBox');
 
       if (report?.narratives?.length) {
-        nList.innerHTML = report.narratives.map(n =>
-          `<li>• ${sanitizeHtml(n.text)} <span style="color:var(--text-muted)">(${sanitizeHtml(String(n.count))})</span></li>`
-        ).join('');
+        nList.innerHTML = report.narratives.map(n => `<li>• ${sanitizeHtml(n.text)} <span style="color:var(--text-muted)">(${sanitizeHtml(String(n.count))})</span></li>`).join('');
       } else {
         nList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma narrativa relevante detectada.</li>`;
       }
 
       if (report?.recommended_actions?.length) {
-        aList.innerHTML = report.recommended_actions.map(a =>
-          `<li>• ${sanitizeHtml(a)}</li>`
-        ).join('');
+        aList.innerHTML = report.recommended_actions.map(a => `<li>• ${sanitizeHtml(a)}</li>`).join('');
       } else {
         aList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma ação sugerida.</li>`;
       }
 
       if (report?.watchlist?.length) {
-        wBox.innerHTML = report.watchlist.map(t =>
-          `<span class="chip">${sanitizeHtml(t)}</span>`
-        ).join('');
+        wBox.innerHTML = report.watchlist.map(t => `<span class="chip">${sanitizeHtml(t)}</span>`).join('');
       } else {
         wBox.innerHTML = `<span style="color:var(--text-muted)">—</span>`;
       }
@@ -612,13 +767,10 @@
         <div style="display:flex; flex-wrap:wrap; gap:6px;">${vetores}</div>
 
         <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Mensagem institucional sugerida</div>
-        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">
-          ${msgBase}
-        </div>
+        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">${msgBase}</div>
       `;
       document.getElementById('analiseModal').style.display = 'flex';
     }
-
     function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
 
     function clearData() {
@@ -676,9 +828,7 @@
       document.getElementById('fontesModalResumo').textContent = item.title || '';
 
       let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) {
-        fontes = [{ source: item.source, url: item.url, date: item.date }];
-      }
+      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
 
       lista.innerHTML = fontes.map((f, i) => `
         <li>
@@ -691,7 +841,6 @@
 
       document.getElementById('fontesModal').style.display = 'flex';
     }
-
     function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
 
     document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
@@ -706,167 +855,15 @@
       });
     });
 
-    // =========================
-    // ALERTAS (CRUD no KV_ALERTS)
-    // =========================
-    async function loadAlerts() {
-      try {
-        const resp = await fetch(`${API_BASE}/alerts`);
-        const data = await resp.json();
-        const alerts = data.alerts || [];
-        renderAlertsTable(alerts);
-      } catch (e) {
-        console.error(e);
-        alert("Falha ao carregar alertas.");
-      }
-    }
-
-    function getAdminToken() {
-      return (document.getElementById("adminToken")?.value || "").trim();
-    }
-
-    async function createAlert() {
-      const name = (document.getElementById("alertName").value || "").trim();
-      const query = (document.getElementById("alertQuery").value || "").trim();
-      const min_risk = document.getElementById("alertMinRisk").value;
-      const interval_minutes = parseInt(document.getElementById("alertInterval").value || "30", 10);
-      const type = document.getElementById("alertType").value;
-      const priority = parseInt(document.getElementById("alertPriority").value || "3", 10);
-      const authority_override = !!document.getElementById("alertAuthorityOverride").checked;
-
-      if (!query) { alert("Informe o termo (query)."); return; }
-
-      const payload = {
-        name: name || query,
-        query,
-        interval_minutes,
-        min_risk,
-        type,
-        priority,
-        focus: "institutional",
-        enabled: true,
-        authority_override
-      };
-
-      const token = getAdminToken();
-
-      try {
-        const resp = await fetch(`${API_BASE}/alerts`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await resp.json().catch(() => ({}));
-        if (!resp.ok || data.ok === false) throw new Error(data.erro || "Erro ao criar alerta.");
-
-        document.getElementById("alertName").value = "";
-        document.getElementById("alertQuery").value = "";
-        await loadAlerts();
-        alert("Alerta criado.");
-      } catch (e) {
-        console.error(e);
-        alert("Falha: " + e.message);
-      }
-    }
-
-    async function toggleAlert(id, enabled) {
-      const token = getAdminToken();
-      try {
-        const resp = await fetch(`${API_BASE}/alerts/toggle`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify({ id, enabled })
-        });
-        const data = await resp.json().catch(() => ({}));
-        if (!resp.ok || data.ok === false) throw new Error(data.erro || "Erro ao alterar status.");
-        await loadAlerts();
-      } catch (e) {
-        console.error(e);
-        alert("Falha: " + e.message);
-      }
-    }
-
-    async function deleteAlert(id) {
-      if (!confirm("Excluir este alerta?")) return;
-      const token = getAdminToken();
-      try {
-        const resp = await fetch(`${API_BASE}/alerts?id=${encodeURIComponent(id)}`, {
-          method: "DELETE",
-          headers: {
-            ...(token ? { "Authorization": `Bearer ${token}` } : {})
-          }
-        });
-        const data = await resp.json().catch(() => ({}));
-        if (!resp.ok || data.ok === false) throw new Error(data.erro || "Erro ao excluir.");
-        await loadAlerts();
-      } catch (e) {
-        console.error(e);
-        alert("Falha: " + e.message);
-      }
-    }
-
-    function renderAlertsTable(alerts) {
-      const tbody = document.querySelector("#alertsTable tbody");
-      const empty = document.getElementById("alertsEmpty");
-
-      if (!alerts.length) {
-        tbody.innerHTML = "";
-        empty.style.display = "block";
-        return;
-      }
-      empty.style.display = "none";
-
-      tbody.innerHTML = alerts.map(a => {
-        const status = a.enabled ? "Ativo" : "Pausado";
-        const btnText = a.enabled ? "Pausar" : "Ativar";
-        const btnAction = a.enabled ? `toggleAlert("${a.id}", false)` : `toggleAlert("${a.id}", true)`;
-
-        return `
-          <tr>
-            <td><div style="font-weight:600;">${sanitizeHtml(a.name || "-")}</div></td>
-            <td><div style="color:var(--text-muted);">${sanitizeHtml(a.query || "-")}</div></td>
-            <td>${sanitizeHtml(String(a.interval_minutes || 30))} min</td>
-            <td>${sanitizeHtml(a.min_risk || "medio")}</td>
-            <td>${sanitizeHtml(a.type || "tema")}</td>
-            <td>${sanitizeHtml(status)}</td>
-            <td style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <button class="filter-btn" onclick='${btnAction}'>${sanitizeHtml(btnText)}</button>
-              <button class="filter-btn" style="border-color:#fecaca; color:#dc2626;" onclick='deleteAlert("${a.id}")'>Excluir</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    // =========================
-    // Sanitização básica (evita injeção por conteúdo vindo de fontes/IA)
-    // =========================
     function sanitizeHtml(str) {
       const s = (str === null || str === undefined) ? '' : String(str);
-      return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
     function sanitizeAttr(url) {
       const u = (url === null || url === undefined) ? '' : String(url);
       if (/^\s*(javascript:|data:)/i.test(u)) return '#';
       return u.replace(/"/g, '%22');
     }
-
-    // Auto-load alertas
-    window.addEventListener("load", () => {
-      loadAlerts();
-    });
   </script>
 </body>
 </html>
