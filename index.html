@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MPGO Monitor - Inteligência Reputacional</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -20,6 +21,7 @@
       --text-muted: #6b7280;
       --radius: 12px;
     }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
 
@@ -33,30 +35,52 @@
 
     .search-card {
       background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      display: flex; gap: 1rem; align-items: center;
+      margin-bottom: 1rem; border: 1px solid #e5e7eb;
     }
+
     .search-input-group { flex: 1; }
-    .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
-    .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+    .search-input-group label {
+      display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+      margin-bottom: 0.5rem; text-transform: uppercase;
+    }
+    .search-input {
+      width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb;
+      border-radius: 8px; font-size: 1rem;
+    }
     .search-input:focus { outline: none; border-color: var(--mp-blue); }
 
-    .btn-action { height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer; padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s; }
+    .btn-action {
+      height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer;
+      padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem;
+      display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s;
+    }
     .btn-search { background: var(--mp-blue); color: white; }
     .btn-search:hover { background: var(--mp-blue-light); }
+
     .btn-report { background: #4b5563; color: white; display: none; }
     .btn-report:hover { background: #374151; }
+
     .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
+
+    .btn-secondary {
+      background: #e5e7eb; color: #111827;
+      border: none; border-radius: 8px; padding: 0.6rem 1rem;
+      cursor: pointer; font-weight: 600;
+    }
 
     .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
     .status-loading { background: #eff6ff; color: var(--mp-blue); }
     .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
     .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
     .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
     .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; }
 
     .metric-big { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: auto; }
+
     .risk-meter-container { margin-top: auto; }
     .risk-bar-bg { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
     .risk-bar-fill { height: 100%; width: 0%; transition: width 1s ease; }
@@ -98,42 +122,53 @@
     .btn-link:hover { text-decoration: underline; }
     .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
 
-    #fontesModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 50; }
-    #fontesModalInner { background: #ffffff; max-width: 700px; width: 90%; padding: 1.5rem 1.75rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
+
+    /* Modals */
+    #fontesModal, #analiseModal, #watchlistModal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center; z-index: 60;
+    }
+    #fontesModalInner, #analiseModalInner, #watchlistModalInner {
+      background: #ffffff; max-width: 900px; width: 92%;
+      padding: 1.5rem; border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
     #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
     #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
     #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
 
-    #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 60; }
-    #analiseModalInner { background: #ffffff; max-width: 800px; width: 92%; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     #analiseConteudo { margin-top: 1rem; font-size: 0.9rem; line-height: 1.6; color: #111827; }
-    .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
-    .field label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform: uppercase; }
-    .field input, .field select { padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-size:0.95rem; }
-    .field input:focus, .field select:focus { outline:none; border-color: var(--mp-blue); }
-    .small-muted { color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; }
+    /* Watchlist table */
+    .wl-table { width: 100%; border-collapse: collapse; }
+    .wl-table th, .wl-table td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+    .wl-input { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .wl-select { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid #e5e7eb; border-radius: 8px; background: white; }
+    .wl-check { transform: scale(1.1); }
 
-    .btn-mini { border:1px solid #e5e7eb; background:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem; }
-    .btn-mini:hover { background:#f9fafb; }
-    .btn-mini.primary { background: var(--mp-blue); color:#fff; border-color: var(--mp-blue); }
-    .btn-mini.primary:hover { background: var(--mp-blue-light); }
-    .btn-mini.danger { background:#fee2e2; border-color:#fecaca; color:#b91c1c; }
-    .btn-mini.danger:hover { background:#fecaca; }
-    .pill { display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #e5e7eb; font-size:0.75rem; color:#374151; background:#fff; }
+    @media print {
+      body { background: white; padding: 0; }
+      .header, .search-card, .filters, .btn-link, .btn-secondary { display: none !important; }
+      .results-section { box-shadow: none; border: none; }
+      .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
+      #dashboardContent { display: block !important; }
+      td, th { border-color: #000 !important; }
+      #executiveReport { display: block !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+
+      body::before {
+        content: "Relatório de Monitoramento - MPGO";
+        display: block; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center;
+      }
+    }
 
     @media (max-width: 768px) {
       .search-card { flex-direction: column; align-items: stretch; }
       .btn-action { margin-top: 0.5rem; }
       .filters { width: 100%; overflow-x: auto; padding-bottom: 4px; }
       td, th { padding: 1rem; }
-      .form-row { grid-template-columns: 1fr; }
     }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -153,95 +188,26 @@
         <label>Monitoramento de Tópico (Últimas 48h)</label>
         <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Operação X", "Ministério Público"'>
       </div>
+
       <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar (IA)</button>
+
       <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">📄 Gerar Relatório</button>
+
       <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">Limpar</button>
+    </div>
+
+    <div style="display:flex; gap:10px; align-items:center; margin-bottom: 1.25rem; flex-wrap: wrap;">
+      <button class="btn-secondary" onclick="abrirWatchlist()">⚙️ Termos/Alertas (Watchlist)</button>
+      <div style="color:var(--text-muted); font-size:0.9rem;">
+        Dica: marque “CRON” na watchlist para entrar no alerta automático via Telegram.
+      </div>
     </div>
 
     <div id="statusIndicator" class="status-bar"></div>
 
-    <!-- NOVO: GERENCIAR ALERTAS -->
-    <div class="card" style="margin-bottom: 1.5rem;">
-      <h3>Gerenciar alertas</h3>
-      <div class="small-muted" style="margin-bottom:10px;">
-        Cadastre termos como “Google Alerts”, mas com análise automática e envio via Telegram. Os alertas rodam conforme interval_minutes.
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>Nome do alerta</label>
-          <input id="a_name" type="text" placeholder="Ex: MPGO - Institucional">
-        </div>
-        <div class="field">
-          <label>Query (termo)</label>
-          <input id="a_query" type="text" placeholder='Ex: "MPGO" ou "Cyro Terra Peres"'>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>Foco</label>
-          <select id="a_focus">
-            <option value="institutional">institutional</option>
-            <option value="query">query</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Risco mínimo</label>
-          <select id="a_min_risk">
-            <option value="baixo">baixo</option>
-            <option value="medio" selected>medio</option>
-            <option value="alto">alto</option>
-            <option value="critico">critico</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>Intervalo (min)</label>
-          <input id="a_interval" type="number" min="5" max="1440" value="30">
-        </div>
-        <div class="field">
-          <label>Prioridade (1-5)</label>
-          <input id="a_priority" type="number" min="1" max="5" value="3">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>Habilitado</label>
-          <select id="a_enabled">
-            <option value="true" selected>true</option>
-            <option value="false">false</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Authority override</label>
-          <select id="a_authority">
-            <option value="false" selected>false</option>
-            <option value="true">true</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
-        <button class="btn-mini primary" onclick="saveAlert()">Salvar alerta</button>
-        <button class="btn-mini" onclick="resetAlertForm()">Limpar formulário</button>
-        <span class="pill" id="editingPill" style="display:none;">Editando: <span id="editingId"></span></span>
-      </div>
-
-      <div style="margin-top:16px; border-top:1px solid #e5e7eb; padding-top:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-          <div style="font-weight:700;">Alertas cadastrados</div>
-          <button class="btn-mini" onclick="loadAlerts()">Atualizar lista</button>
-        </div>
-        <div id="alertsBox" style="margin-top:10px;"></div>
-      </div>
-    </div>
-
     <div id="dashboardContent" style="display: none;">
-      <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 2rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+
+      <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
         <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
           📊 Briefing de Inteligência
           <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
@@ -253,13 +219,11 @@
         <div class="card">
           <h3>Risco Ponderado</h3>
           <div class="risk-meter-container">
-            <div style="display: flex; justify-content: space-between; align-items: end;">
+            <div style="display:flex; justify-content:space-between; align-items:end;">
               <span class="metric-big" id="riskScore">0.0</span>
               <span style="font-weight: 600; margin-bottom: 8px;" id="riskLabel">BAIXO</span>
             </div>
-            <div class="risk-bar-bg">
-              <div class="risk-bar-fill bg-low" id="riskFill"></div>
-            </div>
+            <div class="risk-bar-bg"><div class="risk-bar-fill bg-low" id="riskFill"></div></div>
           </div>
         </div>
         <div class="card">
@@ -277,12 +241,10 @@
           <h3>Narrativas em Circulação</h3>
           <ul id="narrativesList" style="font-size:0.9rem; line-height:1.5; padding-left: 1rem;"></ul>
         </div>
-
         <div class="card">
           <h3>Ações Recomendadas</h3>
           <ul id="actionsList" style="font-size:0.9rem; line-height:1.5; padding-left: 1rem;"></ul>
         </div>
-
         <div class="card">
           <h3>Watchlist</h3>
           <div id="watchlistBox" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
@@ -300,15 +262,15 @@
           </div>
         </div>
 
-        <div style="overflow-x: auto;">
+        <div style="overflow-x:auto;">
           <table id="newsTable">
             <thead>
               <tr>
-                <th style="width: 15%;">Data</th>
-                <th style="width: 45%;">Evento / Síntese Técnica</th>
-                <th style="width: 15%;">Sentimento</th>
-                <th style="width: 15%;">Risco (IA)</th>
-                <th style="width: 10%;">Ações</th>
+                <th style="width: 14%;">Data</th>
+                <th style="width: 48%;">Evento / Síntese</th>
+                <th style="width: 12%;">Sentimento</th>
+                <th style="width: 12%;">Risco</th>
+                <th style="width: 14%;">Ações</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -322,24 +284,63 @@
     </div>
   </div>
 
+  <!-- Modal Fontes -->
   <div id="fontesModal">
     <div id="fontesModalInner">
       <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
       <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
       <ul id="fontesLista"></ul>
-      <div style="margin-top:1.5rem; text-align:right;">
-        <button class="btn-mini" onclick="fecharFontes()">Fechar</button>
+      <div style="margin-top:1.25rem; text-align:right;">
+        <button class="btn-secondary" onclick="fecharFontes()">Fechar</button>
       </div>
     </div>
   </div>
 
+  <!-- Modal Análise -->
   <div id="analiseModal">
     <div id="analiseModalInner">
       <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise Estratégica</h3>
       <div id="analiseConteudo"></div>
       <div style="margin-top:1.25rem; text-align:right;">
-        <button class="btn-mini" onclick="fecharAnalise()">Fechar</button>
+        <button class="btn-secondary" onclick="fecharAnalise()">Fechar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Watchlist -->
+  <div id="watchlistModal">
+    <div id="watchlistModalInner">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <h3 style="margin:0; font-size:1rem; font-weight:700;">Termos/Alertas (Watchlist)</h3>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn-secondary" onclick="addWatchRow()">+ Adicionar</button>
+          <button class="btn-secondary" onclick="saveWatchlist()">Salvar</button>
+          <button class="btn-secondary" onclick="fecharWatchlist()">Fechar</button>
+        </div>
+      </div>
+
+      <p style="margin-top:0.75rem; color:var(--text-muted); font-size:0.9rem; line-height:1.5;">
+        “Ativo” controla se aparece na ferramenta. “CRON” controla se entra no monitoramento automático (Telegram).
+      </p>
+
+      <div style="margin-top:1rem; overflow-x:auto;">
+        <table class="wl-table">
+          <thead>
+            <tr>
+              <th style="min-width:180px;">Nome</th>
+              <th style="min-width:220px;">Query (busca)</th>
+              <th style="min-width:140px;">Tipo</th>
+              <th style="min-width:90px;">Prioridade</th>
+              <th style="min-width:70px;">Ativo</th>
+              <th style="min-width:70px;">CRON</th>
+              <th style="min-width:80px;">Remover</th>
+            </tr>
+          </thead>
+          <tbody id="watchlistTbody"></tbody>
+        </table>
+      </div>
+
+      <div id="watchlistStatus" style="margin-top:0.75rem; color:var(--text-muted); font-size:0.9rem;"></div>
     </div>
   </div>
 
@@ -350,211 +351,8 @@
     let currentFilter = 'all';
     let chartSentiment = null;
     let chartRisk = null;
+    let watchlist = [];
 
-    let editingAlertId = null;
-
-    // ----- init -----
-    window.addEventListener('load', () => {
-      loadAlerts();
-    });
-
-    // ======================================
-    // ALERTS UI
-    // ======================================
-    async function loadAlerts() {
-      const box = document.getElementById('alertsBox');
-      box.innerHTML = '<div class="small-muted">Carregando...</div>';
-
-      try {
-        const resp = await fetch(`${API_BASE}/alerts`);
-        const data = await resp.json();
-
-        if (!resp.ok || !data.ok) throw new Error(data.erro || 'Falha ao carregar alertas');
-
-        const alerts = Array.isArray(data.alerts) ? data.alerts : [];
-        if (!alerts.length) {
-          box.innerHTML = '<div class="small-muted">Nenhum alerta cadastrado.</div>';
-          return;
-        }
-
-        // ordena por prioridade desc
-        alerts.sort((a,b) => (Number(b.priority||0) - Number(a.priority||0)));
-
-        box.innerHTML = `
-          <div style="overflow-x:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:18%;">Nome</th>
-                  <th style="width:24%;">Query</th>
-                  <th style="width:10%;">Foco</th>
-                  <th style="width:10%;">Min risco</th>
-                  <th style="width:10%;">Intervalo</th>
-                  <th style="width:10%;">Status</th>
-                  <th style="width:18%;">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${alerts.map(a => `
-                  <tr>
-                    <td>${sanitizeHtml(a.name || '')}<div class="small-muted">prio: ${sanitizeHtml(String(a.priority||''))}</div></td>
-                    <td>
-                      <button class="btn-link" onclick="fillSearchFromAlert('${sanitizeAttr(a.query||'')}')">${sanitizeHtml(a.query || '')}</button>
-                      <div class="small-muted">id: ${sanitizeHtml(a.id || '')}</div>
-                    </td>
-                    <td>${sanitizeHtml(a.focus || '')}</td>
-                    <td>${sanitizeHtml(a.min_risk || '')}</td>
-                    <td>${sanitizeHtml(String(a.interval_minutes || ''))}m</td>
-                    <td>${a.enabled ? '<span class="pill">on</span>' : '<span class="pill">off</span>'}</td>
-                    <td>
-                      <button class="btn-mini" onclick="editAlert('${sanitizeAttr(a.id)}')">Editar</button>
-                      <button class="btn-mini" onclick="toggleAlert('${sanitizeAttr(a.id)}', ${a.enabled ? 'false':'true'})">${a.enabled ? 'Desativar' : 'Ativar'}</button>
-                      <button class="btn-mini" onclick="runAlertNow('${sanitizeAttr(a.id)}')">Rodar</button>
-                      <button class="btn-mini danger" onclick="deleteAlert('${sanitizeAttr(a.id)}')">Excluir</button>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-      } catch (e) {
-        box.innerHTML = `<div class="small-muted" style="color:#b91c1c;">Erro: ${sanitizeHtml(e.message)}</div>`;
-      }
-    }
-
-    function resetAlertForm() {
-      editingAlertId = null;
-      document.getElementById('a_name').value = '';
-      document.getElementById('a_query').value = '';
-      document.getElementById('a_focus').value = 'institutional';
-      document.getElementById('a_min_risk').value = 'medio';
-      document.getElementById('a_interval').value = 30;
-      document.getElementById('a_priority').value = 3;
-      document.getElementById('a_enabled').value = 'true';
-      document.getElementById('a_authority').value = 'false';
-      document.getElementById('editingPill').style.display = 'none';
-    }
-
-    async function editAlert(id) {
-      // busca lista e preenche form (simples e suficiente)
-      const resp = await fetch(`${API_BASE}/alerts`);
-      const data = await resp.json();
-      const alerts = Array.isArray(data.alerts) ? data.alerts : [];
-      const a = alerts.find(x => x.id === id);
-      if (!a) return;
-
-      editingAlertId = a.id;
-
-      document.getElementById('a_name').value = a.name || '';
-      document.getElementById('a_query').value = a.query || '';
-      document.getElementById('a_focus').value = a.focus || 'institutional';
-      document.getElementById('a_min_risk').value = a.min_risk || 'medio';
-      document.getElementById('a_interval').value = Number(a.interval_minutes || 30);
-      document.getElementById('a_priority').value = Number(a.priority || 3);
-      document.getElementById('a_enabled').value = String(!!a.enabled);
-      document.getElementById('a_authority').value = String(!!a.authority_override);
-
-      document.getElementById('editingId').textContent = a.id;
-      document.getElementById('editingPill').style.display = 'inline-block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function saveAlert() {
-      const payload = {
-        id: editingAlertId || undefined,
-        name: document.getElementById('a_name').value.trim(),
-        query: document.getElementById('a_query').value.trim(),
-        focus: document.getElementById('a_focus').value,
-        min_risk: document.getElementById('a_min_risk').value,
-        interval_minutes: Number(document.getElementById('a_interval').value || 30),
-        priority: Number(document.getElementById('a_priority').value || 3),
-        enabled: document.getElementById('a_enabled').value === 'true',
-        authority_override: document.getElementById('a_authority').value === 'true',
-        channels: ["telegram"]
-      };
-
-      if (!payload.name || !payload.query) {
-        alert('Preencha nome e query.');
-        return;
-      }
-
-      const resp = await fetch(`${API_BASE}/alerts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await resp.json().catch(() => ({}));
-
-      if (!resp.ok || !data.ok) {
-        alert(data.erro || 'Falha ao salvar');
-        return;
-      }
-
-      resetAlertForm();
-      await loadAlerts();
-      alert('Alerta salvo.');
-    }
-
-    async function deleteAlert(id) {
-      if (!confirm('Excluir este alerta?')) return;
-
-      const resp = await fetch(`${API_BASE}/alerts?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
-      const data = await resp.json().catch(() => ({}));
-
-      if (!resp.ok || !data.ok) {
-        alert(data.erro || 'Falha ao excluir');
-        return;
-      }
-      await loadAlerts();
-    }
-
-    async function toggleAlert(id, enabled) {
-      // Toggle via UPSERT simples: carrega, ajusta e salva
-      const resp = await fetch(`${API_BASE}/alerts`);
-      const data = await resp.json();
-      const alerts = Array.isArray(data.alerts) ? data.alerts : [];
-      const a = alerts.find(x => x.id === id);
-      if (!a) return;
-
-      a.enabled = !!enabled;
-
-      const resp2 = await fetch(`${API_BASE}/alerts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(a)
-      });
-      const data2 = await resp2.json().catch(() => ({}));
-
-      if (!resp2.ok || !data2.ok) {
-        alert(data2.erro || 'Falha ao alternar');
-        return;
-      }
-      await loadAlerts();
-    }
-
-    async function runAlertNow(id) {
-      const resp = await fetch(`${API_BASE}/run-alerts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok || !data.ok) {
-        alert(data.erro || 'Falha ao executar');
-        return;
-      }
-      alert('Alerta executado. Se houver novidades e passar no filtro, vai enviar no Telegram.');
-    }
-
-    function fillSearchFromAlert(q) {
-      document.getElementById('termoBusca').value = q;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // ======================================
-    // BUSCA MANUAL (o que você já tinha)
-    // ======================================
     async function buscarNoticias() {
       const termo = document.getElementById('termoBusca').value.trim();
       if (!termo) { alert('Digite um termo para investigar.'); return; }
@@ -580,10 +378,18 @@
           riskScore: (item.risco_score || 0).toFixed(1),
           riskLevel: mapRiskLevel(item.risco_classificacao),
           sources: Array.isArray(item.sources) ? item.sources : [],
+
           narrativa: item.narrativa_principal || '',
           sensiveis: Array.isArray(item.pontos_sensiveis) ? item.pontos_sensiveis : [],
           vetores: Array.isArray(item.vetores_provaveis) ? item.vetores_provaveis : [],
-          mensagemBase: item.mensagem_base_sugerida || ''
+          mensagemBase: item.mensagem_base_sugerida || '',
+
+          // NOVOS CAMPOS
+          orgao: item.orgao_responsavel || item.orgao_hint || '',
+          objeto: item.objeto_principal || '',
+          evOrgao: item.evidencia_orgao || '',
+          evObjeto: item.evidencia_objeto || '',
+          ligacao: item.ligacao_institucional || 'nenhuma'
         }));
 
         if (newsData.length === 0) {
@@ -607,8 +413,11 @@
 
         updateDashboard();
 
-        if (data.report) renderStrategicPanels(data.report);
-        else renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
+        if (data.report) {
+          renderStrategicPanels(data.report);
+        } else {
+          renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
+        }
 
         showStatus(`Análise concluída: ${data.total_raw || 0} menções em ${data.total_clusters || 0} eventos.`, 'ready');
       } catch (e) {
@@ -619,10 +428,14 @@
 
     function gerarRelatorio() { window.print(); }
 
-    function updateDashboard() { updateMetrics(); updateCharts(); updateTable(); }
+    function updateDashboard() {
+      updateMetrics();
+      updateCharts();
+      updateTable();
+    }
 
     function updateMetrics() {
-      if (newsData.length === 0) return;
+      if (!newsData.length) return;
       const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
       const scoreEl = document.getElementById('riskScore');
       const labelEl = document.getElementById('riskLabel');
@@ -649,11 +462,12 @@
       const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
       filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
 
-      if (filtered.length === 0) {
+      if (!filtered.length) {
         tbody.innerHTML = '';
         emptyDiv.style.display = 'block';
         return;
       }
+
       emptyDiv.style.display = 'none';
 
       tbody.innerHTML = filtered.map((item, idx) => {
@@ -664,6 +478,11 @@
           <td>
             <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
             <div style="font-weight:600; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
+            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:6px;">
+              Órgão: ${sanitizeHtml(item.orgao || '—')} |
+              Objeto: ${sanitizeHtml(item.objeto || '—')} |
+              Vínculo: ${sanitizeHtml(item.ligacao || 'nenhuma')}
+            </div>
             <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
           </td>
           <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
@@ -693,10 +512,7 @@
       if (chartSentiment) chartSentiment.destroy();
       chartSentiment = new Chart(ctxSent, {
         type: 'doughnut',
-        data: {
-          labels: ['Positivo', 'Neutro', 'Negativo'],
-          datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }]
-        },
+        data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
       });
 
@@ -707,10 +523,7 @@
       if (chartRisk) chartRisk.destroy();
       chartRisk = new Chart(ctxRisk, {
         type: 'bar',
-        data: {
-          labels: ['Baixo', 'Médio', 'Alto', 'Crítico'],
-          datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }]
-        },
+        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
       });
     }
@@ -757,6 +570,19 @@
         <div style="font-weight:600; margin-bottom:6px;">Evento</div>
         <div style="color:#374151;">${sanitizeHtml(item.title || '')}</div>
 
+        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Fatos extraídos</div>
+        <div style="color:#374151;">
+          Órgão: ${sanitizeHtml(item.orgao || '—')}<br>
+          Objeto: ${sanitizeHtml(item.objeto || '—')}<br>
+          Vínculo institucional: ${sanitizeHtml(item.ligacao || 'nenhuma')}
+        </div>
+
+        <div style="margin-top:10px; font-weight:600; margin-bottom:6px;">Evidências</div>
+        <div style="color:#374151;">
+          ${item.evOrgao ? `Órgão: “${sanitizeHtml(item.evOrgao)}”<br>` : `Órgão: —<br>`}
+          ${item.evObjeto ? `Objeto: “${sanitizeHtml(item.evObjeto)}”` : `Objeto: —`}
+        </div>
+
         <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Narrativa identificada</div>
         <div style="color:#374151;">${sanitizeHtml(item.narrativa || '—')}</div>
 
@@ -767,10 +593,14 @@
         <div style="display:flex; flex-wrap:wrap; gap:6px;">${vetores}</div>
 
         <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Mensagem institucional sugerida</div>
-        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">${msgBase}</div>
+        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">
+          ${msgBase}
+        </div>
       `;
+
       document.getElementById('analiseModal').style.display = 'flex';
     }
+
     function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
 
     function clearData() {
@@ -828,7 +658,9 @@
       document.getElementById('fontesModalResumo').textContent = item.title || '';
 
       let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
+      if (!Array.isArray(fontes) || fontes.length === 0) {
+        fontes = [{ source: item.source, url: item.url, date: item.date }];
+      }
 
       lista.innerHTML = fontes.map((f, i) => `
         <li>
@@ -841,11 +673,144 @@
 
       document.getElementById('fontesModal').style.display = 'flex';
     }
+
     function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
 
+    // -------- Watchlist UI --------
+    async function abrirWatchlist() {
+      document.getElementById('watchlistModal').style.display = 'flex';
+      document.getElementById('watchlistStatus').textContent = 'Carregando...';
+      await loadWatchlist();
+      renderWatchlistTable();
+      document.getElementById('watchlistStatus').textContent = 'Pronto.';
+    }
+
+    function fecharWatchlist() { document.getElementById('watchlistModal').style.display = 'none'; }
+
+    async function loadWatchlist() {
+      try {
+        const resp = await fetch(`${API_BASE}/watchlist`);
+        const data = await resp.json();
+        watchlist = Array.isArray(data?.watchlist) ? data.watchlist : [];
+      } catch {
+        watchlist = [];
+      }
+    }
+
+    function addWatchRow() {
+      watchlist.push({
+        id: crypto.randomUUID(),
+        name: '',
+        query: '',
+        type: 'generic',
+        priority: 1,
+        enabled: true,
+        cron: false,
+        aliases: []
+      });
+      renderWatchlistTable();
+    }
+
+    function removeWatchRow(id) {
+      watchlist = watchlist.filter(w => w.id !== id);
+      renderWatchlistTable();
+    }
+
+    function renderWatchlistTable() {
+      const tbody = document.getElementById('watchlistTbody');
+
+      tbody.innerHTML = watchlist.map(w => `
+        <tr>
+          <td><input class="wl-input" value="${sanitizeAttr(w.name || '')}" oninput="wlUpdate('${w.id}','name',this.value)"></td>
+          <td><input class="wl-input" value="${sanitizeAttr(w.query || '')}" oninput="wlUpdate('${w.id}','query',this.value)"></td>
+          <td>
+            <select class="wl-select" onchange="wlUpdate('${w.id}','type',this.value)">
+              ${renderTypeOptions(w.type)}
+            </select>
+          </td>
+          <td>
+            <select class="wl-select" onchange="wlUpdate('${w.id}','priority',this.value)">
+              ${renderPriorityOptions(w.priority)}
+            </select>
+          </td>
+          <td style="text-align:center;">
+            <input class="wl-check" type="checkbox" ${w.enabled ? 'checked' : ''} onchange="wlUpdate('${w.id}','enabled',this.checked)">
+          </td>
+          <td style="text-align:center;">
+            <input class="wl-check" type="checkbox" ${w.cron ? 'checked' : ''} onchange="wlUpdate('${w.id}','cron',this.checked)">
+          </td>
+          <td style="text-align:center;">
+            <button class="btn-link" onclick="removeWatchRow('${w.id}')">Remover</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTypeOptions(cur) {
+      const types = [
+        { v:'generic', t:'Genérico' },
+        { v:'institution', t:'Instituição' },
+        { v:'authority', t:'Autoridade' },
+        { v:'temporary', t:'Temporário' }
+      ];
+      return types.map(x => `<option value="${x.v}" ${x.v===cur?'selected':''}>${x.t}</option>`).join('');
+    }
+
+    function renderPriorityOptions(cur) {
+      const opts = [1,2,3,4,5];
+      return opts.map(n => `<option value="${n}" ${String(n)===String(cur)?'selected':''}>${n}</option>`).join('');
+    }
+
+    function wlUpdate(id, field, value) {
+      watchlist = watchlist.map(w => {
+        if (w.id !== id) return w;
+        const copy = { ...w };
+        if (field === 'priority') copy[field] = parseInt(value,10) || 1;
+        else copy[field] = value;
+        // autopreenche name se vazio
+        if (field === 'query' && (!copy.name || !copy.name.trim())) copy.name = value.slice(0,80);
+        return copy;
+      });
+    }
+
+    async function saveWatchlist() {
+      const st = document.getElementById('watchlistStatus');
+      st.textContent = 'Salvando...';
+
+      const clean = watchlist
+        .map(w => ({
+          id: w.id,
+          name: (w.name || w.query || '').trim(),
+          query: (w.query || '').trim(),
+          type: (w.type || 'generic').trim(),
+          priority: parseInt(w.priority,10) || 1,
+          enabled: !!w.enabled,
+          cron: !!w.cron,
+          aliases: Array.isArray(w.aliases) ? w.aliases : []
+        }))
+        .filter(w => w.query);
+
+      try {
+        const resp = await fetch(`${API_BASE}/watchlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ watchlist: clean })
+        });
+        const data = await resp.json();
+        watchlist = Array.isArray(data?.watchlist) ? data.watchlist : clean;
+        renderWatchlistTable();
+        st.textContent = 'Salvo com sucesso.';
+      } catch (e) {
+        st.textContent = 'Erro ao salvar.';
+      }
+    }
+
+    // Eventos: fechar modais clicando fora
     document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
     document.getElementById('analiseModal').addEventListener('click', (e) => { if (e.target.id === 'analiseModal') fecharAnalise(); });
+    document.getElementById('watchlistModal').addEventListener('click', (e) => { if (e.target.id === 'watchlistModal') fecharWatchlist(); });
 
+    // Filtros
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -855,9 +820,10 @@
       });
     });
 
+    // Sanitização
     function sanitizeHtml(str) {
       const s = (str === null || str === undefined) ? '' : String(str);
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
     function sanitizeAttr(url) {
       const u = (url === null || url === undefined) ? '' : String(url);
