@@ -2,10 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MPGO Monitor - Inteligência Reputacional</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -21,11 +20,10 @@
       --text-muted: #6b7280;
       --radius: 12px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
 
-    .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 2rem; }
+    .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 1.5rem; }
     .header-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; }
     .logo-badge { font-size: 2rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
     .header h1 { font-size: 1.25rem; font-weight: 700; }
@@ -34,41 +32,43 @@
     .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
     .search-card {
-      background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      display: flex; gap: 1rem; align-items: center;
-      margin-bottom: 1rem; border: 1px solid #e5e7eb;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      border: 1px solid #e5e7eb;
     }
-
     .search-input-group { flex: 1; }
-    .search-input-group label {
-      display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
-      margin-bottom: 0.5rem; text-transform: uppercase;
-    }
-    .search-input {
-      width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb;
-      border-radius: 8px; font-size: 1rem;
-    }
+    .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
+    .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
     .search-input:focus { outline: none; border-color: var(--mp-blue); }
 
     .btn-action {
-      height: 52px; border-radius: 8px; font-weight: 600; cursor: pointer;
-      padding: 0 1.5rem; margin-top: 1.2rem; border: none; font-size: 1rem;
-      display: flex; align-items: center; gap: 0.5rem; transition: transform 0.1s;
+      height: 52px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0 1.25rem;
+      margin-top: 1.2rem;
+      border: none;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.1s;
+      white-space: nowrap;
     }
     .btn-search { background: var(--mp-blue); color: white; }
     .btn-search:hover { background: var(--mp-blue-light); }
-
     .btn-report { background: #4b5563; color: white; display: none; }
     .btn-report:hover { background: #374151; }
-
     .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
-
-    .btn-secondary {
-      background: #e5e7eb; color: #111827;
-      border: none; border-radius: 8px; padding: 0.6rem 1rem;
-      cursor: pointer; font-weight: 600;
-    }
+    .btn-secondary { background: #111827; color: white; }
+    .btn-secondary:hover { background: #0b1220; }
 
     .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
     .status-loading { background: #eff6ff; color: var(--mp-blue); }
@@ -76,14 +76,13 @@
     .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
 
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
-    .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
-    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; }
+    .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; }
 
     .metric-big { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: auto; }
-
     .risk-meter-container { margin-top: auto; }
     .risk-bar-bg { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
-    .risk-bar-fill { height: 100%; width: 0%; transition: width 1s ease; }
+    .risk-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
 
     .bg-critical { background: var(--risk-critical); }
     .bg-high { background: var(--risk-high); }
@@ -95,17 +94,15 @@
     .text-low { color: var(--risk-low); }
 
     .results-section { background: var(--bg-card); border-radius: var(--radius); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; overflow: hidden; }
-    .results-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-
+    .results-header { padding: 1.25rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .filters { display: flex; gap: 0.5rem; }
     .filter-btn { background: transparent; border: 1px solid #e5e7eb; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; }
     .filter-btn:hover { background: #f9fafb; }
     .filter-btn.active { background: var(--mp-blue); color: white; border-color: var(--mp-blue); }
 
     table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 1rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-    td { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
+    th { text-align: left; padding: 1rem 1.25rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 1.1rem 1.25rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
     tr:hover { background: #f9fafb; }
 
     .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
@@ -115,60 +112,42 @@
 
     .badge-risk { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; }
     .dot { width: 8px; height: 8px; border-radius: 50%; }
-
     .content-preview { margin-top: 0.25rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
     .source-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--mp-blue); background: #eff6ff; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px; }
     .btn-link { color: var(--mp-blue); text-decoration: none; font-weight: 600; font-size: 0.875rem; cursor: pointer; background: none; border: none; padding: 0; }
     .btn-link:hover { text-decoration: underline; }
     .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
 
-    .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
-
-    /* Modals */
-    #fontesModal, #analiseModal, #watchlistModal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-      display: none; align-items: center; justify-content: center; z-index: 60;
-    }
-    #fontesModalInner, #analiseModalInner, #watchlistModalInner {
-      background: #ffffff; max-width: 900px; width: 92%;
-      padding: 1.5rem; border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    }
+    /* Modais */
+    #fontesModal, #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 60; }
+    #fontesModalInner, #analiseModalInner { background: #ffffff; max-width: 900px; width: 92%; padding: 1.25rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
     #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
     #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
-
     #analiseConteudo { margin-top: 1rem; font-size: 0.9rem; line-height: 1.6; color: #111827; }
+    .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
 
-    /* Watchlist table */
-    .wl-table { width: 100%; border-collapse: collapse; }
-    .wl-table th, .wl-table td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
-    .wl-input { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid #e5e7eb; border-radius: 8px; }
-    .wl-select { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid #e5e7eb; border-radius: 8px; background: white; }
-    .wl-check { transform: scale(1.1); }
-
-    @media print {
-      body { background: white; padding: 0; }
-      .header, .search-card, .filters, .btn-link, .btn-secondary { display: none !important; }
-      .results-section { box-shadow: none; border: none; }
-      .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
-      #dashboardContent { display: block !important; }
-      td, th { border-color: #000 !important; }
-      #executiveReport { display: block !important; border: 1px solid #ccc !important; box-shadow: none !important; }
-
-      body::before {
-        content: "Relatório de Monitoramento - MPGO";
-        display: block; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center;
-      }
-    }
+    /* Watchlist */
+    .wl-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 70px; gap:10px; align-items:center; }
+    .wl-row input, .wl-row select { width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:8px; }
+    .wl-list { margin-top: 12px; display:flex; flex-direction:column; gap:10px; }
+    .wl-item { border:1px solid #e5e7eb; border-radius:12px; padding:12px; background:#fff; }
+    .wl-item-top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .wl-mini { display:flex; gap:10px; align-items:center; flex-wrap:wrap; color:var(--text-muted); font-size:0.85rem; }
+    .wl-mini label { display:flex; gap:6px; align-items:center; cursor:pointer; }
+    .wl-actions { display:flex; gap:10px; align-items:center; }
+    .wl-del { background:#fee2e2; color:#b91c1c; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+    .wl-save { background:var(--mp-blue); color:#fff; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
 
     @media (max-width: 768px) {
       .search-card { flex-direction: column; align-items: stretch; }
-      .btn-action { margin-top: 0.5rem; }
-      .filters { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+      .btn-action { margin-top: 0.5rem; width: 100%; justify-content: center; }
       td, th { padding: 1rem; }
+      .wl-row { grid-template-columns: 1fr; }
     }
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -183,47 +162,74 @@
   </header>
 
   <div class="container">
+
     <div class="search-card">
       <div class="search-input-group">
-        <label>Monitoramento de Tópico (Últimas 48h)</label>
-        <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Operação X", "Ministério Público"'>
+        <label>Busca pontual (últimas 48h)</label>
+        <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "Operação X", "nome", "tema"'>
       </div>
 
       <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar (IA)</button>
+      <button class="btn-action btn-secondary" onclick="rodarAlertaAgora()">🚨 Rodar alerta agora</button>
 
       <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">📄 Gerar Relatório</button>
-
       <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">Limpar</button>
     </div>
 
-    <div style="display:flex; gap:10px; align-items:center; margin-bottom: 1.25rem; flex-wrap: wrap;">
-      <button class="btn-secondary" onclick="abrirWatchlist()">⚙️ Termos/Alertas (Watchlist)</button>
-      <div style="color:var(--text-muted); font-size:0.9rem;">
-        Dica: marque “CRON” na watchlist para entrar no alerta automático via Telegram.
+    <!-- Watchlist -->
+    <div class="card" style="margin-bottom: 1rem;">
+      <h3>Alertas (Watchlist)</h3>
+
+      <div class="wl-row">
+        <input id="wlQuery" placeholder='Consulta (ex: "Cyro Terra", "GAECO" Goiás, "Operação X")' />
+        <input id="wlLabel" placeholder="Rótulo curto (ex: Cyro Terra)" />
+        <select id="wlType">
+          <option value="geral">geral</option>
+          <option value="institucional">institucional</option>
+          <option value="autoridade">autoridade</option>
+          <option value="temporario">temporario</option>
+        </select>
+        <select id="wlPriority">
+          <option value="1">prioridade 1</option>
+          <option value="2" selected>prioridade 2</option>
+          <option value="3">prioridade 3</option>
+          <option value="4">prioridade 4</option>
+          <option value="5">prioridade 5</option>
+        </select>
+
+        <button class="wl-save" onclick="addWatch()">Adicionar</button>
       </div>
+
+      <div style="margin-top:10px; color:var(--text-muted); font-size:0.9rem;">
+        Dica: o CRON considera itens com "CRON" ligado e "Habilitado".
+      </div>
+
+      <div class="wl-list" id="wlList"></div>
     </div>
 
     <div id="statusIndicator" class="status-bar"></div>
 
-    <div id="dashboardContent" style="display: none;">
+    <div id="dashboardContent" style="display:none;">
 
-      <div id="executiveReport" style="display:none; background: #fff; border-left: 5px solid var(--mp-blue); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h3 style="color: var(--mp-blue); margin-top: 0; display:flex; align-items:center; gap:8px;">
+      <div id="executiveReport" style="display:none; background:#fff; border-left:5px solid var(--mp-blue); padding:1.25rem; margin-bottom:1.25rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <h3 style="color: var(--mp-blue); margin-top:0; display:flex; align-items:center; gap:8px;">
           📊 Briefing de Inteligência
           <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
         </h3>
-        <div id="briefingText" style="font-size: 1rem; line-height: 1.6; color: #374151; white-space: pre-line;"></div>
+        <div id="briefingText" style="font-size:1rem; line-height:1.6; color:#374151; white-space:pre-line;"></div>
       </div>
 
       <div class="grid">
         <div class="card">
-          <h3>Risco Ponderado</h3>
+          <h3>Risco ponderado</h3>
           <div class="risk-meter-container">
             <div style="display:flex; justify-content:space-between; align-items:end;">
               <span class="metric-big" id="riskScore">0.0</span>
-              <span style="font-weight: 600; margin-bottom: 8px;" id="riskLabel">BAIXO</span>
+              <span style="font-weight:600; margin-bottom:8px;" id="riskLabel">BAIXO</span>
             </div>
-            <div class="risk-bar-bg"><div class="risk-bar-fill bg-low" id="riskFill"></div></div>
+            <div class="risk-bar-bg">
+              <div class="risk-bar-fill bg-low" id="riskFill"></div>
+            </div>
           </div>
         </div>
         <div class="card">
@@ -238,12 +244,12 @@
 
       <div class="grid">
         <div class="card">
-          <h3>Narrativas em Circulação</h3>
-          <ul id="narrativesList" style="font-size:0.9rem; line-height:1.5; padding-left: 1rem;"></ul>
+          <h3>Narrativas em circulação</h3>
+          <ul id="narrativesList" style="font-size:0.9rem; line-height:1.5; padding-left:1rem;"></ul>
         </div>
         <div class="card">
-          <h3>Ações Recomendadas</h3>
-          <ul id="actionsList" style="font-size:0.9rem; line-height:1.5; padding-left: 1rem;"></ul>
+          <h3>Ações recomendadas</h3>
+          <ul id="actionsList" style="font-size:0.9rem; line-height:1.5; padding-left:1rem;"></ul>
         </div>
         <div class="card">
           <h3>Watchlist</h3>
@@ -253,7 +259,7 @@
 
       <div class="results-section">
         <div class="results-header">
-          <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de Eventos Detectados</h3>
+          <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de eventos detectados</h3>
           <div class="filters">
             <button class="filter-btn active" data-filter="all">Todos</button>
             <button class="filter-btn" data-filter="negative">🔴 Negativo</button>
@@ -266,20 +272,18 @@
           <table id="newsTable">
             <thead>
               <tr>
-                <th style="width: 14%;">Data</th>
-                <th style="width: 48%;">Evento / Síntese</th>
-                <th style="width: 12%;">Sentimento</th>
-                <th style="width: 12%;">Risco</th>
-                <th style="width: 14%;">Ações</th>
+                <th style="width: 15%;">Data</th>
+                <th style="width: 45%;">Evento / Síntese</th>
+                <th style="width: 15%;">Sentimento</th>
+                <th style="width: 15%;">Risco</th>
+                <th style="width: 10%;">Ações</th>
               </tr>
             </thead>
             <tbody></tbody>
           </table>
         </div>
 
-        <div id="tableEmpty" style="padding: 3rem; text-align: center; color: var(--text-muted);">
-          Nenhum resultado encontrado.
-        </div>
+        <div id="tableEmpty" style="padding:3rem; text-align:center; color:var(--text-muted);">Nenhum resultado encontrado.</div>
       </div>
     </div>
   </div>
@@ -291,7 +295,7 @@
       <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
       <ul id="fontesLista"></ul>
       <div style="margin-top:1.25rem; text-align:right;">
-        <button class="btn-secondary" onclick="fecharFontes()">Fechar</button>
+        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharFontes()">Fechar</button>
       </div>
     </div>
   </div>
@@ -299,60 +303,184 @@
   <!-- Modal Análise -->
   <div id="analiseModal">
     <div id="analiseModalInner">
-      <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise Estratégica</h3>
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise estratégica</h3>
       <div id="analiseConteudo"></div>
       <div style="margin-top:1.25rem; text-align:right;">
-        <button class="btn-secondary" onclick="fecharAnalise()">Fechar</button>
+        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharAnalise()">Fechar</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Modal Watchlist -->
-  <div id="watchlistModal">
-    <div id="watchlistModalInner">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-        <h3 style="margin:0; font-size:1rem; font-weight:700;">Termos/Alertas (Watchlist)</h3>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <button class="btn-secondary" onclick="addWatchRow()">+ Adicionar</button>
-          <button class="btn-secondary" onclick="saveWatchlist()">Salvar</button>
-          <button class="btn-secondary" onclick="fecharWatchlist()">Fechar</button>
-        </div>
-      </div>
-
-      <p style="margin-top:0.75rem; color:var(--text-muted); font-size:0.9rem; line-height:1.5;">
-        “Ativo” controla se aparece na ferramenta. “CRON” controla se entra no monitoramento automático (Telegram).
-      </p>
-
-      <div style="margin-top:1rem; overflow-x:auto;">
-        <table class="wl-table">
-          <thead>
-            <tr>
-              <th style="min-width:180px;">Nome</th>
-              <th style="min-width:220px;">Query (busca)</th>
-              <th style="min-width:140px;">Tipo</th>
-              <th style="min-width:90px;">Prioridade</th>
-              <th style="min-width:70px;">Ativo</th>
-              <th style="min-width:70px;">CRON</th>
-              <th style="min-width:80px;">Remover</th>
-            </tr>
-          </thead>
-          <tbody id="watchlistTbody"></tbody>
-        </table>
-      </div>
-
-      <div id="watchlistStatus" style="margin-top:0.75rem; color:var(--text-muted); font-size:0.9rem;"></div>
     </div>
   </div>
 
   <script>
     const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
 
+    // Tokens (guardamos em sessionStorage para não ficar pedindo toda hora)
+    function getAdminToken() {
+      return sessionStorage.getItem("ADMIN_TOKEN") || "";
+    }
+    function ensureAdminToken() {
+      let t = getAdminToken();
+      if (!t) {
+        t = prompt("ADMIN_TOKEN (X-Admin-Token):") || "";
+        if (t) sessionStorage.setItem("ADMIN_TOKEN", t);
+      }
+      return t;
+    }
+
     let newsData = [];
     let currentFilter = 'all';
     let chartSentiment = null;
     let chartRisk = null;
-    let watchlist = [];
 
+    // =========================
+    // WATCHLIST UI
+    // =========================
+    async function loadWatchlistUI() {
+      try {
+        const resp = await fetch(`${API_BASE}/watchlist`);
+        const data = await resp.json();
+        renderWatchlist(data.items || []);
+      } catch {
+        renderWatchlist([]);
+      }
+    }
+
+    function renderWatchlist(items) {
+      const box = document.getElementById("wlList");
+      if (!items.length) {
+        box.innerHTML = `<div style="color:var(--text-muted);">Nenhum termo cadastrado.</div>`;
+        return;
+      }
+
+      box.innerHTML = items
+        .sort((a,b)=> (b.priority||0)-(a.priority||0))
+        .map(it => `
+          <div class="wl-item">
+            <div class="wl-item-top">
+              <div>
+                <div style="font-weight:800;">${sanitizeHtml(it.label || it.query)}</div>
+                <div style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">${sanitizeHtml(it.query)}</div>
+              </div>
+
+              <div class="wl-actions">
+                <button class="wl-save" onclick="saveWatch('${sanitizeAttr(it.id)}')">Salvar</button>
+                <button class="wl-del" onclick="deleteWatch('${sanitizeAttr(it.id)}')">Remover</button>
+              </div>
+            </div>
+
+            <div class="wl-mini" style="margin-top:10px;">
+              <label><input type="checkbox" id="en_${sanitizeAttr(it.id)}" ${it.enabled ? 'checked':''}/> Habilitado</label>
+              <label><input type="checkbox" id="cr_${sanitizeAttr(it.id)}" ${it.cron ? 'checked':''}/> CRON</label>
+
+              <span>Tipo:</span>
+              <select id="tp_${sanitizeAttr(it.id)}">
+                ${["geral","institucional","autoridade","temporario"].map(v => `<option value="${v}" ${it.type===v?'selected':''}>${v}</option>`).join("")}
+              </select>
+
+              <span>Prioridade:</span>
+              <select id="pr_${sanitizeAttr(it.id)}">
+                ${[1,2,3,4,5].map(v => `<option value="${v}" ${(+it.priority===v)?'selected':''}>${v}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+        `).join("");
+    }
+
+    async function addWatch() {
+      const query = document.getElementById("wlQuery").value.trim();
+      const label = document.getElementById("wlLabel").value.trim() || query;
+      const type = document.getElementById("wlType").value;
+      const priority = parseInt(document.getElementById("wlPriority").value, 10);
+
+      if (!query) { alert("Informe uma consulta."); return; }
+
+      const token = ensureAdminToken();
+      if (!token) return;
+
+      const id = "t_" + Math.random().toString(36).slice(2, 10);
+
+      const payload = { id, query, label, type, priority, enabled: true, cron: true };
+
+      const resp = await fetch(`${API_BASE}/watchlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Token": token },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao salvar"); return; }
+
+      document.getElementById("wlQuery").value = "";
+      document.getElementById("wlLabel").value = "";
+      await loadWatchlistUI();
+    }
+
+    async function saveWatch(id) {
+      const token = ensureAdminToken();
+      if (!token) return;
+
+      // precisamos buscar lista atual para manter query/label
+      const current = await fetch(`${API_BASE}/watchlist`).then(r=>r.json()).catch(()=>({items:[]}));
+      const item = (current.items || []).find(x => x.id === id);
+      if (!item) { alert("Item não encontrado"); return; }
+
+      const enabled = document.getElementById(`en_${id}`).checked;
+      const cron = document.getElementById(`cr_${id}`).checked;
+      const type = document.getElementById(`tp_${id}`).value;
+      const priority = parseInt(document.getElementById(`pr_${id}`).value, 10);
+
+      const payload = { ...item, enabled, cron, type, priority };
+
+      const resp = await fetch(`${API_BASE}/watchlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Token": token },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao salvar"); return; }
+      await loadWatchlistUI();
+    }
+
+    async function deleteWatch(id) {
+      const token = ensureAdminToken();
+      if (!token) return;
+
+      const resp = await fetch(`${API_BASE}/watchlist?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: { "X-Admin-Token": token }
+      });
+
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao remover"); return; }
+      await loadWatchlistUI();
+    }
+
+    // =========================
+    // RUN ALERT NOW
+    // =========================
+    async function rodarAlertaAgora() {
+      const token = prompt("ALERT_RUN_TOKEN (X-Run-Token):") || "";
+      if (!token) return;
+
+      showStatus("Rodando alerta manual...", "loading");
+
+      try {
+        const resp = await fetch(`${API_BASE}/run-alert`, {
+          method: "POST",
+          headers: { "X-Run-Token": token }
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) throw new Error(data.erro || "Falha ao rodar alerta");
+        showStatus(data.sent ? `Alerta enviado (${data.count} itens).` : `Executado: ${data.reason}`, "ready");
+      } catch (e) {
+        showStatus("Erro: " + e.message, "error");
+      }
+    }
+
+    // =========================
+    // BUSCA manual
+    // =========================
     async function buscarNoticias() {
       const termo = document.getElementById('termoBusca').value.trim();
       if (!termo) { alert('Digite um termo para investigar.'); return; }
@@ -361,12 +489,8 @@
 
       try {
         const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.erro || 'Erro na conexão');
-        }
-
-        const data = await resp.json();
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.erro || 'Erro na conexão');
 
         newsData = (data.results || []).map(item => ({
           title: item.title,
@@ -374,22 +498,19 @@
           url: item.url,
           source: item.source,
           date: item.date,
+          sentimento: item.sentimento || item.sentiment,
           sentiment: mapSentiment(item.sentimento || item.sentiment),
           riskScore: (item.risco_score || 0).toFixed(1),
           riskLevel: mapRiskLevel(item.risco_classificacao),
           sources: Array.isArray(item.sources) ? item.sources : [],
 
+          // extras
+          objeto: item.objeto_principal || '',
+          orgao: item.orgao_responsavel || item.orgao_hint || '',
           narrativa: item.narrativa_principal || '',
           sensiveis: Array.isArray(item.pontos_sensiveis) ? item.pontos_sensiveis : [],
           vetores: Array.isArray(item.vetores_provaveis) ? item.vetores_provaveis : [],
-          mensagemBase: item.mensagem_base_sugerida || '',
-
-          // NOVOS CAMPOS
-          orgao: item.orgao_responsavel || item.orgao_hint || '',
-          objeto: item.objeto_principal || '',
-          evOrgao: item.evidencia_orgao || '',
-          evObjeto: item.evidencia_objeto || '',
-          ligacao: item.ligacao_institucional || 'nenhuma'
+          mensagemBase: item.mensagem_base_sugerida || ''
         }));
 
         if (newsData.length === 0) {
@@ -413,11 +534,8 @@
 
         updateDashboard();
 
-        if (data.report) {
-          renderStrategicPanels(data.report);
-        } else {
-          renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
-        }
+        if (data.report) renderStrategicPanels(data.report);
+        else renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
 
         showStatus(`Análise concluída: ${data.total_raw || 0} menções em ${data.total_clusters || 0} eventos.`, 'ready');
       } catch (e) {
@@ -428,11 +546,7 @@
 
     function gerarRelatorio() { window.print(); }
 
-    function updateDashboard() {
-      updateMetrics();
-      updateCharts();
-      updateTable();
-    }
+    function updateDashboard() { updateMetrics(); updateCharts(); updateTable(); }
 
     function updateMetrics() {
       if (!newsData.length) return;
@@ -443,8 +557,7 @@
 
       scoreEl.textContent = avgRisk.toFixed(1);
 
-      let levelClass = 'bg-low';
-      let labelText = 'BAIXO';
+      let levelClass = 'bg-low', labelText = 'BAIXO';
       if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
       else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
       else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
@@ -452,7 +565,7 @@
       labelEl.textContent = labelText;
       labelEl.className = levelClass.replace('bg-', 'text-');
       fillEl.className = `risk-bar-fill ${levelClass}`;
-      setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 100);
+      setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 80);
     }
 
     function updateTable() {
@@ -467,37 +580,40 @@
         emptyDiv.style.display = 'block';
         return;
       }
-
       emptyDiv.style.display = 'none';
 
       tbody.innerHTML = filtered.map((item, idx) => {
         const totalFontes = item.sources ? item.sources.length : 0;
+
+        const extraLinha = (item.objeto || item.orgao)
+          ? `<div style="margin-top:6px; font-size:0.85rem; color:var(--text-muted);">
+               Objeto: ${sanitizeHtml(item.objeto || "n/d")} | Órgão/autor: ${sanitizeHtml(item.orgao || "n/d")}
+             </div>`
+          : '';
+
         return `
-        <tr>
-          <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
-          <td>
-            <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
-            <div style="font-weight:600; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
-            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:6px;">
-              Órgão: ${sanitizeHtml(item.orgao || '—')} |
-              Objeto: ${sanitizeHtml(item.objeto || '—')} |
-              Vínculo: ${sanitizeHtml(item.ligacao || 'nenhuma')}
-            </div>
-            <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
-          </td>
-          <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
-          <td>
-            <div class="badge-risk">
-              <div class="dot bg-${item.riskLevel}"></div>
-              <span class="text-${item.riskLevel}">${sanitizeHtml(item.riskScore)}</span>
-            </div>
-          </td>
-          <td>
-            <button class="btn-link" onclick="abrirFontes(${idx})">Fontes (${totalFontes || 1})</button><br>
-            <button class="btn-link" onclick="abrirAnalise(${idx})">Análise</button><br>
-            <a class="btn-link" href="${sanitizeAttr(item.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>
-          </td>
-        </tr>`;
+          <tr>
+            <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
+            <td>
+              <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
+              <div style="font-weight:700; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
+              <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
+              ${extraLinha}
+            </td>
+            <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
+            <td>
+              <div class="badge-risk">
+                <div class="dot bg-${item.riskLevel}"></div>
+                <span class="text-${item.riskLevel}">${sanitizeHtml(item.riskScore)}</span>
+              </div>
+            </td>
+            <td>
+              <button class="btn-link" onclick="abrirFontes(${idx})">Fontes (${totalFontes || 1})</button><br>
+              <button class="btn-link" onclick="abrirAnalise(${idx})">Análise</button><br>
+              <a class="btn-link" href="${sanitizeAttr(item.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>
+            </td>
+          </tr>
+        `;
       }).join('');
     }
 
@@ -518,7 +634,6 @@
 
       const riskCounts = { critical:0, high:0, medium:0, low:0 };
       newsData.forEach(n => riskCounts[n.riskLevel]++);
-
       const ctxRisk = document.getElementById('riskChart');
       if (chartRisk) chartRisk.destroy();
       chartRisk = new Chart(ctxRisk, {
@@ -556,46 +671,34 @@
       const item = newsData[index];
       if (!item) return;
 
-      const sensiveis = Array.isArray(item.sensiveis) && item.sensiveis.length
-        ? `<ul style="margin-top:6px; padding-left: 1.1rem;">${item.sensiveis.map(s => `<li>${sanitizeHtml(s)}</li>`).join('')}</ul>`
+      const sensiveis = (item.sensiveis && item.sensiveis.length)
+        ? `<ul style="margin-top:6px; padding-left:1.1rem;">${item.sensiveis.map(s => `<li>${sanitizeHtml(s)}</li>`).join('')}</ul>`
         : `<div style="color:var(--text-muted); margin-top:6px;">—</div>`;
 
-      const vetores = Array.isArray(item.vetores) && item.vetores.length
+      const vetores = (item.vetores && item.vetores.length)
         ? item.vetores.map(v => `<span class="chip">${sanitizeHtml(v)}</span>`).join(' ')
         : `<span style="color:var(--text-muted)">—</span>`;
 
       const msgBase = item.mensagemBase ? sanitizeHtml(item.mensagemBase) : '—';
 
       document.getElementById('analiseConteudo').innerHTML = `
-        <div style="font-weight:600; margin-bottom:6px;">Evento</div>
+        <div style="font-weight:700; margin-bottom:6px;">Evento</div>
         <div style="color:#374151;">${sanitizeHtml(item.title || '')}</div>
 
-        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Fatos extraídos</div>
-        <div style="color:#374151;">
-          Órgão: ${sanitizeHtml(item.orgao || '—')}<br>
-          Objeto: ${sanitizeHtml(item.objeto || '—')}<br>
-          Vínculo institucional: ${sanitizeHtml(item.ligacao || 'nenhuma')}
-        </div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Objeto e órgão/autor</div>
+        <div style="color:#374151;">Objeto: ${sanitizeHtml(item.objeto || "n/d")} | Órgão/autor: ${sanitizeHtml(item.orgao || "n/d")}</div>
 
-        <div style="margin-top:10px; font-weight:600; margin-bottom:6px;">Evidências</div>
-        <div style="color:#374151;">
-          ${item.evOrgao ? `Órgão: “${sanitizeHtml(item.evOrgao)}”<br>` : `Órgão: —<br>`}
-          ${item.evObjeto ? `Objeto: “${sanitizeHtml(item.evObjeto)}”` : `Objeto: —`}
-        </div>
-
-        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Narrativa identificada</div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Narrativa identificada</div>
         <div style="color:#374151;">${sanitizeHtml(item.narrativa || '—')}</div>
 
-        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Pontos sensíveis</div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Pontos sensíveis</div>
         ${sensiveis}
 
-        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Vetores prováveis</div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Vetores prováveis</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px;">${vetores}</div>
 
-        <div style="margin-top:12px; font-weight:600; margin-bottom:6px;">Mensagem institucional sugerida</div>
-        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">
-          ${msgBase}
-        </div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Mensagem institucional sugerida</div>
+        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">${msgBase}</div>
       `;
 
       document.getElementById('analiseModal').style.display = 'flex';
@@ -658,159 +761,26 @@
       document.getElementById('fontesModalResumo').textContent = item.title || '';
 
       let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) {
-        fontes = [{ source: item.source, url: item.url, date: item.date }];
-      }
+      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
 
       lista.innerHTML = fontes.map((f, i) => `
         <li>
-          <div style="font-weight:700;">${i + 1}. ${sanitizeHtml(f.source || 'Fonte')}</div>
+          <div style="font-weight:800;">${i + 1}. ${sanitizeHtml(f.source || 'Fonte')}</div>
           ${f.date ? `<div style="color:var(--text-muted); font-size:0.85rem; margin-top:2px;">${sanitizeHtml(formatDate(f.date))}</div>` : ''}
           <div style="margin-top:6px;">
             <a href="${sanitizeAttr(f.url || f.link || '#')}" target="_blank" rel="noopener noreferrer">${sanitizeHtml(f.url || f.link || '#')}</a>
           </div>
-        </li>`).join('');
+        </li>
+      `).join('');
 
       document.getElementById('fontesModal').style.display = 'flex';
     }
 
     function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
 
-    // -------- Watchlist UI --------
-    async function abrirWatchlist() {
-      document.getElementById('watchlistModal').style.display = 'flex';
-      document.getElementById('watchlistStatus').textContent = 'Carregando...';
-      await loadWatchlist();
-      renderWatchlistTable();
-      document.getElementById('watchlistStatus').textContent = 'Pronto.';
-    }
-
-    function fecharWatchlist() { document.getElementById('watchlistModal').style.display = 'none'; }
-
-    async function loadWatchlist() {
-      try {
-        const resp = await fetch(`${API_BASE}/watchlist`);
-        const data = await resp.json();
-        watchlist = Array.isArray(data?.watchlist) ? data.watchlist : [];
-      } catch {
-        watchlist = [];
-      }
-    }
-
-    function addWatchRow() {
-      watchlist.push({
-        id: crypto.randomUUID(),
-        name: '',
-        query: '',
-        type: 'generic',
-        priority: 1,
-        enabled: true,
-        cron: false,
-        aliases: []
-      });
-      renderWatchlistTable();
-    }
-
-    function removeWatchRow(id) {
-      watchlist = watchlist.filter(w => w.id !== id);
-      renderWatchlistTable();
-    }
-
-    function renderWatchlistTable() {
-      const tbody = document.getElementById('watchlistTbody');
-
-      tbody.innerHTML = watchlist.map(w => `
-        <tr>
-          <td><input class="wl-input" value="${sanitizeAttr(w.name || '')}" oninput="wlUpdate('${w.id}','name',this.value)"></td>
-          <td><input class="wl-input" value="${sanitizeAttr(w.query || '')}" oninput="wlUpdate('${w.id}','query',this.value)"></td>
-          <td>
-            <select class="wl-select" onchange="wlUpdate('${w.id}','type',this.value)">
-              ${renderTypeOptions(w.type)}
-            </select>
-          </td>
-          <td>
-            <select class="wl-select" onchange="wlUpdate('${w.id}','priority',this.value)">
-              ${renderPriorityOptions(w.priority)}
-            </select>
-          </td>
-          <td style="text-align:center;">
-            <input class="wl-check" type="checkbox" ${w.enabled ? 'checked' : ''} onchange="wlUpdate('${w.id}','enabled',this.checked)">
-          </td>
-          <td style="text-align:center;">
-            <input class="wl-check" type="checkbox" ${w.cron ? 'checked' : ''} onchange="wlUpdate('${w.id}','cron',this.checked)">
-          </td>
-          <td style="text-align:center;">
-            <button class="btn-link" onclick="removeWatchRow('${w.id}')">Remover</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderTypeOptions(cur) {
-      const types = [
-        { v:'generic', t:'Genérico' },
-        { v:'institution', t:'Instituição' },
-        { v:'authority', t:'Autoridade' },
-        { v:'temporary', t:'Temporário' }
-      ];
-      return types.map(x => `<option value="${x.v}" ${x.v===cur?'selected':''}>${x.t}</option>`).join('');
-    }
-
-    function renderPriorityOptions(cur) {
-      const opts = [1,2,3,4,5];
-      return opts.map(n => `<option value="${n}" ${String(n)===String(cur)?'selected':''}>${n}</option>`).join('');
-    }
-
-    function wlUpdate(id, field, value) {
-      watchlist = watchlist.map(w => {
-        if (w.id !== id) return w;
-        const copy = { ...w };
-        if (field === 'priority') copy[field] = parseInt(value,10) || 1;
-        else copy[field] = value;
-        // autopreenche name se vazio
-        if (field === 'query' && (!copy.name || !copy.name.trim())) copy.name = value.slice(0,80);
-        return copy;
-      });
-    }
-
-    async function saveWatchlist() {
-      const st = document.getElementById('watchlistStatus');
-      st.textContent = 'Salvando...';
-
-      const clean = watchlist
-        .map(w => ({
-          id: w.id,
-          name: (w.name || w.query || '').trim(),
-          query: (w.query || '').trim(),
-          type: (w.type || 'generic').trim(),
-          priority: parseInt(w.priority,10) || 1,
-          enabled: !!w.enabled,
-          cron: !!w.cron,
-          aliases: Array.isArray(w.aliases) ? w.aliases : []
-        }))
-        .filter(w => w.query);
-
-      try {
-        const resp = await fetch(`${API_BASE}/watchlist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ watchlist: clean })
-        });
-        const data = await resp.json();
-        watchlist = Array.isArray(data?.watchlist) ? data.watchlist : clean;
-        renderWatchlistTable();
-        st.textContent = 'Salvo com sucesso.';
-      } catch (e) {
-        st.textContent = 'Erro ao salvar.';
-      }
-    }
-
-    // Eventos: fechar modais clicando fora
     document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
     document.getElementById('analiseModal').addEventListener('click', (e) => { if (e.target.id === 'analiseModal') fecharAnalise(); });
-    document.getElementById('watchlistModal').addEventListener('click', (e) => { if (e.target.id === 'watchlistModal') fecharWatchlist(); });
 
-    // Filtros
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -820,16 +790,22 @@
       });
     });
 
-    // Sanitização
     function sanitizeHtml(str) {
       const s = (str === null || str === undefined) ? '' : String(str);
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+      return s.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
     }
     function sanitizeAttr(url) {
       const u = (url === null || url === undefined) ? '' : String(url);
       if (/^\s*(javascript:|data:)/i.test(u)) return '#';
       return u.replace(/"/g, '%22');
     }
+
+    // init
+    loadWatchlistUI();
   </script>
 </body>
 </html>
