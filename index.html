@@ -1,3 +1,4 @@
+<!-- monitormpgo.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -44,7 +45,7 @@
       border: 1px solid #e5e7eb;
       flex-wrap: wrap;
     }
-    .search-input-group { flex: 1; min-width: 280px; }
+    .search-input-group { flex: 1; min-width: 260px; }
     .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
     .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
     .search-input:focus { outline: none; border-color: var(--mp-blue); }
@@ -66,8 +67,10 @@
     .btn-search:hover { background: var(--mp-blue-light); }
     .btn-secondary { background: #111827; color: white; }
     .btn-secondary:hover { background: #0b1220; }
+
     .btn-report { background: #4b5563; color: white; display: none; }
     .btn-report:hover { background: #374151; }
+
     .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
 
     .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
@@ -118,7 +121,6 @@
     .btn-link:hover { text-decoration: underline; }
     .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
 
-    /* Modais */
     #fontesModal, #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 60; }
     #fontesModalInner, #analiseModalInner { background: #ffffff; max-width: 900px; width: 92%; padding: 1.25rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
@@ -127,8 +129,7 @@
     #analiseConteudo { margin-top: 1rem; font-size: 0.9rem; line-height: 1.6; color: #111827; }
     .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
 
-    /* Watchlist */
-    .wl-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 110px; gap:10px; align-items:center; }
+    .wl-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; gap:10px; align-items:center; }
     .wl-row input, .wl-row select { width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:8px; }
     .wl-list { margin-top: 12px; display:flex; flex-direction:column; gap:10px; }
     .wl-item { border:1px solid #e5e7eb; border-radius:12px; padding:12px; background:#fff; }
@@ -140,7 +141,6 @@
     .wl-save { background:var(--mp-blue); color:#fff; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
 
     @media (max-width: 768px) {
-      .search-card { flex-direction: column; align-items: stretch; }
       .btn-action { width: 100%; justify-content: center; }
       .wl-row { grid-template-columns: 1fr; }
     }
@@ -169,11 +169,10 @@
       <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar (IA)</button>
       <button class="btn-action btn-secondary" onclick="rodarAlertaAgora()">🚨 Rodar alerta agora</button>
 
-      <button class="btn-action btn-report" id="reportBtn" onclick="gerarRelatorio()">📄 Gerar Relatório</button>
+      <button class="btn-action btn-report" id="reportBtn" onclick="window.print()">📄 Gerar Relatório</button>
       <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">Limpar</button>
     </div>
 
-    <!-- Watchlist -->
     <div class="card" style="margin-bottom: 1rem;">
       <h3>Alertas (Watchlist)</h3>
 
@@ -193,12 +192,11 @@
           <option value="4">prioridade 4</option>
           <option value="5">prioridade 5</option>
         </select>
-
         <button class="wl-save" onclick="addWatch()">Adicionar</button>
       </div>
 
       <div style="margin-top:10px; color:var(--text-muted); font-size:0.9rem;">
-        Dica: o CRON considera itens com "CRON" ligado e "Habilitado".
+        Dica: o CRON considera itens com CRON ligado e Habilitado.
       </div>
 
       <div class="wl-list" id="wlList"></div>
@@ -239,21 +237,6 @@
         </div>
       </div>
 
-      <div class="grid">
-        <div class="card">
-          <h3>Narrativas em circulação</h3>
-          <ul id="narrativesList" style="font-size:0.9rem; line-height:1.5; padding-left:1rem;"></ul>
-        </div>
-        <div class="card">
-          <h3>Ações recomendadas</h3>
-          <ul id="actionsList" style="font-size:0.9rem; line-height:1.5; padding-left:1rem;"></ul>
-        </div>
-        <div class="card">
-          <h3>Watchlist</h3>
-          <div id="watchlistBox" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-        </div>
-      </div>
-
       <div class="results-section">
         <div class="results-header">
           <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de eventos detectados</h3>
@@ -270,10 +253,10 @@
             <thead>
               <tr>
                 <th style="width: 15%;">Data</th>
-                <th style="width: 45%;">Matéria (1 por 1) / Síntese</th>
-                <th style="width: 15%;">Sentimento</th>
-                <th style="width: 15%;">Risco</th>
-                <th style="width: 10%;">Ações</th>
+                <th style="width: 50%;">Evento / Síntese</th>
+                <th style="width: 10%;">Sent.</th>
+                <th style="width: 10%;">Risco</th>
+                <th style="width: 15%;">Ações</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -285,10 +268,9 @@
     </div>
   </div>
 
-  <!-- Modal Fontes -->
   <div id="fontesModal">
     <div id="fontesModalInner">
-      <h3 style="margin:0; font-size:1rem; font-weight:700;">Fonte (matéria)</h3>
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
       <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
       <ul id="fontesLista"></ul>
       <div style="margin-top:1.25rem; text-align:right;">
@@ -297,10 +279,9 @@
     </div>
   </div>
 
-  <!-- Modal Análise -->
   <div id="analiseModal">
     <div id="analiseModalInner">
-      <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise estratégica (da matéria)</h3>
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise estratégica</h3>
       <div id="analiseConteudo"></div>
       <div style="margin-top:1.25rem; text-align:right;">
         <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharAnalise()">Fechar</button>
@@ -309,16 +290,30 @@
   </div>
 
   <script>
-    // AJUSTE AQUI:
-    const API_BASE = 'https://SEU-WORKER.SEU-SUBDOMINIO.workers.dev';
+    // IMPORTANTE: coloque aqui o URL REAL do seu Worker (copiado do Cloudflare)
+    // Ex: https://monitormpgo.<seu-subdominio>.workers.dev
+    const API_BASE = 'https://SEU_WORKER_AQUI.workers.dev';
 
-    // Tokens (guardamos em sessionStorage)
-    function getAdminToken() { return sessionStorage.getItem("ADMIN_TOKEN") || ""; }
+    function getAdminToken() {
+      return sessionStorage.getItem("ADMIN_TOKEN") || "";
+    }
     function ensureAdminToken() {
       let t = getAdminToken();
       if (!t) {
         t = prompt("ADMIN_TOKEN (X-Admin-Token):") || "";
         if (t) sessionStorage.setItem("ADMIN_TOKEN", t);
+      }
+      return t;
+    }
+
+    function getAlertToken() {
+      return sessionStorage.getItem("ALERT_RUN_TOKEN") || "";
+    }
+    function ensureAlertToken() {
+      let t = getAlertToken();
+      if (!t) {
+        t = prompt("ALERT_RUN_TOKEN (X-Alert-Token):") || "";
+        if (t) sessionStorage.setItem("ALERT_RUN_TOKEN", t);
       }
       return t;
     }
@@ -401,6 +396,7 @@
         headers: { "Content-Type": "application/json", "X-Admin-Token": token },
         body: JSON.stringify(payload)
       });
+
       const data = await resp.json().catch(()=>({}));
       if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao salvar"); return; }
 
@@ -429,9 +425,9 @@
         headers: { "Content-Type": "application/json", "X-Admin-Token": token },
         body: JSON.stringify(payload)
       });
+
       const data = await resp.json().catch(()=>({}));
       if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao salvar"); return; }
-
       await loadWatchlistUI();
     }
 
@@ -443,17 +439,17 @@
         method: "DELETE",
         headers: { "X-Admin-Token": token }
       });
+
       const data = await resp.json().catch(()=>({}));
       if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao remover"); return; }
-
       await loadWatchlistUI();
     }
 
     // =========================
-    // RUN ALERT NOW (corrigido: X-Alert-Token)
+    // RUN ALERT NOW
     // =========================
     async function rodarAlertaAgora() {
-      const token = prompt("ALERT_RUN_TOKEN (X-Alert-Token):") || "";
+      const token = ensureAlertToken();
       if (!token) return;
 
       showStatus("Rodando alerta manual...", "loading");
@@ -467,7 +463,9 @@
         const data = await resp.json().catch(()=>({}));
         if (!resp.ok || !data.ok) throw new Error(data.erro || "Falha ao rodar alerta");
 
-        showStatus(data.sent ? `Alerta enviado (${data.count_sent} itens).` : `Executado: ${data.reason}`, "ready");
+        const out = data.outcome || {};
+        if (out.sent) showStatus(`Alerta enviado (${out.count_sent} itens).`, "ready");
+        else showStatus(`Executado: ${out.reason}`, "ready");
       } catch (e) {
         showStatus("Erro: " + e.message, "error");
       }
@@ -493,21 +491,16 @@
           url: item.url,
           source: item.source,
           date: item.date,
-          sentiment: mapSentiment(item.sentimento || item.sentiment || item.sentimento),
+          sentiment: mapSentiment(item.sentimento || item.sentiment),
           riskScore: (item.risco_score || 0).toFixed(1),
           riskLevel: mapRiskLevel(item.risco_classificacao),
           sources: Array.isArray(item.sources) ? item.sources : [],
-
           objeto: item.objeto_principal || '',
-          orgao: item.orgao_responsavel || '',
-          narrativa: item.narrativa_principal || '',
-          sensiveis: Array.isArray(item.pontos_sensiveis) ? item.pontos_sensiveis : [],
-          vetores: Array.isArray(item.vetores_provaveis) ? item.vetores_provaveis : [],
-          mensagemBase: item.mensagem_base_sugerida || ''
+          orgao: item.orgao_responsavel || ''
         }));
 
-        if (newsData.length === 0) {
-          showStatus('Nenhuma matéria relevante encontrada nas últimas 48h.', 'ready');
+        if (!newsData.length) {
+          showStatus('Nenhum evento relevante encontrado nas últimas 48h.', 'ready');
           document.getElementById('dashboardContent').style.display = 'none';
           document.getElementById('reportBtn').style.display = 'none';
           document.getElementById('clearBtn').style.display = 'inline-flex';
@@ -526,21 +519,18 @@
         }
 
         updateDashboard();
-        if (data.report) renderStrategicPanels(data.report);
-        else renderStrategicPanels({ narratives: [], recommended_actions: [], watchlist: [] });
-
-        showStatus(`Concluído: ${data.total_raw || 0} menções | ${data.total_items || 0} matérias dedup.`, 'ready');
+        showStatus(`Análise concluída: ${data.total_raw || 0} menções.`, 'ready');
       } catch (e) {
         showStatus('Erro: ' + e.message, 'error');
       }
     }
 
-    function gerarRelatorio() { window.print(); }
     function updateDashboard() { updateMetrics(); updateCharts(); updateTable(); }
 
     function updateMetrics() {
       if (!newsData.length) return;
       const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
+
       const scoreEl = document.getElementById('riskScore');
       const labelEl = document.getElementById('riskLabel');
       const fillEl = document.getElementById('riskFill');
@@ -556,51 +546,6 @@
       labelEl.className = levelClass.replace('bg-', 'text-');
       fillEl.className = `risk-bar-fill ${levelClass}`;
       setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 80);
-    }
-
-    function updateTable() {
-      const tbody = document.querySelector('#newsTable tbody');
-      const emptyDiv = document.getElementById('tableEmpty');
-
-      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
-      filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
-
-      if (!filtered.length) {
-        tbody.innerHTML = '';
-        emptyDiv.style.display = 'block';
-        return;
-      }
-      emptyDiv.style.display = 'none';
-
-      tbody.innerHTML = filtered.map((item, idx) => {
-        const extraLinha = `<div style="margin-top:6px; font-size:0.85rem; color:var(--text-muted);">
-          Objeto: ${sanitizeHtml(item.objeto || "indeterminado")} | Órgão: ${sanitizeHtml(item.orgao || "indeterminado")}
-        </div>`;
-
-        return `
-          <tr>
-            <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
-            <td>
-              <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
-              <div style="font-weight:700; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
-              <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
-              ${extraLinha}
-            </td>
-            <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
-            <td>
-              <div class="badge-risk">
-                <div class="dot bg-${item.riskLevel}"></div>
-                <span class="text-${item.riskLevel}">${sanitizeHtml(item.riskScore)}</span>
-              </div>
-            </td>
-            <td>
-              <button class="btn-link" onclick="abrirFontes(${idx})">Fonte</button><br>
-              <button class="btn-link" onclick="abrirAnalise(${idx})">Análise</button><br>
-              <a class="btn-link" href="${sanitizeAttr(item.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>
-            </td>
-          </tr>
-        `;
-      }).join('');
     }
 
     function updateCharts() {
@@ -624,120 +569,79 @@
       if (chartRisk) chartRisk.destroy();
       chartRisk = new Chart(ctxRisk, {
         type: 'bar',
-        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Matérias', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
+        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
       });
     }
 
-    function renderStrategicPanels(report) {
-      const nList = document.getElementById('narrativesList');
-      const aList = document.getElementById('actionsList');
-      const wBox = document.getElementById('watchlistBox');
+    function updateTable() {
+      const tbody = document.querySelector('#newsTable tbody');
+      const emptyDiv = document.getElementById('tableEmpty');
 
-      if (report?.narratives?.length) {
-        nList.innerHTML = report.narratives.map(n => `<li>• ${sanitizeHtml(n.text)} <span style="color:var(--text-muted)">(${sanitizeHtml(String(n.count))})</span></li>`).join('');
-      } else {
-        nList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma narrativa relevante detectada.</li>`;
-      }
+      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
+      filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
 
-      if (report?.recommended_actions?.length) {
-        aList.innerHTML = report.recommended_actions.map(a => `<li>• ${sanitizeHtml(a)}</li>`).join('');
-      } else {
-        aList.innerHTML = `<li style="color:var(--text-muted)">Nenhuma ação sugerida.</li>`;
+      if (!filtered.length) {
+        tbody.innerHTML = '';
+        emptyDiv.style.display = 'block';
+        return;
       }
+      emptyDiv.style.display = 'none';
 
-      if (report?.watchlist?.length) {
-        wBox.innerHTML = report.watchlist.map(t => `<span class="chip">${sanitizeHtml(t)}</span>`).join('');
-      } else {
-        wBox.innerHTML = `<span style="color:var(--text-muted)">—</span>`;
-      }
+      tbody.innerHTML = filtered.map((item, idx) => {
+        const totalFontes = item.sources ? item.sources.length : 0;
+        const extraLinha = (item.objeto || item.orgao)
+          ? `<div style="margin-top:6px; font-size:0.85rem; color:var(--text-muted);">
+               Objeto: ${sanitizeHtml(item.objeto || "n/d")} | Órgão/ator: ${sanitizeHtml(item.orgao || "n/d")}
+             </div>`
+          : '';
+
+        return `
+          <tr>
+            <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
+            <td>
+              <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
+              <div style="font-weight:700; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
+              <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
+              ${extraLinha}
+            </td>
+            <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
+            <td>
+              <div class="badge-risk">
+                <div class="dot bg-${item.riskLevel}"></div>
+                <span class="text-${item.riskLevel}">${sanitizeHtml(item.riskScore)}</span>
+              </div>
+            </td>
+            <td>
+              <button class="btn-link" onclick="abrirFontes(${idx})">Fontes (${totalFontes || 1})</button><br>
+              <button class="btn-link" onclick="abrirAnalise(${idx})">Análise</button><br>
+              <a class="btn-link" href="${sanitizeAttr(item.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function abrirAnalise(index) {
       const item = newsData[index];
       if (!item) return;
 
-      const sensiveis = (item.sensiveis && item.sensiveis.length)
-        ? `<ul style="margin-top:6px; padding-left:1.1rem;">${item.sensiveis.map(s => `<li>${sanitizeHtml(s)}</li>`).join('')}</ul>`
-        : `<div style="color:var(--text-muted); margin-top:6px;">—</div>`;
-
-      const vetores = (item.vetores && item.vetores.length)
-        ? item.vetores.map(v => `<span class="chip">${sanitizeHtml(v)}</span>`).join(' ')
-        : `<span style="color:var(--text-muted)">—</span>`;
-
-      const msgBase = item.mensagemBase ? sanitizeHtml(item.mensagemBase) : '—';
-
       document.getElementById('analiseConteudo').innerHTML = `
-        <div style="font-weight:700; margin-bottom:6px;">Matéria</div>
+        <div style="font-weight:700; margin-bottom:6px;">Evento</div>
         <div style="color:#374151;">${sanitizeHtml(item.title || '')}</div>
 
-        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Objeto e órgão</div>
-        <div style="color:#374151;">Objeto: ${sanitizeHtml(item.objeto || "indeterminado")} | Órgão: ${sanitizeHtml(item.orgao || "indeterminado")}</div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Objeto e órgão/ator</div>
+        <div style="color:#374151;">Objeto: ${sanitizeHtml(item.objeto || "n/d")} | Órgão/ator: ${sanitizeHtml(item.orgao || "n/d")}</div>
 
-        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Narrativa</div>
-        <div style="color:#374151;">${sanitizeHtml(item.narrativa || '—')}</div>
-
-        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Pontos sensíveis</div>
-        ${sensiveis}
-
-        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Vetores prováveis</div>
-        <div style="display:flex; flex-wrap:wrap; gap:6px;">${vetores}</div>
-
-        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Mensagem sugerida</div>
-        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">${msgBase}</div>
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Síntese</div>
+        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">
+          ${sanitizeHtml(item.content || "")}
+        </div>
       `;
-
       document.getElementById('analiseModal').style.display = 'flex';
     }
 
     function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
-
-    function clearData() {
-      newsData = [];
-      document.getElementById('dashboardContent').style.display = 'none';
-      document.getElementById('clearBtn').style.display = 'none';
-      document.getElementById('reportBtn').style.display = 'none';
-      document.getElementById('statusIndicator').style.display = 'none';
-      document.getElementById('termoBusca').value = '';
-      if (chartSentiment) { chartSentiment.destroy(); chartSentiment = null; }
-      if (chartRisk) { chartRisk.destroy(); chartRisk = null; }
-    }
-
-    function showStatus(msg, type) {
-      const el = document.getElementById('statusIndicator');
-      el.textContent = msg;
-      el.className = `status-bar status-${type}`;
-      el.style.display = 'block';
-    }
-
-    function mapRiskLevel(level) {
-      if (!level) return 'low';
-      level = level.toLowerCase();
-      if (level.includes('critico')) return 'critical';
-      if (level.includes('alto')) return 'high';
-      if (level.includes('medio')) return 'medium';
-      return 'low';
-    }
-
-    function mapSentiment(s) {
-      if (!s) return 'neutral';
-      s = s.toString().toLowerCase();
-      if (s.includes('pos')) return 'positive';
-      if (s.includes('neg')) return 'negative';
-      return 'neutral';
-    }
-
-    function translateSentiment(s) {
-      if (s === 'positive') return 'Positivo';
-      if (s === 'negative') return 'Negativo';
-      return 'Neutro';
-    }
-
-    function formatDate(isoStr) {
-      if (!isoStr) return '-';
-      const d = new Date(isoStr);
-      return isNaN(d.getTime()) ? isoStr : d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    }
 
     function abrirFontes(index) {
       const item = newsData[index];
@@ -747,9 +651,7 @@
       document.getElementById('fontesModalResumo').textContent = item.title || '';
 
       let fontes = item.sources;
-      if (!Array.isArray(fontes) || fontes.length === 0) {
-        fontes = [{ source: item.source, url: item.url, date: item.date }];
-      }
+      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
 
       lista.innerHTML = fontes.map((f, i) => `
         <li>
@@ -777,6 +679,53 @@
         updateTable();
       });
     });
+
+    function clearData() {
+      newsData = [];
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('clearBtn').style.display = 'none';
+      document.getElementById('reportBtn').style.display = 'none';
+      document.getElementById('statusIndicator').style.display = 'none';
+      document.getElementById('termoBusca').value = '';
+      if (chartSentiment) { chartSentiment.destroy(); chartSentiment = null; }
+      if (chartRisk) { chartRisk.destroy(); chartRisk = null; }
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('statusIndicator');
+      el.textContent = msg;
+      el.className = `status-bar status-${type}`;
+      el.style.display = 'block';
+    }
+
+    function mapRiskLevel(level) {
+      if (!level) return 'low';
+      level = String(level).toLowerCase();
+      if (level.includes('critico')) return 'critical';
+      if (level.includes('alto')) return 'high';
+      if (level.includes('medio')) return 'medium';
+      return 'low';
+    }
+
+    function mapSentiment(s) {
+      if (!s) return 'neutral';
+      s = s.toString().toLowerCase();
+      if (s.includes('pos')) return 'positive';
+      if (s.includes('neg')) return 'negative';
+      return 'neutral';
+    }
+
+    function translateSentiment(s) {
+      if (s === 'positive') return 'Positivo';
+      if (s === 'negative') return 'Negativo';
+      return 'Neutro';
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr) return '-';
+      const d = new Date(isoStr);
+      return isNaN(d.getTime()) ? isoStr : d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
 
     function sanitizeHtml(str) {
       const s = (str === null || str === undefined) ? '' : String(str);
