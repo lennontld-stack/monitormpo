@@ -457,7 +457,7 @@
       try {
         const resp = await fetch(`${API_BASE}/run-alert`, {
           method: "POST",
-          headers: { "X-Alert-Token": token }
+         headers: { "X-Alert-Token": token }
         });
 
         const data = await resp.json().catch(()=>({}));
@@ -746,5 +746,6 @@
   </script>
 </body>
 </html>
+
 
 
