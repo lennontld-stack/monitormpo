@@ -2,389 +2,127 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MPGO Monitor - Inteligência Reputacional</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <style>
-    :root {
-      --mp-blue: #003366;
-      --mp-blue-light: #004d99;
-      --bg-page: #f3f4f6;
-      --bg-card: #ffffff;
-      --risk-critical: #ef4444;
-      --risk-high: #f97316;
-      --risk-medium: #eab308;
-      --risk-low: #22c55e;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-      --radius: 12px;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
-
-    .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 1.5rem; }
-    .header-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; }
-    .logo-badge { font-size: 2rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
-    .header h1 { font-size: 1.25rem; font-weight: 700; }
-    .header p { font-size: 0.875rem; opacity: 0.8; }
-
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-
-    .search-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 1rem;
-      border: 1px solid #e5e7eb;
-      flex-wrap: wrap;
-    }
-    .search-input-group { flex: 1; min-width: 260px; }
-    .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
-    .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
-    .search-input:focus { outline: none; border-color: var(--mp-blue); }
-
-    .btn-action {
-      height: 52px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 0 1.25rem;
-      border: none;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-    .btn-search { background: var(--mp-blue); color: white; }
-    .btn-search:hover { background: var(--mp-blue-light); }
-    .btn-secondary { background: #111827; color: white; }
-    .btn-secondary:hover { background: #0b1220; }
-
-    .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
-    .status-loading { background: #eff6ff; color: var(--mp-blue); border: 1px solid #dbeafe; }
-    .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
-    .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
-    .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
-    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; }
-
-    .metric-big { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: auto; }
-    .risk-bar-bg { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
-    .risk-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
-
-    .results-section { background: var(--bg-card); border-radius: var(--radius); border: 1px solid #e5e7eb; overflow: hidden; }
-    .results-header { padding: 1.25rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 1rem 1.25rem; font-size: 0.75rem; color: var(--text-muted); background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-    td { padding: 1.1rem 1.25rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    
-    .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
-    .badge-sentiment-positive { background: #dcfce7; color: #166534; }
-    .badge-sentiment-neutral { background: #f3f4f6; color: #4b5563; }
-    .badge-sentiment-negative { background: #fee2e2; color: #991b1b; }
-
-    .btn-link { color: var(--mp-blue); text-decoration: none; font-weight: 600; font-size: 0.875rem; cursor: pointer; background: none; border: none; }
-    .btn-link:hover { text-decoration: underline; }
-
-    #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
-    #analiseModalInner { background: #fff; width: 90%; max-width: 650px; padding: 1.5rem; border-radius: 12px; }
-
-    /* Estilos Watchlist */
-    .wl-form { display: grid; grid-template-columns: 2fr 1fr 100px; gap: 10px; margin-bottom: 15px; }
-    .wl-form input { padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
-    .wl-item { border: 1px solid #e5e7eb; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: #fff; display: flex; justify-content: space-between; align-items: center; }
-    .wl-info b { color: var(--mp-blue); }
-    .wl-del-btn { color: #ef4444; border: none; background: none; font-weight: 700; cursor: pointer; }
-
-    .bg-critical { background: var(--risk-critical); } .bg-high { background: var(--risk-high); }
-    .bg-medium { background: var(--risk-medium); } .bg-low { background: var(--risk-low); }
-    .text-critical { color: var(--risk-critical); } .text-high { color: var(--risk-high); }
-    .text-medium { color: var(--risk-medium); } .text-low { color: var(--risk-low); }
+    :root { --mp-blue: #003366; --bg-page: #f3f4f6; --risk-critical: #ef4444; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-page); padding: 20px; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-search { background: var(--mp-blue); color: #fff; }
+    .btn-alert { background: #111827; color: #fff; }
+    .status-bar { padding: 10px; margin-top: 10px; border-radius: 8px; font-size: 0.9rem; display: none; }
+    .loading { background: #eff6ff; color: #1e40af; }
+    .ready { background: #f0fdf4; color: #166534; }
+    .wl-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+    .badge-neg { background: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-content">
-    <div class="logo-badge">⚖️</div>
-    <div>
-      <h1>MPGO Monitor</h1>
-      <p>Coordenadoria de Segurança Institucional e Inteligência - CSI</p>
-    </div>
+<div class="card">
+  <h2>Investigação CSI - MPGO</h2>
+  <div style="display:flex; gap:10px; margin-top:15px;">
+    <input type="text" id="termoBusca" style="flex:1; padding:12px; border-radius:8px; border:1px solid #ddd;" placeholder="Digite o termo...">
+    <button class="btn btn-search" onclick="buscarNoticias()">🔍 Investigar</button>
+    <button class="btn btn-alert" onclick="rodarAlertaAgora()">🚨 Rodar Alertas</button>
   </div>
-</header>
-
-<div class="container">
-  
-  <div class="search-card">
-    <div class="search-input-group">
-      <label>Investigação Pontual (Tempo Real)</label>
-      <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Cyro Terra", "Operação X"'>
-    </div>
-    <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar</button>
-    <button class="btn-action btn-secondary" onclick="rodarAlertaAgora()">🚨 Rodar Alertas</button>
-  </div>
-
   <div id="statusIndicator" class="status-bar"></div>
+</div>
 
-  <div id="dashboardContent" style="display:none;">
-    <div class="grid">
-      <div class="card">
-        <h3>Risco Médio</h3>
-        <div class="metric-big" id="riskScore">0.0</div>
-        <div id="riskLabel" style="font-weight: 700; margin-top: 5px;">BAIXO</div>
-        <div class="risk-bar-bg">
-          <div class="risk-bar-fill bg-low" id="riskFill"></div>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Sentimento</h3>
-        <canvas id="sentimentChart" height="150"></canvas>
-      </div>
-      <div class="card">
-        <h3>Matriz de Risco</h3>
-        <canvas id="riskChart" height="150"></canvas>
-      </div>
-    </div>
-
-    <div class="results-section">
-      <div class="results-header">
-        <h3>Dossiê de Eventos Encontrados</h3>
-      </div>
-      <table id="newsTable">
-        <thead>
-          <tr>
-            <th style="width: 15%">Fonte/Data</th>
-            <th style="width: 55%">Título e Análise</th>
-            <th style="width: 10%">Sent.</th>
-            <th style="width: 10%">Risco</th>
-            <th style="width: 10%">Ações</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top: 2rem;">
-    <h3>Configurar Monitoramento Automático (Watchlist)</h3>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Estes termos serão buscados automaticamente pelo robô de 1h em 1h.</p>
-    
-    <div class="wl-form">
-      <input type="text" id="wlQuery" placeholder='Termo (ex: "MPGO", "Operação Y")'>
-      <input type="text" id="wlLabel" placeholder="Apelido (ex: Alerta Institucional)">
-      <button class="wl-save-btn" style="background: var(--mp-blue); color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="addWatch()">Cadastrar</button>
-    </div>
-
-    <div id="wlList">
-      </div>
+<div id="dashboard" style="display:none;">
+  <div class="card">
+    <h3>Dossiê de Eventos</h3>
+    <table id="newsTable">
+      <thead><tr><th>Fonte</th><th>Título</th><th>Sentimento</th><th>Risco</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
 </div>
 
-<div id="analiseModal">
-  <div id="analiseModalInner">
-    <h2 id="analiseTitulo" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--mp-blue);">Ficha Técnica de Inteligência</h2>
-    <div id="analiseConteudo" style="max-height: 450px; overflow-y: auto;"></div>
-    <div style="margin-top: 1.5rem; text-align: right;">
-      <button class="btn-action btn-secondary" style="height: 40px;" onclick="fecharAnalise()">Fechar</button>
-    </div>
+<div class="card">
+  <h3>Watchlist Ativa</h3>
+  <div style="margin-bottom:15px;">
+    <input id="wlQuery" placeholder="Termo"> <input id="wlLabel" placeholder="Apelido"> 
+    <button class="btn btn-search" style="padding:8px;" onclick="addWatch()">+ Adicionar</button>
   </div>
+  <div id="wlList"></div>
 </div>
 
 <script>
-  const API_BASE = 'https://monitormpgo.lennontld.workers.dev'; // Verifique se este é seu URL atual
+  const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
   let newsData = [];
-  let chartSent = null;
-  let chartRsk = null;
-
-  // CARREGAR WATCHLIST AO ABRIR
-  window.onload = loadWatchlist;
-
-  async function loadWatchlist() {
-    try {
-      const resp = await fetch(`${API_BASE}/watchlist`);
-      const data = await resp.json();
-      const wlBox = document.getElementById('wlList');
-      if (data.items && data.items.length > 0) {
-        wlBox.innerHTML = data.items.map(i => `
-          <div class="wl-item">
-            <div class="wl-info">
-              <b>${sanitizeHtml(i.label)}</b>: <i>${sanitizeHtml(i.query)}</i>
-            </div>
-            <button class="wl-del-btn" onclick="deleteWatch('${i.id}')">Excluir</button>
-          </div>
-        `).join('');
-      } else {
-        wlBox.innerHTML = '<p style="color: gray; font-size: 0.85rem;">Nenhum termo cadastrado.</p>';
-      }
-    } catch (e) { console.error("Erro Watchlist:", e); }
-  }
-
-  async function addWatch() {
-    const query = document.getElementById('wlQuery').value.trim();
-    const label = document.getElementById('wlLabel').value.trim();
-    if (!query || !label) return alert("Preencha o termo e o apelido.");
-
-    try {
-      const resp = await fetch(`${API_BASE}/watchlist`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, label, enabled: true, cron: true })
-      });
-      if (resp.ok) {
-        document.getElementById('wlQuery').value = '';
-        document.getElementById('wlLabel').value = '';
-        loadWatchlist();
-      }
-    } catch (e) { alert("Erro ao cadastrar."); }
-  }
-
-  async function deleteWatch(id) {
-    if (!confirm("Deseja remover este termo?")) return;
-    try {
-      await fetch(`${API_BASE}/watchlist?id=${id}`, { method: "DELETE" });
-      loadWatchlist();
-    } catch (e) { alert("Erro ao excluir."); }
-  }
 
   async function buscarNoticias() {
-    const q = document.getElementById('termoBusca').value.trim();
-    if(!q) return alert("Digite um termo para busca.");
-    showStatus("Realizando varredura em Goiás (Últimas 48h)...", "loading");
-
+    const q = document.getElementById('termoBusca').value;
+    if(!q) return;
+    showStatus("Investigando...", "loading");
     try {
       const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(q)}`);
       const data = await resp.json();
-      processarDados(data.results || []);
-      showStatus("Varredura concluída com sucesso.", "ready");
-    } catch (e) { showStatus("Erro na conexão com o Worker.", "error"); }
+      renderTable(data.results || []);
+      showStatus("Análise concluída.", "ready");
+      document.getElementById('dashboard').style.display = 'block';
+    } catch (e) { showStatus("Erro na busca.", "ready"); }
   }
 
   async function rodarAlertaAgora() {
-    showStatus("Executando monitoramento da Watchlist...", "loading");
+    showStatus("Disparando robôs de monitoramento...", "loading");
     try {
       const resp = await fetch(`${API_BASE}/run-alert`, { method: "POST" });
       const data = await resp.json();
-      if(data.outcome && data.outcome.results) {
-        const allEvents = data.outcome.results.flatMap(r => r.data);
-        processarDados(allEvents);
-        showStatus(`Monitoramento enviado ao Telegram (${data.outcome.dispatched} alertas).`, "ready");
-      }
-    } catch (e) { showStatus("Erro ao disparar alertas.", "error"); }
+      // O dashboard exibe a mensagem de sucesso imediatamente
+      showStatus(data.msg, "ready"); 
+    } catch (e) { showStatus("Erro ao iniciar alertas.", "ready"); }
   }
 
-  function processarDados(results) {
-    if(!results || results.length === 0) {
-       document.getElementById('dashboardContent').style.display = 'none';
-       return showStatus("Nenhum evento relevante detectado neste período.", "ready");
-    }
-
-    newsData = results.map(item => ({
-      title: item.title,
-      url: item.url,
-      source: item.source,
-      date: item.date,
-      sentiment: item.sentimento || 'neutral',
-      riskScore: item.risco_score || 0,
-      riskLevel: item.risco_classificacao || 'baixo',
-      resumo: item.resumo_analitico || item.sintese_tecnica,
-      objeto: item.objeto_principal,
-      orgao: item.orgao_responsavel,
-      narrativa: item.narrativa_principal,
-      recomendacoes: item.recomendacao_contraprop || []
-    }));
-
-    document.getElementById('dashboardContent').style.display = 'block';
-    renderDashboard();
-  }
-
-  function renderDashboard() {
-    const avg = newsData.reduce((a, b) => a + b.riskScore, 0) / newsData.length;
-    document.getElementById('riskScore').innerText = avg.toFixed(1);
-    
-    const fill = document.getElementById('riskFill');
-    const label = document.getElementById('riskLabel');
-    fill.style.width = Math.min(avg, 100) + '%';
-    
-    if(avg > 75) { label.innerText = 'CRÍTICO'; label.className = 'text-critical'; fill.className = 'risk-bar-fill bg-critical'; }
-    else if(avg > 45) { label.innerText = 'ALTO'; label.className = 'text-high'; fill.className = 'risk-bar-fill bg-high'; }
-    else if(avg > 25) { label.innerText = 'MÉDIO'; label.className = 'text-medium'; fill.className = 'risk-bar-fill bg-medium'; }
-    else { label.innerText = 'BAIXO'; label.className = 'text-low'; fill.className = 'risk-bar-fill bg-low'; }
-
+  function renderTable(results) {
     const tbody = document.querySelector('#newsTable tbody');
-    tbody.innerHTML = newsData.map((n, i) => `
+    tbody.innerHTML = results.map(n => `
       <tr>
-        <td><b>${n.source}</b><br><small>${new Date(n.date).toLocaleString('pt-BR')}</small></td>
-        <td><b>${sanitizeHtml(n.title)}</b><br><small style="color:#666">${sanitizeHtml(n.resumo)}</small></td>
-        <td><span class="badge badge-sentiment-${n.sentiment}">${n.sentiment.toUpperCase()}</span></td>
-        <td><span style="font-weight:700" class="text-${n.riskLevel}">${n.riskScore}</span></td>
-        <td><button class="btn-link" onclick="verAnalise(${i})">FICHA</button></td>
+        <td><b>${n.source}</b></td>
+        <td>${n.title}</td>
+        <td><span class="badge ${n.sentimento==='negativo'?'badge-neg':''}">${n.sentimento}</span></td>
+        <td><b>${n.risco_score}</b></td>
       </tr>
     `).join('');
-
-    renderCharts();
   }
 
-  function renderCharts() {
-    if(chartSent) chartSent.destroy();
-    if(chartRsk) chartRsk.destroy();
+  async function loadWatchlist() {
+    const resp = await fetch(`${API_BASE}/watchlist`);
+    const data = await resp.json();
+    document.getElementById('wlList').innerHTML = data.items.map(i => `
+      <div class="wl-item"><span><b>${i.label}</b>: ${i.query}</span> 
+      <button onclick="deleteWatch('${i.id}')" style="color:red; cursor:pointer; border:none; background:none;">Excluir</button></div>
+    `).join('');
+  }
 
-    const sentCounts = [
-      newsData.filter(n => n.sentiment === 'positivo').length,
-      newsData.filter(n => n.sentiment === 'neutral').length,
-      newsData.filter(n => n.sentiment === 'negativo').length
-    ];
-
-    chartSent = new Chart(document.getElementById('sentimentChart'), {
-      type: 'doughnut',
-      data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentCounts, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'] }] },
-      options: { plugins: { legend: { position: 'bottom' } } }
+  async function addWatch() {
+    const query = document.getElementById('wlQuery').value;
+    const label = document.getElementById('wlLabel').value;
+    await fetch(`${API_BASE}/watchlist`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, label, enabled: true, cron: true })
     });
-
-    const riskLevels = [
-      newsData.filter(n => n.riskLevel === 'baixo').length,
-      newsData.filter(n => n.riskLevel === 'medio').length,
-      newsData.filter(n => n.riskLevel === 'alto').length,
-      newsData.filter(n => n.riskLevel === 'critico').length
-    ];
-
-    chartRsk = new Chart(document.getElementById('riskChart'), {
-      type: 'bar',
-      data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Qtd Notícias', data: riskLevels, backgroundColor: '#003366' }] },
-      options: { scales: { y: { beginAtZero: true } } }
-    });
+    loadWatchlist();
   }
 
-  function verAnalise(idx) {
-    const n = newsData[idx];
-    document.getElementById('analiseConteudo').innerHTML = `
-      <p><b>🎯 Objeto:</b> ${n.objeto || 'Não identificado'}</p>
-      <p><b>🏛️ Ator/Órgão:</b> ${n.orgao || 'Não identificado'}</p>
-      <p><b>📢 Narrativa Detectada:</b> ${n.narrativa || 'Informacional'}</p>
-      <hr style="margin: 15px 0">
-      <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border-left: 4px solid var(--mp-blue);">
-        <b>Síntese Técnica:</b><br>${n.resumo}
-      </div>
-      <h4 style="margin-top: 15px; color: var(--mp-blue);">🛡️ Recomendações de Contrapropaganda:</h4>
-      <ul style="padding-left: 20px;">${n.recomendacoes.map(r => `<li>${r}</li>`).join('') || '<li>Monitoramento contínuo.</li>'}</ul>
-      <p style="margin-top:15px;"><a href="${n.url}" target="_blank" style="color:var(--mp-blue); font-weight:700;">Acessar Link Original 🔗</a></p>
-    `;
-    document.getElementById('analiseModal').style.display = 'flex';
+  async function deleteWatch(id) {
+    await fetch(`${API_BASE}/watchlist?id=${id}`, { method: "DELETE" });
+    loadWatchlist();
   }
 
-  function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
-  function showStatus(m, t) { const s = document.getElementById('statusIndicator'); s.innerText = m; s.className = 'status-bar status-' + t; s.style.display = 'block'; }
-  function sanitizeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
+  function showStatus(m, t) {
+    const s = document.getElementById('statusIndicator');
+    s.innerText = m; s.className = 'status-bar ' + t; s.style.display = 'block';
+  }
+
+  loadWatchlist();
 </script>
 </body>
 </html>
