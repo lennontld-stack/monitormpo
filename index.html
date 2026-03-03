@@ -96,12 +96,20 @@
     .btn-link { color: var(--mp-blue); text-decoration: none; font-weight: 600; font-size: 0.875rem; cursor: pointer; background: none; border: none; }
     .btn-link:hover { text-decoration: underline; }
 
-    #fontesModal, #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
-    #fontesModalInner, #analiseModalInner { background: #fff; width: 90%; max-width: 600px; padding: 1.5rem; border-radius: 12px; }
+    #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+    #analiseModalInner { background: #fff; width: 90%; max-width: 650px; padding: 1.5rem; border-radius: 12px; }
 
-    .wl-item { border: 1px solid #e5e7eb; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: #fff; }
+    /* Estilos Watchlist */
+    .wl-form { display: grid; grid-template-columns: 2fr 1fr 100px; gap: 10px; margin-bottom: 15px; }
+    .wl-form input { padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .wl-item { border: 1px solid #e5e7eb; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .wl-info b { color: var(--mp-blue); }
+    .wl-del-btn { color: #ef4444; border: none; background: none; font-weight: 700; cursor: pointer; }
+
     .bg-critical { background: var(--risk-critical); } .bg-high { background: var(--risk-high); }
     .bg-medium { background: var(--risk-medium); } .bg-low { background: var(--risk-low); }
+    .text-critical { color: var(--risk-critical); } .text-high { color: var(--risk-high); }
+    .text-medium { color: var(--risk-medium); } .text-low { color: var(--risk-low); }
   </style>
 </head>
 <body>
@@ -111,19 +119,20 @@
     <div class="logo-badge">⚖️</div>
     <div>
       <h1>MPGO Monitor</h1>
-      <p>Coordenadoria de Segurança Institucional e Inteligência - Dashboard de Riscos</p>
+      <p>Coordenadoria de Segurança Institucional e Inteligência - CSI</p>
     </div>
   </div>
 </header>
 
 <div class="container">
+  
   <div class="search-card">
     <div class="search-input-group">
-      <label>Investigação Pontual</label>
-      <input type="text" id="termoBusca" class="search-input" placeholder="Digite o termo ou nome da autoridade...">
+      <label>Investigação Pontual (Tempo Real)</label>
+      <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "GAECO", "Cyro Terra", "Operação X"'>
     </div>
-    <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Pesquisar</button>
-    <button class="btn-action btn-secondary" onclick="rodarAlertaAgora()">🚨 Rodar Alerta Agora</button>
+    <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar</button>
+    <button class="btn-action btn-secondary" onclick="rodarAlertaAgora()">🚨 Rodar Alertas</button>
   </div>
 
   <div id="statusIndicator" class="status-bar"></div>
@@ -131,7 +140,7 @@
   <div id="dashboardContent" style="display:none;">
     <div class="grid">
       <div class="card">
-        <h3>Risco Ponderado</h3>
+        <h3>Risco Médio</h3>
         <div class="metric-big" id="riskScore">0.0</div>
         <div id="riskLabel" style="font-weight: 700; margin-top: 5px;">BAIXO</div>
         <div class="risk-bar-bg">
@@ -139,27 +148,27 @@
         </div>
       </div>
       <div class="card">
-        <h3>Sentimento Médio</h3>
+        <h3>Sentimento</h3>
         <canvas id="sentimentChart" height="150"></canvas>
       </div>
       <div class="card">
-        <h3>Volume por Risco</h3>
+        <h3>Matriz de Risco</h3>
         <canvas id="riskChart" height="150"></canvas>
       </div>
     </div>
 
     <div class="results-section">
       <div class="results-header">
-        <h3>Eventos Detectados (Últimas 48h)</h3>
+        <h3>Dossiê de Eventos Encontrados</h3>
       </div>
       <table id="newsTable">
         <thead>
           <tr>
-            <th>Fonte/Data</th>
-            <th>Síntese do Evento</th>
-            <th>Sentimento</th>
-            <th>Risco</th>
-            <th>Ações</th>
+            <th style="width: 15%">Fonte/Data</th>
+            <th style="width: 55%">Título e Análise</th>
+            <th style="width: 10%">Sent.</th>
+            <th style="width: 10%">Risco</th>
+            <th style="width: 10%">Ações</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -168,15 +177,24 @@
   </div>
 
   <div class="card" style="margin-top: 2rem;">
-    <h3>Configurar Watchlist (Monitoramento Ativo)</h3>
-    <div id="wlList"></div>
+    <h3>Configurar Monitoramento Automático (Watchlist)</h3>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Estes termos serão buscados automaticamente pelo robô de 1h em 1h.</p>
+    
+    <div class="wl-form">
+      <input type="text" id="wlQuery" placeholder='Termo (ex: "MPGO", "Operação Y")'>
+      <input type="text" id="wlLabel" placeholder="Apelido (ex: Alerta Institucional)">
+      <button class="wl-save-btn" style="background: var(--mp-blue); color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="addWatch()">Cadastrar</button>
+    </div>
+
+    <div id="wlList">
+      </div>
   </div>
 </div>
 
 <div id="analiseModal">
   <div id="analiseModalInner">
-    <h2 id="analiseTitulo" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--mp-blue);">Análise Estratégica</h2>
-    <div id="analiseConteudo" style="max-height: 400px; overflow-y: auto;"></div>
+    <h2 id="analiseTitulo" style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--mp-blue);">Ficha Técnica de Inteligência</h2>
+    <div id="analiseConteudo" style="max-height: 450px; overflow-y: auto;"></div>
     <div style="margin-top: 1.5rem; text-align: right;">
       <button class="btn-action btn-secondary" style="height: 40px;" onclick="fecharAnalise()">Fechar</button>
     </div>
@@ -184,41 +202,91 @@
 </div>
 
 <script>
-  const API_BASE = 'https://monitormpgo.lennontld.workers.dev'; // Substitua pelo seu URL real
+  const API_BASE = 'https://monitormpgo.lennontld.workers.dev'; // Verifique se este é seu URL atual
   let newsData = [];
   let chartSent = null;
   let chartRsk = null;
 
+  // CARREGAR WATCHLIST AO ABRIR
+  window.onload = loadWatchlist;
+
+  async function loadWatchlist() {
+    try {
+      const resp = await fetch(`${API_BASE}/watchlist`);
+      const data = await resp.json();
+      const wlBox = document.getElementById('wlList');
+      if (data.items && data.items.length > 0) {
+        wlBox.innerHTML = data.items.map(i => `
+          <div class="wl-item">
+            <div class="wl-info">
+              <b>${sanitizeHtml(i.label)}</b>: <i>${sanitizeHtml(i.query)}</i>
+            </div>
+            <button class="wl-del-btn" onclick="deleteWatch('${i.id}')">Excluir</button>
+          </div>
+        `).join('');
+      } else {
+        wlBox.innerHTML = '<p style="color: gray; font-size: 0.85rem;">Nenhum termo cadastrado.</p>';
+      }
+    } catch (e) { console.error("Erro Watchlist:", e); }
+  }
+
+  async function addWatch() {
+    const query = document.getElementById('wlQuery').value.trim();
+    const label = document.getElementById('wlLabel').value.trim();
+    if (!query || !label) return alert("Preencha o termo e o apelido.");
+
+    try {
+      const resp = await fetch(`${API_BASE}/watchlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, label, enabled: true, cron: true })
+      });
+      if (resp.ok) {
+        document.getElementById('wlQuery').value = '';
+        document.getElementById('wlLabel').value = '';
+        loadWatchlist();
+      }
+    } catch (e) { alert("Erro ao cadastrar."); }
+  }
+
+  async function deleteWatch(id) {
+    if (!confirm("Deseja remover este termo?")) return;
+    try {
+      await fetch(`${API_BASE}/watchlist?id=${id}`, { method: "DELETE" });
+      loadWatchlist();
+    } catch (e) { alert("Erro ao excluir."); }
+  }
+
   async function buscarNoticias() {
-    const q = document.getElementById('termoBusca').value;
-    if(!q) return alert("Digite um termo.");
-    showStatus("Investigando na rede...", "loading");
+    const q = document.getElementById('termoBusca').value.trim();
+    if(!q) return alert("Digite um termo para busca.");
+    showStatus("Realizando varredura em Goiás (Últimas 48h)...", "loading");
 
     try {
       const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(q)}`);
       const data = await resp.json();
       processarDados(data.results || []);
-      showStatus("Busca concluída.", "ready");
-    } catch (e) { showStatus("Erro na busca: " + e.message, "error"); }
+      showStatus("Varredura concluída com sucesso.", "ready");
+    } catch (e) { showStatus("Erro na conexão com o Worker.", "error"); }
   }
 
   async function rodarAlertaAgora() {
-    showStatus("Rodando Watchlist e Alertas...", "loading");
+    showStatus("Executando monitoramento da Watchlist...", "loading");
     try {
       const resp = await fetch(`${API_BASE}/run-alert`, { method: "POST" });
       const data = await resp.json();
       if(data.outcome && data.outcome.results) {
         const allEvents = data.outcome.results.flatMap(r => r.data);
         processarDados(allEvents);
-        showStatus(`Alerta rodado! ${data.outcome.dispatched} notificações enviadas.`, "ready");
+        showStatus(`Monitoramento enviado ao Telegram (${data.outcome.dispatched} alertas).`, "ready");
       }
-    } catch (e) { showStatus("Erro ao rodar alerta.", "error"); }
+    } catch (e) { showStatus("Erro ao disparar alertas.", "error"); }
   }
 
   function processarDados(results) {
-    if(!results.length) {
+    if(!results || results.length === 0) {
        document.getElementById('dashboardContent').style.display = 'none';
-       return showStatus("Nenhuma notícia relevante encontrada.", "ready");
+       return showStatus("Nenhum evento relevante detectado neste período.", "ready");
     }
 
     newsData = results.map(item => ({
@@ -232,7 +300,8 @@
       resumo: item.resumo_analitico || item.sintese_tecnica,
       objeto: item.objeto_principal,
       orgao: item.orgao_responsavel,
-      recomendações: item.recomendacao_contraprop || []
+      narrativa: item.narrativa_principal,
+      recomendacoes: item.recomendacao_contraprop || []
     }));
 
     document.getElementById('dashboardContent').style.display = 'block';
@@ -240,22 +309,26 @@
   }
 
   function renderDashboard() {
-    // 1. Médias
     const avg = newsData.reduce((a, b) => a + b.riskScore, 0) / newsData.length;
     document.getElementById('riskScore').innerText = avg.toFixed(1);
+    
     const fill = document.getElementById('riskFill');
-    fill.style.width = avg + '%';
-    fill.className = 'risk-bar-fill ' + (avg > 70 ? 'bg-critical' : avg > 40 ? 'bg-medium' : 'bg-low');
+    const label = document.getElementById('riskLabel');
+    fill.style.width = Math.min(avg, 100) + '%';
+    
+    if(avg > 75) { label.innerText = 'CRÍTICO'; label.className = 'text-critical'; fill.className = 'risk-bar-fill bg-critical'; }
+    else if(avg > 45) { label.innerText = 'ALTO'; label.className = 'text-high'; fill.className = 'risk-bar-fill bg-high'; }
+    else if(avg > 25) { label.innerText = 'MÉDIO'; label.className = 'text-medium'; fill.className = 'risk-bar-fill bg-medium'; }
+    else { label.innerText = 'BAIXO'; label.className = 'text-low'; fill.className = 'risk-bar-fill bg-low'; }
 
-    // 2. Tabela
     const tbody = document.querySelector('#newsTable tbody');
     tbody.innerHTML = newsData.map((n, i) => `
       <tr>
-        <td style="font-size: 0.8rem;"><b>${n.source}</b><br>${new Date(n.date).toLocaleDateString()}</td>
-        <td><b>${n.title}</b><br><small>${n.resumo.substring(0, 100)}...</small></td>
-        <td><span class="badge badge-sentiment-${n.sentiment}">${n.sentiment}</span></td>
+        <td><b>${n.source}</b><br><small>${new Date(n.date).toLocaleString('pt-BR')}</small></td>
+        <td><b>${sanitizeHtml(n.title)}</b><br><small style="color:#666">${sanitizeHtml(n.resumo)}</small></td>
+        <td><span class="badge badge-sentiment-${n.sentiment}">${n.sentiment.toUpperCase()}</span></td>
         <td><span style="font-weight:700" class="text-${n.riskLevel}">${n.riskScore}</span></td>
-        <td><button class="btn-link" onclick="verAnalise(${i})">Análise IA</button></td>
+        <td><button class="btn-link" onclick="verAnalise(${i})">FICHA</button></td>
       </tr>
     `).join('');
 
@@ -274,7 +347,7 @@
 
     chartSent = new Chart(document.getElementById('sentimentChart'), {
       type: 'doughnut',
-      data: { labels: ['Pos', 'Neu', 'Neg'], datasets: [{ data: sentCounts, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'] }] },
+      data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentCounts, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'] }] },
       options: { plugins: { legend: { position: 'bottom' } } }
     });
 
@@ -287,30 +360,31 @@
 
     chartRsk = new Chart(document.getElementById('riskChart'), {
       type: 'bar',
-      data: { labels: ['B', 'M', 'A', 'C'], datasets: [{ label: 'Qtd', data: riskLevels, backgroundColor: '#003366' }] }
+      data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Qtd Notícias', data: riskLevels, backgroundColor: '#003366' }] },
+      options: { scales: { y: { beginAtZero: true } } }
     });
   }
 
   function verAnalise(idx) {
     const n = newsData[idx];
     document.getElementById('analiseConteudo').innerHTML = `
-      <p><b>Objeto:</b> ${n.objeto}</p>
-      <p><b>Órgão:</b> ${n.orgao}</p>
-      <hr style="margin: 10px 0">
-      <p style="background: #f9f9f9; padding: 10px; border-radius: 5px;">${n.resumo}</p>
-      <h4 style="margin-top: 15px; color: var(--mp-blue);">Sugestões de Contrapropaganda:</h4>
-      <ul>${n.recomendações.map(r => `<li>${r}</li>`).join('')}</ul>
+      <p><b>🎯 Objeto:</b> ${n.objeto || 'Não identificado'}</p>
+      <p><b>🏛️ Ator/Órgão:</b> ${n.orgao || 'Não identificado'}</p>
+      <p><b>📢 Narrativa Detectada:</b> ${n.narrativa || 'Informacional'}</p>
+      <hr style="margin: 15px 0">
+      <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border-left: 4px solid var(--mp-blue);">
+        <b>Síntese Técnica:</b><br>${n.resumo}
+      </div>
+      <h4 style="margin-top: 15px; color: var(--mp-blue);">🛡️ Recomendações de Contrapropaganda:</h4>
+      <ul style="padding-left: 20px;">${n.recomendacoes.map(r => `<li>${r}</li>`).join('') || '<li>Monitoramento contínuo.</li>'}</ul>
+      <p style="margin-top:15px;"><a href="${n.url}" target="_blank" style="color:var(--mp-blue); font-weight:700;">Acessar Link Original 🔗</a></p>
     `;
     document.getElementById('analiseModal').style.display = 'flex';
   }
 
   function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
   function showStatus(m, t) { const s = document.getElementById('statusIndicator'); s.innerText = m; s.className = 'status-bar status-' + t; s.style.display = 'block'; }
-
-  // Watchlist Initial Load
-  fetch(`${API_BASE}/watchlist`).then(r => r.json()).then(d => {
-    document.getElementById('wlList').innerHTML = d.items.map(i => `<div class="wl-item"><b>${i.label}</b>: <i>${i.query}</i></div>`).join('');
-  });
+  function sanitizeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
 </script>
 </body>
 </html>
