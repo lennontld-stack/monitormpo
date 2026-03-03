@@ -1,83 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>MPGO Monitor - Inteligência Reputacional</title>
+  <meta charset="UTF-8">
+  <title>MPGO Monitor - Dashboard CSI</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { --mp-blue: #003366; --bg-page: #f3f4f6; --risk-critical: #ef4444; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg-page); padding: 20px; }
+    :root { --mp-blue: #003366; --bg: #f3f4f6; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 20px; }
     .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
     .btn-search { background: var(--mp-blue); color: #fff; }
     .btn-alert { background: #111827; color: #fff; }
-    .status-bar { padding: 10px; margin-top: 10px; border-radius: 8px; font-size: 0.9rem; display: none; }
-    .loading { background: #eff6ff; color: #1e40af; }
-    .ready { background: #f0fdf4; color: #166534; }
-    .wl-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .status { padding: 10px; margin-top: 10px; border-radius: 8px; display: none; text-align: center; font-weight: 500; }
+    .status-loading { background: #eff6ff; color: #1e40af; }
+    .status-ready { background: #f0fdf4; color: #166534; }
+    table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-    .badge-neg { background: #fee2e2; color: #991b1b; }
+    .wl-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>Investigação CSI - MPGO</h2>
+  <h2>Monitor de Inteligência - CSI MPGO</h2>
   <div style="display:flex; gap:10px; margin-top:15px;">
-    <input type="text" id="termoBusca" style="flex:1; padding:12px; border-radius:8px; border:1px solid #ddd;" placeholder="Digite o termo...">
+    <input type="text" id="termoBusca" style="flex:1; padding:12px; border-radius:8px; border:1px solid #ddd;" placeholder="Digite o termo para investigação manual...">
     <button class="btn btn-search" onclick="buscarNoticias()">🔍 Investigar</button>
     <button class="btn btn-alert" onclick="rodarAlertaAgora()">🚨 Rodar Alertas</button>
   </div>
-  <div id="statusIndicator" class="status-bar"></div>
+  <div id="statusIndicator" class="status"></div>
 </div>
 
 <div id="dashboard" style="display:none;">
   <div class="card">
-    <h3>Dossiê de Eventos</h3>
+    <h3>Resultados da Busca Manual</h3>
     <table id="newsTable">
-      <thead><tr><th>Fonte</th><th>Título</th><th>Sentimento</th><th>Risco</th></tr></thead>
+      <thead><tr><th>Fonte</th><th>Título</th><th>Risco</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 </div>
 
 <div class="card">
-  <h3>Watchlist Ativa</h3>
-  <div style="margin-bottom:15px;">
-    <input id="wlQuery" placeholder="Termo"> <input id="wlLabel" placeholder="Apelido"> 
-    <button class="btn btn-search" style="padding:8px;" onclick="addWatch()">+ Adicionar</button>
+  <h3>Watchlist de Monitoramento</h3>
+  <div style="margin-bottom:15px; display:flex; gap:10px;">
+    <input id="wlQuery" placeholder='Termo (ex: "GAECO")' style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd;"> 
+    <input id="wlLabel" placeholder="Apelido" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd;"> 
+    <button class="btn btn-search" onclick="addWatch()">Cadastrar</button>
   </div>
   <div id="wlList"></div>
 </div>
 
 <script>
   const API_BASE = 'https://monitormpgo.lennontld.workers.dev';
-  let newsData = [];
 
   async function buscarNoticias() {
-    const q = document.getElementById('termoBusca').value;
+    const q = document.getElementById('termoBusca').value.trim();
     if(!q) return;
-    showStatus("Investigando...", "loading");
+    showStatus("Investigando rede e processando IA...", "status-loading");
     try {
       const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(q)}`);
       const data = await resp.json();
       renderTable(data.results || []);
-      showStatus("Análise concluída.", "ready");
+      showStatus("Investigação concluída.", "status-ready");
       document.getElementById('dashboard').style.display = 'block';
-    } catch (e) { showStatus("Erro na busca.", "ready"); }
+    } catch (e) { showStatus("Erro na investigação.", "status-ready"); }
   }
 
   async function rodarAlertaAgora() {
-    showStatus("Disparando robôs de monitoramento...", "loading");
+    showStatus("Disparando robôs CSI em segundo plano...", "status-loading");
     try {
       const resp = await fetch(`${API_BASE}/run-alert`, { method: "POST" });
       const data = await resp.json();
-      // O dashboard exibe a mensagem de sucesso imediatamente
-      showStatus(data.msg, "ready"); 
-    } catch (e) { showStatus("Erro ao iniciar alertas.", "ready"); }
+      // O Dashboard libera o usuário imediatamente
+      showStatus(data.msg, "status-ready"); 
+    } catch (e) { showStatus("Erro ao disparar monitoramento.", "status-ready"); }
   }
 
   function renderTable(results) {
@@ -86,40 +84,45 @@
       <tr>
         <td><b>${n.source}</b></td>
         <td>${n.title}</td>
-        <td><span class="badge ${n.sentimento==='negativo'?'badge-neg':''}">${n.sentimento}</span></td>
         <td><b>${n.risco_score}</b></td>
       </tr>
     `).join('');
   }
 
   async function loadWatchlist() {
-    const resp = await fetch(`${API_BASE}/watchlist`);
-    const data = await resp.json();
-    document.getElementById('wlList').innerHTML = data.items.map(i => `
-      <div class="wl-item"><span><b>${i.label}</b>: ${i.query}</span> 
-      <button onclick="deleteWatch('${i.id}')" style="color:red; cursor:pointer; border:none; background:none;">Excluir</button></div>
-    `).join('');
+    try {
+      const resp = await fetch(`${API_BASE}/watchlist`);
+      const data = await resp.json();
+      document.getElementById('wlList').innerHTML = data.items.map(i => `
+        <div class="wl-item"><span><b>${i.label}</b>: ${i.query}</span> 
+        <button onclick="deleteWatch('${i.id}')" style="color:red; cursor:pointer; border:none; background:none; font-weight:700;">Remover</button></div>
+      `).join('');
+    } catch (e) { console.log("Erro ao carregar lista."); }
   }
 
   async function addWatch() {
     const query = document.getElementById('wlQuery').value;
     const label = document.getElementById('wlLabel').value;
+    if(!query || !label) return;
     await fetch(`${API_BASE}/watchlist`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, label, enabled: true, cron: true })
     });
+    document.getElementById('wlQuery').value = '';
+    document.getElementById('wlLabel').value = '';
     loadWatchlist();
   }
 
   async function deleteWatch(id) {
+    if(!confirm("Remover este termo?")) return;
     await fetch(`${API_BASE}/watchlist?id=${id}`, { method: "DELETE" });
     loadWatchlist();
   }
 
   function showStatus(m, t) {
     const s = document.getElementById('statusIndicator');
-    s.innerText = m; s.className = 'status-bar ' + t; s.style.display = 'block';
+    s.innerText = m; s.className = 'status ' + t; s.style.display = 'block';
   }
 
   loadWatchlist();
