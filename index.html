@@ -1,123 +1,748 @@
+<!-- monitormpgo.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>CSI - Inteligência MPGO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #002B5B; --secondary: #1A5F7A; --bg: #F8FAFC; --card-bg: #FFFFFF; --text: #1E293B; --border: #E2E8F0; --danger: #EF4444; --success: #22C55E; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text); }
-        .app-header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 2rem; text-align: center; }
-        .wrapper { max-width: 1100px; margin: -2rem auto 2rem; padding: 0 1.5rem; }
-        .search-container { background: var(--card-bg); padding: 1.5rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: flex; gap: 1rem; border: 1px solid var(--border); }
-        .search-container input { flex: 1; padding: 1rem; border: 2px solid var(--border); border-radius: 10px; }
-        .btn { padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; border: none; }
-        .btn-primary { background: var(--primary); color: white; }
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .news-card { background: var(--card-bg); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; }
-        .news-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; }
-        .badge { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; margin-right: 5px; }
-        .badge-danger { background: #FEE2E2; color: var(--danger); }
-        .badge-success { background: #DCFCE7; color: var(--success); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: white; width: 90%; max-width: 600px; border-radius: 20px; padding: 2rem; position: relative; }
-        .contra-box { background: #F1F5F9; border-left: 4px solid var(--primary); padding: 1rem; margin-top: 1rem; border-radius: 4px; }
-        #statusIndicator { padding: 10px; text-align: center; margin-top: 10px; display: none; border-radius: 8px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MPGO Monitor - Inteligência Reputacional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --mp-blue: #003366;
+      --mp-blue-light: #004d99;
+      --bg-page: #f3f4f6;
+      --bg-card: #ffffff;
+      --risk-critical: #ef4444;
+      --risk-high: #f97316;
+      --risk-medium: #eab308;
+      --risk-low: #22c55e;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); padding-bottom: 40px; }
+
+    .header { background: var(--mp-blue); color: white; padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 1.5rem; }
+    .header-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .logo-badge { font-size: 2rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
+    .header h1 { font-size: 1.25rem; font-weight: 700; }
+    .header p { font-size: 0.875rem; opacity: 0.8; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .search-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      border: 1px solid #e5e7eb;
+      flex-wrap: wrap;
+    }
+    .search-input-group { flex: 1; min-width: 260px; }
+    .search-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
+    .search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+    .search-input:focus { outline: none; border-color: var(--mp-blue); }
+
+    .btn-action {
+      height: 52px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0 1.25rem;
+      border: none;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .btn-search { background: var(--mp-blue); color: white; }
+    .btn-search:hover { background: var(--mp-blue-light); }
+    .btn-secondary { background: #111827; color: white; }
+    .btn-secondary:hover { background: #0b1220; }
+
+    .btn-report { background: #4b5563; color: white; display: none; }
+    .btn-report:hover { background: #374151; }
+
+    .btn-clear { background: #fee2e2; color: #dc2626; display: none; }
+
+    .status-bar { margin-top: 1rem; font-size: 0.875rem; font-weight: 500; padding: 0.75rem; border-radius: 8px; display: none; text-align: center; }
+    .status-loading { background: #eff6ff; color: var(--mp-blue); }
+    .status-ready { background: #f0fdf4; color: var(--risk-low); border: 1px solid #dcfce7; }
+    .status-error { background: #fef2f2; color: var(--risk-critical); border: 1px solid #fee2e2; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+    .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; }
+
+    .metric-big { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: auto; }
+    .risk-meter-container { margin-top: auto; }
+    .risk-bar-bg { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
+    .risk-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
+
+    .bg-critical { background: var(--risk-critical); }
+    .bg-high { background: var(--risk-high); }
+    .bg-medium { background: var(--risk-medium); }
+    .bg-low { background: var(--risk-low); }
+    .text-critical { color: var(--risk-critical); }
+    .text-high { color: var(--risk-high); }
+    .text-medium { color: var(--risk-medium); }
+    .text-low { color: var(--risk-low); }
+
+    .results-section { background: var(--bg-card); border-radius: var(--radius); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid #e5e7eb; overflow: hidden; }
+    .results-header { padding: 1.25rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .filters { display: flex; gap: 0.5rem; }
+    .filter-btn { background: transparent; border: 1px solid #e5e7eb; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; }
+    .filter-btn:hover { background: #f9fafb; }
+    .filter-btn.active { background: var(--mp-blue); color: white; border-color: var(--mp-blue); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 1rem 1.25rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 1.1rem 1.25rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    tr:hover { background: #f9fafb; }
+
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .badge-sentiment-positive { background: #dcfce7; color: #166534; }
+    .badge-sentiment-neutral { background: #f3f4f6; color: #4b5563; }
+    .badge-sentiment-negative { background: #fee2e2; color: #991b1b; }
+
+    .badge-risk { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .content-preview { margin-top: 0.25rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+    .source-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--mp-blue); background: #eff6ff; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px; }
+    .btn-link { color: var(--mp-blue); text-decoration: none; font-weight: 600; font-size: 0.875rem; cursor: pointer; background: none; border: none; padding: 0; }
+    .btn-link:hover { text-decoration: underline; }
+    .chart-box { height: 200px; display: flex; justify-content: center; align-items: center; }
+
+    #fontesModal, #analiseModal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 60; }
+    #fontesModalInner, #analiseModalInner { background: #ffffff; max-width: 900px; width: 92%; padding: 1.25rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    #fontesLista { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-left: 1rem; }
+    #fontesLista li { margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-main); }
+    #fontesLista a { color: var(--mp-blue); text-decoration: none; word-break: break-all; }
+    #analiseConteudo { margin-top: 1rem; font-size: 0.9rem; line-height: 1.6; color: #111827; }
+    .chip { background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; }
+
+    .wl-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; gap:10px; align-items:center; }
+    .wl-row input, .wl-row select { width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:8px; }
+    .wl-list { margin-top: 12px; display:flex; flex-direction:column; gap:10px; }
+    .wl-item { border:1px solid #e5e7eb; border-radius:12px; padding:12px; background:#fff; }
+    .wl-item-top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .wl-mini { display:flex; gap:10px; align-items:center; flex-wrap:wrap; color:var(--text-muted); font-size:0.85rem; }
+    .wl-mini label { display:flex; gap:6px; align-items:center; cursor:pointer; }
+    .wl-actions { display:flex; gap:10px; align-items:center; }
+    .wl-del { background:#fee2e2; color:#b91c1c; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+    .wl-save { background:var(--mp-blue); color:#fff; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+
+    @media (max-width: 768px) {
+      .btn-action { width: 100%; justify-content: center; }
+      .wl-row { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
+
 <body>
-
-<header class="app-header">
-    <h1>CSI Intelligence Portal</h1>
-    <p>Monitoramento Reputacional e Contrapropaganda Estratégica</p>
-</header>
-
-<div class="wrapper">
-    <div class="search-container">
-        <input type="text" id="termoBusca" placeholder="Termo exato (ex: 'Ministério Público do Estado de Goiás')">
-        <button class="btn btn-primary" onclick="buscar()">🚀 Investigar</button>
-        <button class="btn" style="background:#0F172A; color:white;" onclick="alertar()">📡 Rodar Watchlist</button>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-badge">⚖️</div>
+      <div>
+        <h1>MPGO Monitor</h1>
+        <p>Coordenadoria de Segurança Institucional e Inteligência - Análise Reputacional</p>
+      </div>
     </div>
-    <div id="statusIndicator"></div>
-    <div id="resultsGrid" class="results-grid"></div>
-</div>
+  </header>
 
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-card">
-        <h2 id="mTitle" style="color:var(--primary); margin-bottom:15px;">Ficha Técnica</h2>
-        <div id="mContent"></div>
-        <button class="btn btn-primary" style="margin-top:20px; width:100%;" onclick="fecharModal()">Concluído</button>
+  <div class="container">
+
+    <div class="search-card">
+      <div class="search-input-group">
+        <label>Busca pontual (últimas 48h)</label>
+        <input type="text" id="termoBusca" class="search-input" placeholder='Ex: "Operação X", "nome", "tema"'>
+      </div>
+
+      <button class="btn-action btn-search" onclick="buscarNoticias()">🔍 Investigar (IA)</button>
+      <button class="btn-action btn-secondary" onclick="rodarAlertaAgora()">🚨 Rodar alerta agora</button>
+
+      <button class="btn-action btn-report" id="reportBtn" onclick="window.print()">📄 Gerar Relatório</button>
+      <button class="btn-action btn-clear" id="clearBtn" onclick="clearData()">Limpar</button>
     </div>
-</div>
 
-<script>
-    const API_BASE = 'https://monitormpgo.lennontld.workers.dev'; // Verifique se este é o URL correto
-    let newsList = [];
+    <div class="card" style="margin-bottom: 1rem;">
+      <h3>Alertas (Watchlist)</h3>
 
-    async function buscar() {
-        const q = document.getElementById('termoBusca').value;
-        if(!q) return;
-        showStatus("Varredura de exatidão textual ativa...", "#eff6ff", "#1e40af");
-        try {
-            const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(q)}`);
-            const data = await resp.json();
-            newsList = data.results || [];
-            renderCards();
-            showStatus(newsList.length ? "Análise concluída." : "Nenhum resultado exato encontrado.", "#f0fdf4", "#166534");
-        } catch (e) { showStatus("Erro na conexão.", "#fef2f2", "#991b1b"); }
+      <div class="wl-row">
+        <input id="wlQuery" placeholder='Consulta (ex: "Cyro Terra", "GAECO" Goiás, "Operação X")' />
+        <input id="wlLabel" placeholder="Rótulo curto (ex: Cyro Terra)" />
+        <select id="wlType">
+          <option value="geral">geral</option>
+          <option value="institucional">institucional</option>
+          <option value="autoridade">autoridade</option>
+          <option value="temporario">temporario</option>
+        </select>
+        <select id="wlPriority">
+          <option value="1">prioridade 1</option>
+          <option value="2" selected>prioridade 2</option>
+          <option value="3">prioridade 3</option>
+          <option value="4">prioridade 4</option>
+          <option value="5">prioridade 5</option>
+        </select>
+        <button class="wl-save" onclick="addWatch()">Adicionar</button>
+      </div>
+
+      <div style="margin-top:10px; color:var(--text-muted); font-size:0.9rem;">
+        Dica: o CRON considera itens com CRON ligado e Habilitado.
+      </div>
+
+      <div class="wl-list" id="wlList"></div>
+    </div>
+
+    <div id="statusIndicator" class="status-bar"></div>
+
+    <div id="dashboardContent" style="display:none;">
+
+      <div id="executiveReport" style="display:none; background:#fff; border-left:5px solid var(--mp-blue); padding:1.25rem; margin-bottom:1.25rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <h3 style="color: var(--mp-blue); margin-top:0; display:flex; align-items:center; gap:8px;">
+          📊 Briefing de Inteligência
+          <span style="font-size:0.7em; background:#eff6ff; color:var(--mp-blue); padding:2px 8px; border-radius:12px;">Gerado por IA</span>
+        </h3>
+        <div id="briefingText" style="font-size:1rem; line-height:1.6; color:#374151; white-space:pre-line;"></div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Risco ponderado</h3>
+          <div class="risk-meter-container">
+            <div style="display:flex; justify-content:space-between; align-items:end;">
+              <span class="metric-big" id="riskScore">0.0</span>
+              <span style="font-weight:600; margin-bottom:8px;" id="riskLabel">BAIXO</span>
+            </div>
+            <div class="risk-bar-bg">
+              <div class="risk-bar-fill bg-low" id="riskFill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Sentimento</h3>
+          <div class="chart-box"><canvas id="sentimentChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Gravidade</h3>
+          <div class="chart-box"><canvas id="riskChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="results-section">
+        <div class="results-header">
+          <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">Dossiê de eventos detectados</h3>
+          <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="negative">🔴 Negativo</button>
+            <button class="filter-btn" data-filter="neutral">⚪ Neutro</button>
+            <button class="filter-btn" data-filter="positive">🟢 Positivo</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table id="newsTable">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Data</th>
+                <th style="width: 50%;">Evento / Síntese</th>
+                <th style="width: 10%;">Sent.</th>
+                <th style="width: 10%;">Risco</th>
+                <th style="width: 15%;">Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="tableEmpty" style="padding:3rem; text-align:center; color:var(--text-muted);">Nenhum resultado encontrado.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fontesModal">
+    <div id="fontesModalInner">
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Fontes do evento</h3>
+      <p id="fontesModalResumo" style="margin-top:0.5rem; font-size:0.875rem; color:var(--text-muted);"></p>
+      <ul id="fontesLista"></ul>
+      <div style="margin-top:1.25rem; text-align:right;">
+        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharFontes()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="analiseModal">
+    <div id="analiseModalInner">
+      <h3 style="margin:0; font-size:1rem; font-weight:700;">Análise estratégica</h3>
+      <div id="analiseConteudo"></div>
+      <div style="margin-top:1.25rem; text-align:right;">
+        <button style="background:#e5e7eb; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;" onclick="fecharAnalise()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // IMPORTANTE: coloque aqui o URL REAL do seu Worker (copiado do Cloudflare)
+    // Ex: https://monitormpgo.<seu-subdominio>.workers.dev
+    const API_BASE = 'https://SEU_WORKER_AQUI.workers.dev';
+
+    function getAdminToken() {
+      return sessionStorage.getItem("ADMIN_TOKEN") || "";
+    }
+    function ensureAdminToken() {
+      let t = getAdminToken();
+      if (!t) {
+        t = prompt("ADMIN_TOKEN (X-Admin-Token):") || "";
+        if (t) sessionStorage.setItem("ADMIN_TOKEN", t);
+      }
+      return t;
     }
 
-    async function alertar() {
-        showStatus("Disparando robôs CSI...", "#eff6ff", "#1e40af");
-        const resp = await fetch(`${API_BASE}/run-alert`, { method: "POST" });
+    function getAlertToken() {
+      return sessionStorage.getItem("ALERT_RUN_TOKEN") || "";
+    }
+    function ensureAlertToken() {
+      let t = getAlertToken();
+      if (!t) {
+        t = prompt("ALERT_RUN_TOKEN (X-Alert-Token):") || "";
+        if (t) sessionStorage.setItem("ALERT_RUN_TOKEN", t);
+      }
+      return t;
+    }
+
+    let newsData = [];
+    let currentFilter = 'all';
+    let chartSentiment = null;
+    let chartRisk = null;
+
+    // =========================
+    // WATCHLIST UI
+    // =========================
+    async function loadWatchlistUI() {
+      try {
+        const resp = await fetch(`${API_BASE}/watchlist`);
         const data = await resp.json();
-        showStatus(data.msg, "#f0fdf4", "#166534");
+        renderWatchlist(data.items || []);
+      } catch {
+        renderWatchlist([]);
+      }
     }
 
-    function renderCards() {
-        const grid = document.getElementById('resultsGrid');
-        grid.innerHTML = newsList.map((n, i) => `
-            <div class="news-card">
-                <div>
-                    <div style="font-size:0.75rem; color:gray; margin-bottom:5px;">${n.source}</div>
-                    <h3 class="news-title">${n.title}</h3>
-                    <div style="margin-bottom:15px;">
-                        <span class="badge ${n.risco_score > 60 ? 'badge-danger' : 'badge-success'}">Risco: ${n.risco_score}</span>
-                        <span class="badge" style="background:#E2E8F0;">${n.sentimento}</span>
-                    </div>
-                </div>
-                <button class="btn" style="background:#0F172A; color:white; width:100%;" onclick="verDetalhes(${i})">📄 Abrir Ficha Técnica</button>
+    function renderWatchlist(items) {
+      const box = document.getElementById("wlList");
+      if (!items.length) {
+        box.innerHTML = `<div style="color:var(--text-muted);">Nenhum termo cadastrado.</div>`;
+        return;
+      }
+
+      box.innerHTML = items
+        .sort((a,b)=> (b.priority||0)-(a.priority||0))
+        .map(it => `
+          <div class="wl-item">
+            <div class="wl-item-top">
+              <div>
+                <div style="font-weight:800;">${sanitizeHtml(it.label || it.query)}</div>
+                <div style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">${sanitizeHtml(it.query)}</div>
+              </div>
+
+              <div class="wl-actions">
+                <button class="wl-save" onclick="saveWatch('${sanitizeAttr(it.id)}')">Salvar</button>
+                <button class="wl-del" onclick="deleteWatch('${sanitizeAttr(it.id)}')">Remover</button>
+              </div>
             </div>
-        `).join('');
+
+            <div class="wl-mini" style="margin-top:10px;">
+              <label><input type="checkbox" id="en_${sanitizeAttr(it.id)}" ${it.enabled ? 'checked':''}/> Habilitado</label>
+              <label><input type="checkbox" id="cr_${sanitizeAttr(it.id)}" ${it.cron ? 'checked':''}/> CRON</label>
+
+              <span>Tipo:</span>
+              <select id="tp_${sanitizeAttr(it.id)}">
+                ${["geral","institucional","autoridade","temporario"].map(v => `<option value="${v}" ${it.type===v?'selected':''}>${v}</option>`).join("")}
+              </select>
+
+              <span>Prioridade:</span>
+              <select id="pr_${sanitizeAttr(it.id)}">
+                ${[1,2,3,4,5].map(v => `<option value="${v}" ${(+it.priority===v)?'selected':''}>${v}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+        `).join("");
     }
 
-    function verDetalhes(i) {
-        const n = newsList[i];
-        const modal = document.getElementById('modalOverlay');
-        
-        // CORREÇÃO DO [object Object]: Verifica se é array e limpa o texto
-        const recomHtml = Array.isArray(n.recomendacao_contraprop) 
-            ? n.recomendacao_contraprop.map(r => `<li>${typeof r === 'object' ? JSON.stringify(r) : r}</li>`).join('')
-            : `<li>${n.recomendacao_contraprop || 'Monitoramento contínuo.'}</li>`;
+    async function addWatch() {
+      const query = document.getElementById("wlQuery").value.trim();
+      const label = document.getElementById("wlLabel").value.trim() || query;
+      const type = document.getElementById("wlType").value;
+      const priority = parseInt(document.getElementById("wlPriority").value, 10);
 
-        document.getElementById('mContent').innerHTML = `
-            <p><strong>🎯 Objeto:</strong> ${n.objeto_principal || 'N/A'}</p>
-            <p><strong>🏛️ Órgão:</strong> ${n.orgao_responsavel || 'N/A'}</p>
-            <div style="background:#F8FAFC; padding:1rem; border-radius:10px; margin-top:10px; border:1px solid var(--border);">
-                <strong>Síntese CSI:</strong><br>${n.resumo_analitico}
-            </div>
-            <div class="contra-box">
-                <strong>🛡️ Contrapropaganda:</strong>
-                <ul style="padding-left:1.5rem; font-size:0.9rem; margin-top:5px;">${recomHtml}</ul>
-            </div>
-            <p style="margin-top:15px; font-size:0.8rem;"><a href="${n.url}" target="_blank">Acessar Fonte Original 🔗</a></p>
+      if (!query) { alert("Informe uma consulta."); return; }
+
+      const token = ensureAdminToken();
+      if (!token) return;
+
+      const id = "t_" + Math.random().toString(36).slice(2, 10);
+      const payload = { id, query, label, type, priority, enabled: true, cron: true };
+
+      const resp = await fetch(`${API_BASE}/watchlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Token": token },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await resp.json().catch(()=>({}));
+      if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao salvar"); return; }
+
+      document.getElementById("wlQuery").value = "";
+      document.getElementById("wlLabel").value = "";
+      await loadWatchlistUI();
+    }
+
+    async function saveWatch(id) {
+      const token = ensureAdminToken();
+      if (!token) return;
+
+      const current = await fetch(`${API_BASE}/watchlist`).then(r=>r.json()).catch(()=>({items:[]}));
+      const item = (current.items || []).find(x => x.id === id);
+      if (!item) { alert("Item não encontrado"); return; }
+
+      const enabled = document.getElementById(`en_${id}`).checked;
+      const cron = document.getElementById(`cr_${id}`).checked;
+      const type = document.getElementById(`tp_${id}`).value;
+      const priority = parseInt(document.getElementById(`pr_${id}`).value, 10);
+
+      const payload = { ...item, enabled, cron, type, priority };
+
+      const resp = await fetch(`${API_BASE}/watchlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Token": token },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await resp.json().catch(()=>({}));
+      if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao salvar"); return; }
+      await loadWatchlistUI();
+    }
+
+    async function deleteWatch(id) {
+      const token = ensureAdminToken();
+      if (!token) return;
+
+      const resp = await fetch(`${API_BASE}/watchlist?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: { "X-Admin-Token": token }
+      });
+
+      const data = await resp.json().catch(()=>({}));
+      if (!resp.ok || !data.ok) { alert(data.erro || "Falha ao remover"); return; }
+      await loadWatchlistUI();
+    }
+
+    // =========================
+    // RUN ALERT NOW
+    // =========================
+    async function rodarAlertaAgora() {
+      const token = ensureAlertToken();
+      if (!token) return;
+
+      showStatus("Rodando alerta manual...", "loading");
+
+      try {
+        const resp = await fetch(`${API_BASE}/run-alert`, {
+          method: "POST",
+          headers: { "X-Alert-Token": token }
+        });
+
+        const data = await resp.json().catch(()=>({}));
+        if (!resp.ok || !data.ok) throw new Error(data.erro || "Falha ao rodar alerta");
+
+        const out = data.outcome || {};
+        if (out.sent) showStatus(`Alerta enviado (${out.count_sent} itens).`, "ready");
+        else showStatus(`Executado: ${out.reason}`, "ready");
+      } catch (e) {
+        showStatus("Erro: " + e.message, "error");
+      }
+    }
+
+    // =========================
+    // BUSCA manual
+    // =========================
+    async function buscarNoticias() {
+      const termo = document.getElementById('termoBusca').value.trim();
+      if (!termo) { alert('Digite um termo para investigar.'); return; }
+
+      showStatus(`Investigando "${termo}"...`, 'loading');
+
+      try {
+        const resp = await fetch(`${API_BASE}/unified-search?q=${encodeURIComponent(termo)}`);
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.erro || 'Erro na conexão');
+
+        newsData = (data.results || []).map(item => ({
+          title: item.title,
+          content: item.content || item.sintese_tecnica || "Sem resumo.",
+          url: item.url,
+          source: item.source,
+          date: item.date,
+          sentiment: mapSentiment(item.sentimento || item.sentiment),
+          riskScore: (item.risco_score || 0).toFixed(1),
+          riskLevel: mapRiskLevel(item.risco_classificacao),
+          sources: Array.isArray(item.sources) ? item.sources : [],
+          objeto: item.objeto_principal || '',
+          orgao: item.orgao_responsavel || ''
+        }));
+
+        if (!newsData.length) {
+          showStatus('Nenhum evento relevante encontrado nas últimas 48h.', 'ready');
+          document.getElementById('dashboardContent').style.display = 'none';
+          document.getElementById('reportBtn').style.display = 'none';
+          document.getElementById('clearBtn').style.display = 'inline-flex';
+          return;
+        }
+
+        document.getElementById('dashboardContent').style.display = 'block';
+        document.getElementById('clearBtn').style.display = 'inline-flex';
+        document.getElementById('reportBtn').style.display = 'inline-flex';
+
+        if (data.executive_briefing) {
+          document.getElementById('briefingText').textContent = data.executive_briefing;
+          document.getElementById('executiveReport').style.display = 'block';
+        } else {
+          document.getElementById('executiveReport').style.display = 'none';
+        }
+
+        updateDashboard();
+        showStatus(`Análise concluída: ${data.total_raw || 0} menções.`, 'ready');
+      } catch (e) {
+        showStatus('Erro: ' + e.message, 'error');
+      }
+    }
+
+    function updateDashboard() { updateMetrics(); updateCharts(); updateTable(); }
+
+    function updateMetrics() {
+      if (!newsData.length) return;
+      const avgRisk = newsData.reduce((acc, curr) => acc + parseFloat(curr.riskScore), 0) / newsData.length;
+
+      const scoreEl = document.getElementById('riskScore');
+      const labelEl = document.getElementById('riskLabel');
+      const fillEl = document.getElementById('riskFill');
+
+      scoreEl.textContent = avgRisk.toFixed(1);
+
+      let levelClass = 'bg-low', labelText = 'BAIXO';
+      if (avgRisk >= 80) { levelClass = 'bg-critical'; labelText = 'CRÍTICO'; }
+      else if (avgRisk >= 60) { levelClass = 'bg-high'; labelText = 'ALTO'; }
+      else if (avgRisk >= 30) { levelClass = 'bg-medium'; labelText = 'MÉDIO'; }
+
+      labelEl.textContent = labelText;
+      labelEl.className = levelClass.replace('bg-', 'text-');
+      fillEl.className = `risk-bar-fill ${levelClass}`;
+      setTimeout(() => { fillEl.style.width = `${Math.min(avgRisk, 100)}%`; }, 80);
+    }
+
+    function updateCharts() {
+      const sentData = [
+        newsData.filter(n => n.sentiment === 'positive').length,
+        newsData.filter(n => n.sentiment === 'neutral').length,
+        newsData.filter(n => n.sentiment === 'negative').length
+      ];
+
+      const ctxSent = document.getElementById('sentimentChart');
+      if (chartSentiment) chartSentiment.destroy();
+      chartSentiment = new Chart(ctxSent, {
+        type: 'doughnut',
+        data: { labels: ['Positivo', 'Neutro', 'Negativo'], datasets: [{ data: sentData, backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+      });
+
+      const riskCounts = { critical:0, high:0, medium:0, low:0 };
+      newsData.forEach(n => riskCounts[n.riskLevel]++);
+      const ctxRisk = document.getElementById('riskChart');
+      if (chartRisk) chartRisk.destroy();
+      chartRisk = new Chart(ctxRisk, {
+        type: 'bar',
+        data: { labels: ['Baixo', 'Médio', 'Alto', 'Crítico'], datasets: [{ label: 'Eventos', data: [riskCounts.low, riskCounts.medium, riskCounts.high, riskCounts.critical], backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'], borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function updateTable() {
+      const tbody = document.querySelector('#newsTable tbody');
+      const emptyDiv = document.getElementById('tableEmpty');
+
+      const filtered = newsData.filter(item => currentFilter === 'all' || item.sentiment === currentFilter);
+      filtered.sort((a, b) => parseFloat(b.riskScore) - parseFloat(a.riskScore));
+
+      if (!filtered.length) {
+        tbody.innerHTML = '';
+        emptyDiv.style.display = 'block';
+        return;
+      }
+      emptyDiv.style.display = 'none';
+
+      tbody.innerHTML = filtered.map((item, idx) => {
+        const totalFontes = item.sources ? item.sources.length : 0;
+        const extraLinha = (item.objeto || item.orgao)
+          ? `<div style="margin-top:6px; font-size:0.85rem; color:var(--text-muted);">
+               Objeto: ${sanitizeHtml(item.objeto || "n/d")} | Órgão/ator: ${sanitizeHtml(item.orgao || "n/d")}
+             </div>`
+          : '';
+
+        return `
+          <tr>
+            <td><div style="font-size:0.85rem; color:var(--text-muted);">${formatDate(item.date)}</div></td>
+            <td>
+              <span class="source-tag">${sanitizeHtml(item.source || 'Fonte')}</span>
+              <div style="font-weight:700; margin-bottom:4px;">${sanitizeHtml(item.title || '')}</div>
+              <div class="content-preview">${sanitizeHtml(item.content || '')}</div>
+              ${extraLinha}
+            </td>
+            <td><span class="badge badge-sentiment-${item.sentiment}">${translateSentiment(item.sentiment)}</span></td>
+            <td>
+              <div class="badge-risk">
+                <div class="dot bg-${item.riskLevel}"></div>
+                <span class="text-${item.riskLevel}">${sanitizeHtml(item.riskScore)}</span>
+              </div>
+            </td>
+            <td>
+              <button class="btn-link" onclick="abrirFontes(${idx})">Fontes (${totalFontes || 1})</button><br>
+              <button class="btn-link" onclick="abrirAnalise(${idx})">Análise</button><br>
+              <a class="btn-link" href="${sanitizeAttr(item.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>
+            </td>
+          </tr>
         `;
-        modal.style.display = 'flex';
+      }).join('');
     }
 
-    function fecharModal() { document.getElementById('modalOverlay').style.display = 'none'; }
-    function showStatus(m, bg, c) { const el = document.getElementById('statusIndicator'); el.innerText = m; el.style.cssText = `background:${bg}; color:${c}; display:block;`; }
-</script>
+    function abrirAnalise(index) {
+      const item = newsData[index];
+      if (!item) return;
+
+      document.getElementById('analiseConteudo').innerHTML = `
+        <div style="font-weight:700; margin-bottom:6px;">Evento</div>
+        <div style="color:#374151;">${sanitizeHtml(item.title || '')}</div>
+
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Objeto e órgão/ator</div>
+        <div style="color:#374151;">Objeto: ${sanitizeHtml(item.objeto || "n/d")} | Órgão/ator: ${sanitizeHtml(item.orgao || "n/d")}</div>
+
+        <div style="margin-top:12px; font-weight:700; margin-bottom:6px;">Síntese</div>
+        <div style="margin-top:6px; padding:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; white-space:pre-line;">
+          ${sanitizeHtml(item.content || "")}
+        </div>
+      `;
+      document.getElementById('analiseModal').style.display = 'flex';
+    }
+
+    function fecharAnalise() { document.getElementById('analiseModal').style.display = 'none'; }
+
+    function abrirFontes(index) {
+      const item = newsData[index];
+      if (!item) return;
+
+      const lista = document.getElementById('fontesLista');
+      document.getElementById('fontesModalResumo').textContent = item.title || '';
+
+      let fontes = item.sources;
+      if (!Array.isArray(fontes) || fontes.length === 0) fontes = [{ source: item.source, url: item.url, date: item.date }];
+
+      lista.innerHTML = fontes.map((f, i) => `
+        <li>
+          <div style="font-weight:800;">${i + 1}. ${sanitizeHtml(f.source || 'Fonte')}</div>
+          ${f.date ? `<div style="color:var(--text-muted); font-size:0.85rem; margin-top:2px;">${sanitizeHtml(formatDate(f.date))}</div>` : ''}
+          <div style="margin-top:6px;">
+            <a href="${sanitizeAttr(f.url || f.link || '#')}" target="_blank" rel="noopener noreferrer">${sanitizeHtml(f.url || f.link || '#')}</a>
+          </div>
+        </li>
+      `).join('');
+
+      document.getElementById('fontesModal').style.display = 'flex';
+    }
+
+    function fecharFontes() { document.getElementById('fontesModal').style.display = 'none'; }
+
+    document.getElementById('fontesModal').addEventListener('click', (e) => { if (e.target.id === 'fontesModal') fecharFontes(); });
+    document.getElementById('analiseModal').addEventListener('click', (e) => { if (e.target.id === 'analiseModal') fecharAnalise(); });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        updateTable();
+      });
+    });
+
+    function clearData() {
+      newsData = [];
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('clearBtn').style.display = 'none';
+      document.getElementById('reportBtn').style.display = 'none';
+      document.getElementById('statusIndicator').style.display = 'none';
+      document.getElementById('termoBusca').value = '';
+      if (chartSentiment) { chartSentiment.destroy(); chartSentiment = null; }
+      if (chartRisk) { chartRisk.destroy(); chartRisk = null; }
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('statusIndicator');
+      el.textContent = msg;
+      el.className = `status-bar status-${type}`;
+      el.style.display = 'block';
+    }
+
+    function mapRiskLevel(level) {
+      if (!level) return 'low';
+      level = String(level).toLowerCase();
+      if (level.includes('critico')) return 'critical';
+      if (level.includes('alto')) return 'high';
+      if (level.includes('medio')) return 'medium';
+      return 'low';
+    }
+
+    function mapSentiment(s) {
+      if (!s) return 'neutral';
+      s = s.toString().toLowerCase();
+      if (s.includes('pos')) return 'positive';
+      if (s.includes('neg')) return 'negative';
+      return 'neutral';
+    }
+
+    function translateSentiment(s) {
+      if (s === 'positive') return 'Positivo';
+      if (s === 'negative') return 'Negativo';
+      return 'Neutro';
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr) return '-';
+      const d = new Date(isoStr);
+      return isNaN(d.getTime()) ? isoStr : d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function sanitizeHtml(str) {
+      const s = (str === null || str === undefined) ? '' : String(str);
+      return s.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+    }
+    function sanitizeAttr(url) {
+      const u = (url === null || url === undefined) ? '' : String(url);
+      if (/^\s*(javascript:|data:)/i.test(u)) return '#';
+      return u.replace(/"/g, '%22');
+    }
+
+    // init
+    loadWatchlistUI();
+  </script>
 </body>
 </html>
